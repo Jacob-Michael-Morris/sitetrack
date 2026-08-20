@@ -1,8 +1,9 @@
+import Tools from './pages/Tools'
+
 function App() {
   return (
     <div>
-      <h1>SiteTrack</h1>
-      <p>Jobsite Tool and Maintenance Management System</p>
+      <Tools />
     </div>
   )
 }
