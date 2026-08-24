@@ -10,6 +10,10 @@ import Assignments from './pages/Assignments'
 import Inspections from './pages/Inspections'
 import Maintenance from './pages/Maintenance'
 import Alerts from './pages/Alerts'
+import RegisterTool from './pages/RegisterTool'
+import EditTool from './pages/EditTool'
+import RegisterJobsite from './pages/RegisterJobsite'
+import EditJobsite from './pages/EditJobsite'
 
 function App() {
   return (
@@ -36,13 +40,38 @@ function App() {
         />
 
         <Route
+        path="/tools/new"
+        element={<RegisterTool />}
+        />
+
+        <Route
+        path="/tools/:id"
+        element={<ToolDetails />}
+        />
+
+        <Route
+        path="/tools/:id/edit"
+        element={<EditTool />}
+        />
+
+        <Route
           path="/jobsites"
           element={<Jobsites />}
         />
 
         <Route
+          path="/jobsites/new"
+          element={<RegisterJobsite />}
+        />
+
+        <Route
           path="/jobsites/:id"
           element={<JobsiteDetails />}
+        />
+
+        <Route
+          path="/jobsites/:id/edit"
+          element={<EditJobsite />}
         />
 
         <Route

@@ -9,3 +9,12 @@ export interface Tool {
   created_at: string
   updated_at: string
 }
+
+export interface ToolInput {
+  name: string
+  serial_number: string
+  category: string
+  status: string
+  condition: string
+  purchase_date: string
+}

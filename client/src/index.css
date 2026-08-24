@@ -101,3 +101,68 @@ h1 {
   padding: 32px;
   overflow-x: auto;
 }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.button,
+button {
+  display: inline-block;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background-color: #333;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.toolbar input,
+.toolbar select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.toolbar input {
+  min-width: 250px;
+}
+
+.tool-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 500px;
+  background-color: white;
+  padding: 24px;
+}
+
+.tool-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tool-form input,
+.tool-form select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.details-card {
+  max-width: 600px;
+  background-color: white;
+  padding: 24px;
+  margin: 20px 0;
+}
