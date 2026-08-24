@@ -1,4 +1,5 @@
 import pool from '../database/pool.js'
+import { createAlert } from './alerts.service.js'
 
 export async function getAllInspections() {
   const result = await pool.query(
@@ -56,5 +57,17 @@ export async function createInspection(inspection: {
     ]
   )
 
-  return result.rows[0]
+const createdInspection = result.rows[0]
+
+if (inspection.result === 'Failed') {
+  await createAlert({
+    tool_id: inspection.tool_id,
+    jobsite_id: null,
+    alert_type: 'Failed Inspection',
+    message: 'Tool failed inspection and requires review.',
+    severity: 'High'
+  })
+}
+
+return createdInspection
 }

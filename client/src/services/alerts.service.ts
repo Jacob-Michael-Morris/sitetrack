@@ -1,0 +1,37 @@
+import type { Alert } from '../types/Alert.js'
+
+const API_URL = 'http://localhost:3000/api/alerts'
+
+export async function getAlerts(): Promise<Alert[]> {
+  const response = await fetch(API_URL)
+
+  if (!response.ok) {
+    throw new Error('Unable to retrieve alerts')
+  }
+
+  return response.json()
+}
+
+export async function markAlertRead(id: number): Promise<Alert> {
+  const response = await fetch(`${API_URL}/${id}/read`, {
+    method: 'PUT'
+  })
+
+  if (!response.ok) {
+    throw new Error('Unable to mark alert as read')
+  }
+
+  return response.json()
+}
+
+export async function markAllAlertsRead() {
+  const response = await fetch(`${API_URL}/read-all`, {
+    method: 'PUT'
+  })
+
+  if (!response.ok) {
+    throw new Error('Unable to mark alerts as read')
+  }
+
+  return response.json()
+}
