@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import toolsRouter from './routes/tools.routes.js'
 import jobsitesRouter from './routes/jobsites.routes.js'
+import assignmentsRouter from './routes/assignments.routes.js'
 
 const app = express()
 const PORT = 3000
@@ -21,6 +22,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/tools', toolsRouter)
 app.use('/api/jobsites', jobsitesRouter)
+app.use('/api/assignments', assignmentsRouter)
 
 app.listen(PORT, () => {
   console.log(`SiteTrack API running at http://localhost:${PORT}`)
