@@ -16,6 +16,7 @@ function Sidebar() {
         <NavLink to="/inspections">Inspections</NavLink>
         <NavLink to="/maintenance">Maintenance</NavLink>
         <NavLink to="/alerts">Alerts</NavLink>
+        <NavLink to="/damage-reports">Damage Reports</NavLink>
       </nav>
     </aside>
   )
