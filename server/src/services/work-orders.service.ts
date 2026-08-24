@@ -1,4 +1,5 @@
 import pool from '../database/pool.js'
+import { createAlert } from './alerts.service.js'
 
 export async function getAllWorkOrders() {
   const result = await pool.query(
@@ -81,6 +82,17 @@ export async function createWorkOrder(workOrder: {
       [workOrder.tool_id]
     )
 
+    await createAlert(
+    {
+        tool_id: workOrder.tool_id,
+        jobsite_id: null,
+        alert_type: 'Maintenance Work Order',
+        message: 'A maintenance work order was created for this tool.',
+        severity: workOrder.priority
+    },
+    client
+    )
+
     await client.query('COMMIT')
 
     return result.rows[0]
@@ -154,6 +166,17 @@ export async function returnToolToService(id: number) {
         [workOrder.damage_report_id]
       )
     }
+
+    await createAlert(
+    {
+        tool_id: workOrder.tool_id,
+        jobsite_id: null,
+        alert_type: 'Return to Service',
+        message: 'Maintenance is complete and the tool has been returned to service.',
+        severity: 'Info'
+    },
+    client
+    )
 
     await client.query('COMMIT')
   } catch (error) {

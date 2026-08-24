@@ -1,4 +1,5 @@
 import pool from '../database/pool.js'
+import { createAlert } from './alerts.service.js'
 
 export async function getAllDamageReports() {
   const result = await pool.query(
@@ -70,6 +71,17 @@ export async function createDamageReport(report: {
            updated_at = CURRENT_TIMESTAMP
        WHERE tool_id = $1`,
       [report.tool_id]
+    )
+
+    await createAlert(
+    {
+        tool_id: report.tool_id,
+        jobsite_id: null,
+        alert_type: 'Damage Report',
+        message: 'Tool damage was reported and the tool was removed from service.',
+        severity: report.severity
+    },
+    client
     )
 
     await client.query('COMMIT')

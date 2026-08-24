@@ -6,6 +6,7 @@ import assignmentsRouter from './routes/assignments.routes.js'
 import inspectionsRouter from './routes/inspections.routes.js'
 import damageReportsRouter from './routes/damage-reports.routes.js'
 import workOrdersRouter from './routes/work-orders.routes.js'
+import alertsRouter from './routes/alerts.routes.js'
 
 const app = express()
 const PORT = 3000
@@ -29,6 +30,7 @@ app.use('/api/assignments', assignmentsRouter)
 app.use('/api/inspections', inspectionsRouter)
 app.use('/api/damage-reports', damageReportsRouter)
 app.use('/api/work-orders', workOrdersRouter)
+app.use('/api/alerts', alertsRouter)
 
 app.listen(PORT, () => {
   console.log(`SiteTrack API running at http://localhost:${PORT}`)
