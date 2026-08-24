@@ -14,6 +14,7 @@ import RegisterTool from './pages/RegisterTool'
 import EditTool from './pages/EditTool'
 import RegisterJobsite from './pages/RegisterJobsite'
 import EditJobsite from './pages/EditJobsite'
+import DamageReports from './pages/DamageReports'
 
 function App() {
   return (
@@ -77,6 +78,11 @@ function App() {
         <Route
           path="/assignments"
           element={<Assignments />}
+        />
+
+        <Route
+          path="/damage-reports"
+          element={<DamageReports />}
         />
 
         <Route
