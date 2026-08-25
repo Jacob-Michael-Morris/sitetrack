@@ -3,7 +3,9 @@ import type { ToolAssignment } from '../types/ToolAssignment.js'
 const API_URL = 'http://localhost:3000/api/assignments'
 
 export async function getAssignments(): Promise<ToolAssignment[]> {
-  const response = await fetch(API_URL)
+  const response = await fetch(API_URL, {
+    credentials: 'include'
+  })
 
   if (!response.ok) {
     throw new Error('Unable to retrieve assignments')
@@ -19,6 +21,7 @@ export async function checkoutTool(
 ) {
   const response = await fetch(`${API_URL}/checkout`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -42,6 +45,7 @@ export async function returnTool(
 ) {
   const response = await fetch(`${API_URL}/return`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -65,6 +69,7 @@ export async function transferTool(
 ) {
   const response = await fetch(`${API_URL}/transfer`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },

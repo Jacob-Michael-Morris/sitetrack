@@ -6,7 +6,9 @@ import type {
 const API_URL = 'http://localhost:3000/api/damage-reports'
 
 export async function getDamageReports(): Promise<DamageReport[]> {
-  const response = await fetch(API_URL)
+  const response = await fetch(API_URL, {
+    credentials: 'include'
+  })
 
   if (!response.ok) {
     throw new Error('Unable to retrieve damage reports')
@@ -20,6 +22,7 @@ export async function createDamageReport(
 ): Promise<DamageReport> {
   const response = await fetch(API_URL, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },
