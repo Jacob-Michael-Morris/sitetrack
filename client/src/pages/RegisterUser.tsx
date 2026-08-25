@@ -17,6 +17,8 @@ function RegisterUser() {
   const [roleId, setRoleId] = useState('')
 
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] =
+    useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -43,17 +45,46 @@ function RegisterUser() {
   ) {
     event.preventDefault()
 
+    const cleanName = name.trim()
+    const cleanEmail = email.trim()
+
+    if (!cleanName) {
+      setError('Name is required.')
+      return
+    }
+
+    if (password.length < 8) {
+      setError(
+        'Password must be at least 8 characters long.'
+      )
+      return
+    }
+
+    if (!roleId) {
+      setError('Select a role.')
+      return
+    }
+
     try {
+      setSubmitting(true)
+      setError('')
+
       const user = await createUser({
-        name,
-        email,
+        name: cleanName,
+        email: cleanEmail,
         password,
         role_id: Number(roleId)
       })
 
       navigate(`/users/${user.user_id}`)
-    } catch {
-      setError('Unable to create user.')
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to create user.'
+      )
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -61,7 +92,11 @@ function RegisterUser() {
     <div>
       <h1>Create User</h1>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
 
       <form
         className="tool-form"
@@ -75,6 +110,7 @@ function RegisterUser() {
               setName(event.target.value)
             }
             required
+            maxLength={150}
           />
         </label>
 
@@ -87,6 +123,7 @@ function RegisterUser() {
               setEmail(event.target.value)
             }
             required
+            maxLength={255}
           />
         </label>
 
@@ -99,6 +136,7 @@ function RegisterUser() {
               setPassword(event.target.value)
             }
             required
+            minLength={8}
           />
         </label>
 
@@ -126,8 +164,13 @@ function RegisterUser() {
           </select>
         </label>
 
-        <button type="submit">
-          Create User
+        <button
+          type="submit"
+          disabled={submitting}
+        >
+          {submitting
+            ? 'Creating...'
+            : 'Create User'}
         </button>
       </form>
     </div>

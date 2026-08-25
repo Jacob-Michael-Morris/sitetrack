@@ -1,30 +1,49 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import {
+  useEffect,
+  useState
+} from 'react'
+
+import {
+  useNavigate,
+  useParams
+} from 'react-router'
+
 import {
   getTool,
   updateTool
-} from '../services/tools.service'
-import type { ToolInput } from '../types/Tool'
+} from '../services/tools.service.js'
+
+import type {
+  ToolInput
+} from '../types/Tool.js'
 
 function EditTool() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState<ToolInput>({
-    name: '',
-    serial_number: '',
-    category: '',
-    status: 'Available',
-    condition: 'Good',
-    purchase_date: ''
-  })
+  const [form, setForm] =
+    useState<ToolInput>({
+      name: '',
+      serial_number: '',
+      category: '',
+      status: 'Available',
+      condition: 'Good',
+      purchase_date: ''
+    })
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] =
+    useState(true)
+
+  const [submitting, setSubmitting] =
+    useState(false)
+
   const [error, setError] = useState('')
 
   useEffect(() => {
     async function loadTool() {
       if (!id) {
+        setLoading(false)
+        setError('Invalid tool ID.')
         return
       }
 
@@ -41,8 +60,12 @@ function EditTool() {
             ? tool.purchase_date.substring(0, 10)
             : ''
         })
-      } catch {
-        setError('Unable to load tool.')
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to load tool.'
+        )
       } finally {
         setLoading(false)
       }
@@ -52,11 +75,15 @@ function EditTool() {
   }, [id])
 
   function handleChange(
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    event: React.ChangeEvent<
+      HTMLInputElement |
+      HTMLSelectElement
+    >
   ) {
     setForm({
       ...form,
-      [event.target.name]: event.target.value
+      [event.target.name]:
+        event.target.value
     })
   }
 
@@ -69,11 +96,68 @@ function EditTool() {
       return
     }
 
+    const cleanName = form.name.trim()
+
+    const cleanSerialNumber =
+      form.serial_number.trim()
+
+    const cleanCategory =
+      form.category.trim()
+
+    if (!cleanName) {
+      setError('Tool name is required.')
+      return
+    }
+
+    if (!cleanSerialNumber) {
+      setError('Serial number is required.')
+      return
+    }
+
+    if (!cleanCategory) {
+      setError('Category is required.')
+      return
+    }
+
+    if (form.purchase_date) {
+      const purchaseDate = new Date(
+        `${form.purchase_date}T00:00:00`
+      )
+
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      if (purchaseDate > today) {
+        setError(
+          'Purchase date cannot be in the future.'
+        )
+        return
+      }
+    }
+
     try {
-      await updateTool(id, form)
+      setSubmitting(true)
+      setError('')
+
+      await updateTool(
+        id,
+        {
+          ...form,
+          name: cleanName,
+          serial_number: cleanSerialNumber,
+          category: cleanCategory
+        }
+      )
+
       navigate(`/tools/${id}`)
-    } catch {
-      setError('Unable to update tool.')
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to update tool.'
+      )
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -81,13 +165,24 @@ function EditTool() {
     return <p>Loading tool...</p>
   }
 
+  const today = new Date()
+    .toISOString()
+    .slice(0, 10)
+
   return (
     <div>
       <h1>Edit Tool</h1>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
 
-      <form className="tool-form" onSubmit={handleSubmit}>
+      <form
+        className="tool-form"
+        onSubmit={handleSubmit}
+      >
         <label>
           Tool Name
           <input
@@ -95,6 +190,7 @@ function EditTool() {
             value={form.name}
             onChange={handleChange}
             required
+            maxLength={150}
           />
         </label>
 
@@ -105,6 +201,7 @@ function EditTool() {
             value={form.serial_number}
             onChange={handleChange}
             required
+            maxLength={100}
           />
         </label>
 
@@ -114,6 +211,8 @@ function EditTool() {
             name="category"
             value={form.category}
             onChange={handleChange}
+            required
+            maxLength={100}
           />
         </label>
 
@@ -152,11 +251,17 @@ function EditTool() {
             name="purchase_date"
             value={form.purchase_date}
             onChange={handleChange}
+            max={today}
           />
         </label>
 
-        <button type="submit">
-          Save Changes
+        <button
+          type="submit"
+          disabled={submitting}
+        >
+          {submitting
+            ? 'Saving...'
+            : 'Save Changes'}
         </button>
       </form>
     </div>

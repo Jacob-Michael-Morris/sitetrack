@@ -13,6 +13,8 @@ import auditLogsRouter from './routes/audit-logs.routes.js'
 import authRouter from './routes/auth.routes.js'
 import usersRouter from './routes/users.routes.js'
 import rolesRouter from './routes/roles.routes.js'
+import dashboardRouter from './routes/dashboard.routes.js'
+import reportsRouter from './routes/reports.routes.js'
 
 const app = express()
 const PORT = 3000
@@ -36,6 +38,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRouter)
 
+app.use('/api/dashboard', dashboardRouter)
 app.use('/api/tools', toolsRouter)
 app.use('/api/jobsites', jobsitesRouter)
 app.use('/api/assignments', assignmentsRouter)
@@ -44,9 +47,9 @@ app.use('/api/damage-reports', damageReportsRouter)
 app.use('/api/work-orders', workOrdersRouter)
 app.use('/api/alerts', alertsRouter)
 app.use('/api/audit-logs', auditLogsRouter)
-
 app.use('/api/users', usersRouter)
 app.use('/api/roles', rolesRouter)
+app.use('/api/reports', reportsRouter)
 
 app.listen(PORT, () => {
   console.log(

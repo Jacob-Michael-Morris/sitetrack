@@ -1,26 +1,40 @@
 import { useEffect, useState } from 'react'
 
-import { getAuditLogs } from '../services/audit-logs.service.ts'
+import { getAuditLogs } from '../services/audit-logs.service.js'
 
 import type { AuditLog as AuditLogType } from '../types/AuditLog.js'
 
 function AuditLog() {
-  const [logs, setLogs] = useState<AuditLogType[]>([])
+  const [auditLogs, setAuditLogs] = useState<AuditLogType[]>([])
   const [search, setSearch] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
+    let cancelled = false
+
     getAuditLogs()
-      .then(setLogs)
-      .catch(() => {
-        setError('Unable to load audit logs.')
+      .then((data) => {
+        if (!cancelled) {
+          setAuditLogs(data)
+        }
       })
+      .catch(() => {
+        if (!cancelled) {
+          setError('Unable to load audit log.')
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  const filteredLogs = logs.filter((log) => {
+  const filteredLogs = auditLogs.filter((log) => {
     const searchValue = search.toLowerCase()
 
     return (
+      log.user_name?.toLowerCase().includes(searchValue) ||
+      log.role_name?.toLowerCase().includes(searchValue) ||
       log.action.toLowerCase().includes(searchValue) ||
       log.entity_type.toLowerCase().includes(searchValue) ||
       log.description.toLowerCase().includes(searchValue)
@@ -32,7 +46,9 @@ function AuditLog() {
       <div className="page-header">
         <div>
           <h1>Audit Log</h1>
-          <p>View important SiteTrack system activity.</p>
+          <p>
+            Review important activity performed in SiteTrack.
+          </p>
         </div>
       </div>
 
@@ -41,21 +57,23 @@ function AuditLog() {
       <div className="toolbar">
         <input
           type="text"
-          placeholder="Search audit history..."
+          placeholder="Search audit log..."
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) =>
+            setSearch(event.target.value)
+          }
         />
       </div>
 
       <table>
         <thead>
           <tr>
-            <th>Date</th>
+            <th>User</th>
+            <th>Role</th>
             <th>Action</th>
             <th>Entity</th>
-            <th>Entity ID</th>
             <th>Description</th>
-            <th>User</th>
+            <th>Timestamp</th>
           </tr>
         </thead>
 
@@ -63,13 +81,33 @@ function AuditLog() {
           {filteredLogs.map((log) => (
             <tr key={log.audit_log_id}>
               <td>
-                {new Date(log.created_at).toLocaleString()}
+                {log.user_name ?? 'System / Legacy'}
               </td>
-              <td>{log.action}</td>
-              <td>{log.entity_type}</td>
-              <td>{log.entity_id ?? 'N/A'}</td>
-              <td>{log.description}</td>
-              <td>{log.user_id ?? 'System'}</td>
+
+              <td>
+                {log.role_name ?? 'N/A'}
+              </td>
+
+              <td>
+                {log.action}
+              </td>
+
+              <td>
+                {log.entity_type}
+                {log.entity_id !== null
+                  ? ` #${log.entity_id}`
+                  : ''}
+              </td>
+
+              <td>
+                {log.description}
+              </td>
+
+              <td>
+                {new Date(
+                  log.created_at
+                ).toLocaleString()}
+              </td>
             </tr>
           ))}
         </tbody>

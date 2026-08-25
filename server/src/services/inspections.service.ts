@@ -37,16 +37,25 @@ export async function getInspectionById(id: number) {
   return result.rows[0]
 }
 
-export async function createInspection(inspection: {
-  tool_id: number
-  result: string
-  condition: string
-  notes: string
-  next_inspection_date: string | null
-}) {
+export async function createInspection(
+  inspection: {
+    tool_id: number
+    result: string
+    condition: string
+    notes: string
+    next_inspection_date: string | null
+  },
+  userId: number
+) {
   const result = await pool.query(
     `INSERT INTO inspections
-      (tool_id, result, condition, notes, next_inspection_date)
+      (
+        tool_id,
+        result,
+        condition,
+        notes,
+        next_inspection_date
+      )
      VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
     [
@@ -58,25 +67,26 @@ export async function createInspection(inspection: {
     ]
   )
 
-const createdInspection = result.rows[0]
+  const createdInspection = result.rows[0]
 
-if (inspection.result === 'Failed') {
-  await createAlert({
-    tool_id: inspection.tool_id,
-    jobsite_id: null,
-    alert_type: 'Failed Inspection',
-    message: 'Tool failed inspection and requires review.',
-    severity: 'High'
+  if (inspection.result === 'Failed') {
+    await createAlert({
+      tool_id: inspection.tool_id,
+      jobsite_id: null,
+      alert_type: 'Failed Inspection',
+      message: 'Tool failed inspection and requires review.',
+      severity: 'High'
+    })
+  }
+
+  await createAuditLog({
+    user_id: userId,
+    action: 'INSPECTION',
+    entity_type: 'Tool',
+    entity_id: inspection.tool_id,
+    description:
+      `Inspection recorded with result: ${inspection.result}.`
   })
-}
 
-await createAuditLog({
-  user_id: null,
-  action: 'INSPECTION',
-  entity_type: 'Tool',
-  entity_id: inspection.tool_id,
-  description: `Inspection recorded with result: ${inspection.result}.`
-})
-
-return createdInspection
+  return createdInspection
 }

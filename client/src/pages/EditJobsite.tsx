@@ -1,48 +1,84 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import {
+  useEffect,
+  useState
+} from 'react'
+
+import {
+  useNavigate,
+  useParams
+} from 'react-router'
+
 import {
   getJobsite,
   updateJobsite
 } from '../services/jobsites.service.js'
-import type { JobsiteInput } from '../types/Jobsite.js'
+
+import type {
+  JobsiteInput
+} from '../types/Jobsite.js'
 
 function EditJobsite() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState<JobsiteInput>({
-    name: '',
-    location: '',
-    status: 'Active',
-    start_date: '',
-    end_date: '',
-    description: ''
-  })
+  const [form, setForm] =
+    useState<JobsiteInput>({
+      name: '',
+      location: '',
+      status: 'Active',
+      start_date: '',
+      end_date: '',
+      description: ''
+    })
 
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] =
+    useState(true)
+
+  const [submitting, setSubmitting] =
+    useState(false)
+
   const [error, setError] = useState('')
 
   useEffect(() => {
     async function loadJobsite() {
-      if (!id) return
+      if (!id) {
+        setLoading(false)
+        setError('Invalid jobsite ID.')
+        return
+      }
 
       try {
-        const jobsite = await getJobsite(id)
+        const jobsite =
+          await getJobsite(id)
 
         setForm({
           name: jobsite.name,
-          location: jobsite.location || '',
+          location:
+            jobsite.location || '',
           status: jobsite.status,
-          start_date: jobsite.start_date
-            ? jobsite.start_date.substring(0, 10)
-            : '',
-          end_date: jobsite.end_date
-            ? jobsite.end_date.substring(0, 10)
-            : '',
-          description: jobsite.description || ''
+          start_date:
+            jobsite.start_date
+              ? jobsite.start_date.substring(
+                  0,
+                  10
+                )
+              : '',
+          end_date:
+            jobsite.end_date
+              ? jobsite.end_date.substring(
+                  0,
+                  10
+                )
+              : '',
+          description:
+            jobsite.description || ''
         })
-      } catch {
-        setError('Unable to load jobsite.')
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to load jobsite.'
+        )
       } finally {
         setLoading(false)
       }
@@ -53,12 +89,15 @@ function EditJobsite() {
 
   function handleChange(
     event: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      HTMLInputElement |
+      HTMLSelectElement |
+      HTMLTextAreaElement
     >
   ) {
     setForm({
       ...form,
-      [event.target.name]: event.target.value
+      [event.target.name]:
+        event.target.value
     })
   }
 
@@ -67,25 +106,85 @@ function EditJobsite() {
   ) {
     event.preventDefault()
 
-    if (!id) return
+    if (!id) {
+      return
+    }
+
+    const cleanName = form.name.trim()
+
+    const cleanLocation =
+      form.location.trim()
+
+    const cleanDescription =
+      form.description.trim()
+
+    if (!cleanName) {
+      setError('Jobsite name is required.')
+      return
+    }
+
+    if (!cleanLocation) {
+      setError(
+        'Jobsite location is required.'
+      )
+      return
+    }
+
+    if (
+      form.start_date &&
+      form.end_date &&
+      form.end_date < form.start_date
+    ) {
+      setError(
+        'End date cannot be before start date.'
+      )
+      return
+    }
 
     try {
-      await updateJobsite(id, form)
+      setSubmitting(true)
+      setError('')
+
+      await updateJobsite(
+        id,
+        {
+          ...form,
+          name: cleanName,
+          location: cleanLocation,
+          description: cleanDescription
+        }
+      )
+
       navigate(`/jobsites/${id}`)
-    } catch {
-      setError('Unable to update jobsite.')
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to update jobsite.'
+      )
+    } finally {
+      setSubmitting(false)
     }
   }
 
-  if (loading) return <p>Loading jobsite...</p>
+  if (loading) {
+    return <p>Loading jobsite...</p>
+  }
 
   return (
     <div>
       <h1>Edit Jobsite</h1>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
 
-      <form className="tool-form" onSubmit={handleSubmit}>
+      <form
+        className="tool-form"
+        onSubmit={handleSubmit}
+      >
         <label>
           Jobsite Name
           <input
@@ -102,6 +201,7 @@ function EditJobsite() {
             name="location"
             value={form.location}
             onChange={handleChange}
+            required
           />
         </label>
 
@@ -135,6 +235,7 @@ function EditJobsite() {
             name="end_date"
             value={form.end_date}
             onChange={handleChange}
+            min={form.start_date || undefined}
           />
         </label>
 
@@ -147,8 +248,13 @@ function EditJobsite() {
           />
         </label>
 
-        <button type="submit">
-          Save Changes
+        <button
+          type="submit"
+          disabled={submitting}
+        >
+          {submitting
+            ? 'Saving...'
+            : 'Save Changes'}
         </button>
       </form>
     </div>

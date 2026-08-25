@@ -1,0 +1,142 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.dashboard-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.dashboard-heading h1 {
+  margin-bottom: 4px;
+}
+
+.dashboard-heading p {
+  margin: 0;
+}
+
+.dashboard-role {
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dashboard-page section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dashboard-page section h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(180px, 1fr)
+  );
+  gap: 16px;
+}
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.dashboard-card span {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.dashboard-card strong {
+  font-size: 30px;
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dashboard-action {
+  display: inline-block;
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #ffffff;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 600;
+}
+
+.dashboard-action:hover {
+  background-color: #f3f4f6;
+}
+
+.dashboard-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dashboard-table-container {
+  overflow-x: auto;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  vertical-align: top;
+}
+
+.dashboard-table th {
+  font-size: 14px;
+}
+
+.dashboard-table td {
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .dashboard-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-actions {
+    flex-direction: column;
+  }
+
+  .dashboard-action {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

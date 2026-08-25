@@ -7,9 +7,13 @@ import {
   transferTool
 } from '../services/assignments.service.js'
 
-export async function getAssignments(req: Request, res: Response) {
+export async function getAssignments(
+  req: Request,
+  res: Response
+) {
   try {
     const assignments = await getAllAssignments()
+
     res.json(assignments)
   } catch (error) {
     console.error(error)
@@ -20,23 +24,24 @@ export async function getAssignments(req: Request, res: Response) {
   }
 }
 
-export async function checkout(req: Request, res: Response) {
+export async function checkout(
+  req: Request,
+  res: Response
+) {
   try {
-    const toolId = Number(req.body.tool_id)
-    const jobsiteId = Number(req.body.jobsite_id)
-    const notes = req.body.notes || ''
+    const {
+      tool_id,
+      jobsite_id,
+      notes
+    } = req.body
 
-    if (!toolId || !jobsiteId) {
-      res.status(400).json({
-        message: 'Tool and jobsite are required'
-      })
-      return
-    }
+    const userId = Number(res.locals.auth.userId)
 
     const assignment = await checkoutTool(
-      toolId,
-      jobsiteId,
-      notes
+      Number(tool_id),
+      Number(jobsite_id),
+      notes ?? '',
+      userId
     )
 
     res.status(201).json(assignment)
@@ -44,7 +49,10 @@ export async function checkout(req: Request, res: Response) {
     console.error(error)
 
     res.status(400).json({
-      message: 'Unable to check out tool'
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Unable to check out tool'
     })
   }
 }
@@ -54,19 +62,28 @@ export async function returnAssignment(
   res: Response
 ) {
   try {
-    const toolId = Number(req.body.tool_id)
-    const notes = req.body.notes || ''
+    const {
+      tool_id,
+      notes
+    } = req.body
 
-    await returnTool(toolId, notes)
+    const userId = Number(res.locals.auth.userId)
 
-    res.json({
-      message: 'Tool returned successfully'
-    })
+    const assignment = await returnTool(
+      Number(tool_id),
+      notes ?? '',
+      userId
+    )
+
+    res.json(assignment)
   } catch (error) {
     console.error(error)
 
     res.status(400).json({
-      message: 'Unable to return tool'
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Unable to return tool'
     })
   }
 }
@@ -76,14 +93,19 @@ export async function transfer(
   res: Response
 ) {
   try {
-    const toolId = Number(req.body.tool_id)
-    const jobsiteId = Number(req.body.jobsite_id)
-    const notes = req.body.notes || ''
+    const {
+      tool_id,
+      jobsite_id,
+      notes
+    } = req.body
+
+    const userId = Number(res.locals.auth.userId)
 
     const assignment = await transferTool(
-      toolId,
-      jobsiteId,
-      notes
+      Number(tool_id),
+      Number(jobsite_id),
+      notes ?? '',
+      userId
     )
 
     res.json(assignment)
@@ -91,7 +113,10 @@ export async function transfer(
     console.error(error)
 
     res.status(400).json({
-      message: 'Unable to transfer tool'
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Unable to transfer tool'
     })
   }
 }

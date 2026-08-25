@@ -26,6 +26,7 @@ import Inspections from './pages/Inspections.js'
 import DamageReports from './pages/DamageReports.js'
 import Maintenance from './pages/Maintenance.js'
 import Alerts from './pages/Alerts.js'
+import Reports from './pages/Reports.js'
 import AuditLog from './pages/AuditLog.js'
 
 import Users from './pages/Users.js'
@@ -33,9 +34,13 @@ import RegisterUser from './pages/RegisterUser.js'
 import UserDetails from './pages/UserDetails.js'
 import EditUser from './pages/EditUser.js'
 
+import Forbidden from './pages/Forbidden.js'
+import NotFound from './pages/NotFound.js'
+
 const ADMIN = 'Administrator'
 const EQUIPMENT_MANAGER = 'Equipment Manager'
-const MAINTENANCE_TECHNICIAN = 'Maintenance Technician'
+const MAINTENANCE_TECHNICIAN =
+  'Maintenance Technician'
 const WORKER = 'Worker'
 const SAFETY_PERSONNEL = 'Safety Personnel'
 
@@ -62,6 +67,11 @@ function App() {
           <Route
             path="/dashboard"
             element={<Dashboard />}
+          />
+
+          <Route
+            path="/forbidden"
+            element={<Forbidden />}
           />
 
           <Route
@@ -199,6 +209,11 @@ function App() {
               path="/alerts"
               element={<Alerts />}
             />
+
+            <Route
+              path="/reports"
+              element={<Reports />}
+            />
           </Route>
 
           <Route
@@ -233,6 +248,11 @@ function App() {
               element={<AuditLog />}
             />
           </Route>
+
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
         </Route>
       </Route>
     </Routes>

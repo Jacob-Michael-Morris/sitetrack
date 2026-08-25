@@ -67,15 +67,20 @@ export async function addDamageReport(
       return
     }
 
-    const report = await createDamageReport({
-      tool_id: Number(tool_id),
-      inspection_id: inspection_id
-        ? Number(inspection_id)
-        : null,
-      description,
-      severity,
-      notes: notes || ''
-    })
+    const userId = Number(res.locals.auth.userId)
+
+    const report = await createDamageReport(
+      {
+        tool_id: Number(tool_id),
+        inspection_id: inspection_id
+          ? Number(inspection_id)
+          : null,
+        description,
+        severity,
+        notes: notes || ''
+      },
+      userId
+    )
 
     res.status(201).json(report)
   } catch (error) {

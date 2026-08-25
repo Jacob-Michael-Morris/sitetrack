@@ -40,14 +40,17 @@ export async function getWorkOrderById(id: number) {
   return result.rows[0]
 }
 
-export async function createWorkOrder(workOrder: {
-  tool_id: number
-  damage_report_id: number | null
-  description: string
-  priority: string
-  assigned_to: string
-  notes: string
-}) {
+export async function createWorkOrder(
+  workOrder: {
+    tool_id: number
+    damage_report_id: number | null
+    description: string
+    priority: string
+    assigned_to: string
+    notes: string
+  },
+  userId: number
+) {
   const client = await pool.connect()
 
   try {
@@ -75,39 +78,44 @@ export async function createWorkOrder(workOrder: {
       ]
     )
 
+    const createdWorkOrder = result.rows[0]
+
     await client.query(
       `UPDATE tools
-       SET status = 'Maintenance',
-           updated_at = CURRENT_TIMESTAMP
+       SET
+         status = 'Maintenance',
+         updated_at = CURRENT_TIMESTAMP
        WHERE tool_id = $1`,
       [workOrder.tool_id]
     )
 
     await createAlert(
-    {
+      {
         tool_id: workOrder.tool_id,
         jobsite_id: null,
         alert_type: 'Maintenance Work Order',
-        message: 'A maintenance work order was created for this tool.',
+        message:
+          'A maintenance work order was created for this tool.',
         severity: workOrder.priority
-    },
-    client
+      },
+      client
     )
 
     await createAuditLog(
       {
-        user_id: null,
+        user_id: userId,
         action: 'WORK_ORDER_CREATED',
         entity_type: 'Tool',
         entity_id: workOrder.tool_id,
-        description: 'Maintenance work order created.'
+        description:
+          `Maintenance work order #${createdWorkOrder.work_order_id} was created.`
       },
       client
     )
 
     await client.query('COMMIT')
 
-    return result.rows[0]
+    return createdWorkOrder
   } catch (error) {
     await client.query('ROLLBACK')
     throw error
@@ -116,27 +124,69 @@ export async function createWorkOrder(workOrder: {
   }
 }
 
-export async function completeWorkOrder(id: number) {
-  const result = await pool.query(
-    `UPDATE work_orders
-     SET status = 'Completed',
-         completed_at = CURRENT_TIMESTAMP
-     WHERE work_order_id = $1
-     RETURNING *`,
-    [id]
-  )
-
-  return result.rows[0]
-}
-
-export async function returnToolToService(id: number) {
+export async function completeWorkOrder(
+  id: number,
+  userId: number
+) {
   const client = await pool.connect()
 
   try {
     await client.query('BEGIN')
 
     const result = await client.query(
-      `SELECT tool_id, damage_report_id, status
+      `UPDATE work_orders
+       SET
+         status = 'Completed',
+         completed_at = CURRENT_TIMESTAMP
+       WHERE work_order_id = $1
+       RETURNING *`,
+      [id]
+    )
+
+    const workOrder = result.rows[0]
+
+    if (!workOrder) {
+      await client.query('ROLLBACK')
+      return undefined
+    }
+
+    await createAuditLog(
+      {
+        user_id: userId,
+        action: 'WORK_ORDER_COMPLETED',
+        entity_type: 'Tool',
+        entity_id: workOrder.tool_id,
+        description:
+          `Maintenance work order #${workOrder.work_order_id} was completed.`
+      },
+      client
+    )
+
+    await client.query('COMMIT')
+
+    return workOrder
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  } finally {
+    client.release()
+  }
+}
+
+export async function returnToolToService(
+  id: number,
+  userId: number
+) {
+  const client = await pool.connect()
+
+  try {
+    await client.query('BEGIN')
+
+    const result = await client.query(
+      `SELECT
+         tool_id,
+         damage_report_id,
+         status
        FROM work_orders
        WHERE work_order_id = $1
        FOR UPDATE`,
@@ -162,9 +212,10 @@ export async function returnToolToService(id: number) {
 
     await client.query(
       `UPDATE tools
-       SET status = 'Available',
-           condition = 'Good',
-           updated_at = CURRENT_TIMESTAMP
+       SET
+         status = 'Available',
+         condition = 'Good',
+         updated_at = CURRENT_TIMESTAMP
        WHERE tool_id = $1`,
       [workOrder.tool_id]
     )
@@ -172,37 +223,39 @@ export async function returnToolToService(id: number) {
     if (workOrder.damage_report_id) {
       await client.query(
         `UPDATE damage_reports
-         SET status = 'Resolved',
-             resolved_at = CURRENT_TIMESTAMP
+         SET
+           status = 'Resolved',
+           resolved_at = CURRENT_TIMESTAMP
          WHERE damage_report_id = $1`,
         [workOrder.damage_report_id]
       )
     }
 
     await createAlert(
-    {
+      {
         tool_id: workOrder.tool_id,
         jobsite_id: null,
         alert_type: 'Return to Service',
-        message: 'Maintenance is complete and the tool has been returned to service.',
+        message:
+          'Maintenance is complete and the tool has been returned to service.',
         severity: 'Info'
-    },
-    client
+      },
+      client
     )
 
     await createAuditLog(
       {
-        user_id: null,
+        user_id: userId,
         action: 'RETURN_TO_SERVICE',
         entity_type: 'Tool',
         entity_id: workOrder.tool_id,
-        description: 'Tool maintenance completed and tool returned to service.'
+        description:
+          `Work order #${id} was closed and the tool was returned to service.`
       },
       client
     )
 
     await client.query('COMMIT')
-    
   } catch (error) {
     await client.query('ROLLBACK')
     throw error

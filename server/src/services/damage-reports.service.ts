@@ -39,13 +39,16 @@ export async function getDamageReportById(id: number) {
   return result.rows[0]
 }
 
-export async function createDamageReport(report: {
-  tool_id: number
-  inspection_id: number | null
-  description: string
-  severity: string
-  notes: string
-}) {
+export async function createDamageReport(
+  report: {
+    tool_id: number
+    inspection_id: number | null
+    description: string
+    severity: string
+    notes: string
+  },
+  userId: number
+) {
   const client = await pool.connect()
 
   try {
@@ -53,7 +56,13 @@ export async function createDamageReport(report: {
 
     const result = await client.query(
       `INSERT INTO damage_reports
-        (tool_id, inspection_id, description, severity, notes)
+        (
+          tool_id,
+          inspection_id,
+          description,
+          severity,
+          notes
+        )
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
       [
@@ -67,31 +76,34 @@ export async function createDamageReport(report: {
 
     await client.query(
       `UPDATE tools
-       SET status = 'Out of Service',
-           condition = 'Damaged',
-           updated_at = CURRENT_TIMESTAMP
+       SET
+         status = 'Out of Service',
+         condition = 'Damaged',
+         updated_at = CURRENT_TIMESTAMP
        WHERE tool_id = $1`,
       [report.tool_id]
     )
 
     await createAlert(
-    {
+      {
         tool_id: report.tool_id,
         jobsite_id: null,
         alert_type: 'Damage Report',
-        message: 'Tool damage was reported and the tool was removed from service.',
+        message:
+          'Tool damage was reported and the tool was removed from service.',
         severity: report.severity
-    },
-    client
+      },
+      client
     )
 
     await createAuditLog(
       {
-        user_id: null,
+        user_id: userId,
         action: 'DAMAGE_REPORT',
         entity_type: 'Tool',
         entity_id: report.tool_id,
-        description: `Damage reported with severity: ${report.severity}.`
+        description:
+          `Damage reported with severity: ${report.severity}.`
       },
       client
     )
