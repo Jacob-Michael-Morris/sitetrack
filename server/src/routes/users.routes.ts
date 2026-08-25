@@ -1,8 +1,11 @@
 import { Router } from 'express'
 
 import {
-  getAuditLogs
-} from '../controllers/audit-logs.controller.js'
+  addUser,
+  editUser,
+  getUser,
+  getUsers
+} from '../controllers/users.controller.js'
 
 import {
   requireAuth,
@@ -14,6 +17,9 @@ const router = Router()
 router.use(requireAuth)
 router.use(requireRole('Administrator'))
 
-router.get('/', getAuditLogs)
+router.get('/', getUsers)
+router.get('/:id', getUser)
+router.post('/', addUser)
+router.put('/:id', editUser)
 
 export default router

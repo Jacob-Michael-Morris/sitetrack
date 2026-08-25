@@ -1,5 +1,7 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
+
 import toolsRouter from './routes/tools.routes.js'
 import jobsitesRouter from './routes/jobsites.routes.js'
 import assignmentsRouter from './routes/assignments.routes.js'
@@ -8,15 +10,22 @@ import damageReportsRouter from './routes/damage-reports.routes.js'
 import workOrdersRouter from './routes/work-orders.routes.js'
 import alertsRouter from './routes/alerts.routes.js'
 import auditLogsRouter from './routes/audit-logs.routes.js'
+import authRouter from './routes/auth.routes.js'
+import usersRouter from './routes/users.routes.js'
+import rolesRouter from './routes/roles.routes.js'
 
 const app = express()
 const PORT = 3000
 
-app.use(cors({
-  origin: 'http://localhost:5173'
-}))
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+  })
+)
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.get('/api/health', (req, res) => {
   res.json({
@@ -24,6 +33,8 @@ app.get('/api/health', (req, res) => {
     message: 'SiteTrack API is running'
   })
 })
+
+app.use('/api/auth', authRouter)
 
 app.use('/api/tools', toolsRouter)
 app.use('/api/jobsites', jobsitesRouter)
@@ -34,6 +45,11 @@ app.use('/api/work-orders', workOrdersRouter)
 app.use('/api/alerts', alertsRouter)
 app.use('/api/audit-logs', auditLogsRouter)
 
+app.use('/api/users', usersRouter)
+app.use('/api/roles', rolesRouter)
+
 app.listen(PORT, () => {
-  console.log(`SiteTrack API running at http://localhost:${PORT}`)
+  console.log(
+    `SiteTrack API running at http://localhost:${PORT}`
+  )
 })

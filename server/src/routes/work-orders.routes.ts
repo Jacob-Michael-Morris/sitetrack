@@ -8,7 +8,21 @@ import {
   returnToService
 } from '../controllers/work-orders.controller.js'
 
+import {
+  requireAuth,
+  requireRole
+} from '../middleware/auth.middleware.js'
+
 const router = Router()
+
+router.use(requireAuth)
+
+router.use(
+  requireRole(
+    'Administrator',
+    'Maintenance Technician'
+  )
+)
 
 router.get('/', getWorkOrders)
 router.get('/:id', getWorkOrder)
