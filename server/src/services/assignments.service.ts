@@ -1,4 +1,5 @@
 import pool from '../database/pool.js'
+import { createAuditLog } from './audit-logs.service.js'
 
 export async function getAllAssignments() {
   const result = await pool.query(
@@ -61,6 +62,17 @@ export async function checkoutTool(
       [toolId]
     )
 
+    await createAuditLog(
+      {
+        user_id: null,
+        action: 'CHECKOUT',
+        entity_type: 'Tool',
+        entity_id: toolId,
+        description: `Tool ${toolId} was checked out to jobsite ${jobsiteId}.`
+      },
+      client
+    )
+
     await client.query('COMMIT')
 
     return assignmentResult.rows[0]
@@ -116,7 +128,19 @@ export async function returnTool(
       [toolId]
     )
 
+    await createAuditLog(
+      {
+        user_id: null,
+        action: 'RETURN',
+        entity_type: 'Tool',
+        entity_id: toolId,
+        description: `Tool ${toolId} was returned.`
+      },
+      client
+    )
+
     await client.query('COMMIT')
+
   } catch (error) {
     await client.query('ROLLBACK')
     throw error
@@ -168,6 +192,17 @@ export async function transferTool(
        VALUES ($1, $2, 'Assigned', $3)
        RETURNING *`,
       [toolId, newJobsiteId, notes]
+    )
+
+    await createAuditLog(
+      {
+        user_id: null,
+        action: 'TRANSFER',
+        entity_type: 'Tool',
+        entity_id: toolId,
+        description: `Tool ${toolId} was transferred to jobsite ${newJobsiteId}.`
+      },
+      client
     )
 
     await client.query('COMMIT')

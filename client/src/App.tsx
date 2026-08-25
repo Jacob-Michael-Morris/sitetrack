@@ -1,20 +1,25 @@
 import { Navigate, Route, Routes } from 'react-router'
 
-import Layout from './components/Layout'
-import Dashboard from './pages/Dashboard'
-import Tools from './pages/Tools'
-import ToolDetails from './pages/ToolDetails'
-import Jobsites from './pages/Jobsites'
-import JobsiteDetails from './pages/JobsiteDetails'
-import Assignments from './pages/Assignments'
-import Inspections from './pages/Inspections'
-import Maintenance from './pages/Maintenance'
-import Alerts from './pages/Alerts'
-import RegisterTool from './pages/RegisterTool'
-import EditTool from './pages/EditTool'
-import RegisterJobsite from './pages/RegisterJobsite'
-import EditJobsite from './pages/EditJobsite'
-import DamageReports from './pages/DamageReports'
+import Layout from './components/Layout.js'
+
+import Dashboard from './pages/Dashboard.js'
+
+import Tools from './pages/Tools.js'
+import ToolDetails from './pages/ToolDetails.js'
+import RegisterTool from './pages/RegisterTool.js'
+import EditTool from './pages/EditTool.js'
+
+import Jobsites from './pages/Jobsites.js'
+import JobsiteDetails from './pages/JobsiteDetails.js'
+import RegisterJobsite from './pages/RegisterJobsite.js'
+import EditJobsite from './pages/EditJobsite.js'
+
+import Assignments from './pages/Assignments.js'
+import Inspections from './pages/Inspections.js'
+import DamageReports from './pages/DamageReports.js'
+import Maintenance from './pages/Maintenance.js'
+import Alerts from './pages/Alerts.js'
+import AuditLog from './pages/AuditLog.js'
 
 function App() {
   return (
@@ -36,23 +41,18 @@ function App() {
         />
 
         <Route
+          path="/tools/new"
+          element={<RegisterTool />}
+        />
+
+        <Route
           path="/tools/:id"
           element={<ToolDetails />}
         />
 
         <Route
-        path="/tools/new"
-        element={<RegisterTool />}
-        />
-
-        <Route
-        path="/tools/:id"
-        element={<ToolDetails />}
-        />
-
-        <Route
-        path="/tools/:id/edit"
-        element={<EditTool />}
+          path="/tools/:id/edit"
+          element={<EditTool />}
         />
 
         <Route
@@ -81,13 +81,13 @@ function App() {
         />
 
         <Route
-          path="/damage-reports"
-          element={<DamageReports />}
+          path="/inspections"
+          element={<Inspections />}
         />
 
         <Route
-          path="/inspections"
-          element={<Inspections />}
+          path="/damage-reports"
+          element={<DamageReports />}
         />
 
         <Route
@@ -98,6 +98,11 @@ function App() {
         <Route
           path="/alerts"
           element={<Alerts />}
+        />
+
+        <Route
+          path="/audit-log"
+          element={<AuditLog />}
         />
       </Route>
     </Routes>

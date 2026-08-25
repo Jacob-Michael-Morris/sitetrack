@@ -1,5 +1,6 @@
 import pool from '../database/pool.js'
 import { createAlert } from './alerts.service.js'
+import { createAuditLog } from './audit-logs.service.js'
 
 export async function getAllDamageReports() {
   const result = await pool.query(
@@ -82,6 +83,17 @@ export async function createDamageReport(report: {
         severity: report.severity
     },
     client
+    )
+
+    await createAuditLog(
+      {
+        user_id: null,
+        action: 'DAMAGE_REPORT',
+        entity_type: 'Tool',
+        entity_id: report.tool_id,
+        description: `Damage reported with severity: ${report.severity}.`
+      },
+      client
     )
 
     await client.query('COMMIT')

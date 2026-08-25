@@ -1,5 +1,6 @@
 import pool from '../database/pool.js'
 import { createAlert } from './alerts.service.js'
+import { createAuditLog } from './audit-logs.service.js'
 
 export async function getAllInspections() {
   const result = await pool.query(
@@ -68,6 +69,14 @@ if (inspection.result === 'Failed') {
     severity: 'High'
   })
 }
+
+await createAuditLog({
+  user_id: null,
+  action: 'INSPECTION',
+  entity_type: 'Tool',
+  entity_id: inspection.tool_id,
+  description: `Inspection recorded with result: ${inspection.result}.`
+})
 
 return createdInspection
 }

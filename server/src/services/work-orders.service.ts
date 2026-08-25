@@ -1,5 +1,6 @@
 import pool from '../database/pool.js'
 import { createAlert } from './alerts.service.js'
+import { createAuditLog } from './audit-logs.service.js'
 
 export async function getAllWorkOrders() {
   const result = await pool.query(
@@ -93,6 +94,17 @@ export async function createWorkOrder(workOrder: {
     client
     )
 
+    await createAuditLog(
+      {
+        user_id: null,
+        action: 'WORK_ORDER_CREATED',
+        entity_type: 'Tool',
+        entity_id: workOrder.tool_id,
+        description: 'Maintenance work order created.'
+      },
+      client
+    )
+
     await client.query('COMMIT')
 
     return result.rows[0]
@@ -178,7 +190,19 @@ export async function returnToolToService(id: number) {
     client
     )
 
+    await createAuditLog(
+      {
+        user_id: null,
+        action: 'RETURN_TO_SERVICE',
+        entity_type: 'Tool',
+        entity_id: workOrder.tool_id,
+        description: 'Tool maintenance completed and tool returned to service.'
+      },
+      client
+    )
+
     await client.query('COMMIT')
+    
   } catch (error) {
     await client.query('ROLLBACK')
     throw error
