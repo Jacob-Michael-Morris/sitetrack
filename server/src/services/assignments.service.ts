@@ -1,23 +1,28 @@
 import pool from '../database/pool.js'
-import { createAuditLog } from './audit-logs.service.js'
+
+import {
+  createAuditLog
+} from './audit-logs.service.js'
 
 export async function getAllAssignments() {
   const result = await pool.query(
     `SELECT
        a.assignment_id,
        a.tool_id,
+       t.name AS tool_name,
+       t.serial_number,
        a.jobsite_id,
+       j.name AS jobsite_name,
        a.assigned_at,
        a.released_at,
        a.status,
-       a.notes,
-       t.name AS tool_name,
-       t.serial_number,
-       j.name AS jobsite_name
+       a.notes
      FROM tool_assignments a
-     JOIN tools t ON a.tool_id = t.tool_id
-     JOIN jobsites j ON a.jobsite_id = j.jobsite_id
-     ORDER BY a.assignment_id DESC`
+     JOIN tools t
+       ON a.tool_id = t.tool_id
+     JOIN jobsites j
+       ON a.jobsite_id = j.jobsite_id
+     ORDER BY a.assigned_at DESC`
   )
 
   return result.rows
@@ -26,7 +31,8 @@ export async function getAllAssignments() {
 export async function checkoutTool(
   toolId: number,
   jobsiteId: number,
-  notes: string
+  notes: string,
+  userId: number
 ) {
   const client = await pool.connect()
 
@@ -34,48 +40,94 @@ export async function checkoutTool(
     await client.query('BEGIN')
 
     const toolResult = await client.query(
-      'SELECT status FROM tools WHERE tool_id = $1 FOR UPDATE',
+      `SELECT
+         tool_id,
+         name,
+         status
+       FROM tools
+       WHERE tool_id = $1
+       FOR UPDATE`,
       [toolId]
     )
 
-    if (toolResult.rowCount === 0) {
-      throw new Error('TOOL_NOT_FOUND')
+    const tool = toolResult.rows[0]
+
+    if (!tool) {
+      throw new Error('Tool not found')
     }
 
-    if (toolResult.rows[0].status !== 'Available') {
-      throw new Error('TOOL_NOT_AVAILABLE')
+    const activeAssignmentResult = await client.query(
+      `SELECT assignment_id
+       FROM tool_assignments
+       WHERE tool_id = $1
+         AND released_at IS NULL`,
+      [toolId]
+    )
+
+    if (activeAssignmentResult.rowCount !== 0) {
+      throw new Error(
+        'Tool already has an active assignment'
+      )
+    }
+
+    const jobsiteResult = await client.query(
+      `SELECT
+         jobsite_id,
+         name
+       FROM jobsites
+       WHERE jobsite_id = $1`,
+      [jobsiteId]
+    )
+
+    const jobsite = jobsiteResult.rows[0]
+
+    if (!jobsite) {
+      throw new Error('Jobsite not found')
     }
 
     const assignmentResult = await client.query(
       `INSERT INTO tool_assignments
-        (tool_id, jobsite_id, status, notes)
-       VALUES ($1, $2, 'Assigned', $3)
+        (
+          tool_id,
+          jobsite_id,
+          status,
+          notes
+        )
+       VALUES ($1, $2, 'Checked Out', $3)
        RETURNING *`,
-      [toolId, jobsiteId, notes]
+      [
+        toolId,
+        jobsiteId,
+        notes || null
+      ]
     )
+
+    const assignment = assignmentResult.rows[0]
 
     await client.query(
       `UPDATE tools
-       SET status = 'Checked Out',
-           updated_at = CURRENT_TIMESTAMP
+       SET
+         status = 'Checked Out',
+         updated_at = CURRENT_TIMESTAMP
        WHERE tool_id = $1`,
       [toolId]
     )
 
     await createAuditLog(
       {
-        user_id: null,
-        action: 'CHECKOUT',
+        user_id: userId,
+        action: 'TOOL_CHECKOUT',
         entity_type: 'Tool',
         entity_id: toolId,
-        description: `Tool ${toolId} was checked out to jobsite ${jobsiteId}.`
+        description:
+          `Tool "${tool.name}" was checked out to jobsite "${jobsite.name}".`
       },
       client
     )
 
     await client.query('COMMIT')
 
-    return assignmentResult.rows[0]
+    return assignment
   } catch (error) {
     await client.query('ROLLBACK')
     throw error
@@ -86,15 +138,34 @@ export async function checkoutTool(
 
 export async function returnTool(
   toolId: number,
-  notes: string
+  notes: string,
+  userId: number
 ) {
   const client = await pool.connect()
 
   try {
     await client.query('BEGIN')
 
-    const assignmentResult = await client.query(
-      `SELECT assignment_id
+    const toolResult = await client.query(
+      `SELECT
+         tool_id,
+         name
+       FROM tools
+       WHERE tool_id = $1
+       FOR UPDATE`,
+      [toolId]
+    )
+
+    const tool = toolResult.rows[0]
+
+    if (!tool) {
+      throw new Error('Tool not found')
+    }
+
+    const activeAssignmentResult = await client.query(
+      `SELECT
+         assignment_id,
+         jobsite_id
        FROM tool_assignments
        WHERE tool_id = $1
          AND released_at IS NULL
@@ -102,45 +173,58 @@ export async function returnTool(
       [toolId]
     )
 
-    if (assignmentResult.rowCount === 0) {
-      throw new Error('NO_ACTIVE_ASSIGNMENT')
+    const activeAssignment =
+      activeAssignmentResult.rows[0]
+
+    if (!activeAssignment) {
+      throw new Error(
+        'Tool does not have an active assignment'
+      )
     }
 
-    const assignmentId = assignmentResult.rows[0].assignment_id
-
-    await client.query(
+    const result = await client.query(
       `UPDATE tool_assignments
-       SET released_at = CURRENT_TIMESTAMP,
-           status = 'Returned',
-           notes = CASE
-             WHEN $2 = '' THEN notes
-             ELSE $2
-           END
-       WHERE assignment_id = $1`,
-      [assignmentId, notes]
+       SET
+         released_at = CURRENT_TIMESTAMP,
+         status = 'Returned',
+         notes = CASE
+           WHEN $1 = '' THEN notes
+           ELSE $1
+         END
+       WHERE assignment_id = $2
+       RETURNING *`,
+      [
+        notes,
+        activeAssignment.assignment_id
+      ]
     )
+
+    const assignment = result.rows[0]
 
     await client.query(
       `UPDATE tools
-       SET status = 'Available',
-           updated_at = CURRENT_TIMESTAMP
+       SET
+         status = 'Available',
+         updated_at = CURRENT_TIMESTAMP
        WHERE tool_id = $1`,
       [toolId]
     )
 
     await createAuditLog(
       {
-        user_id: null,
-        action: 'RETURN',
+        user_id: userId,
+        action: 'TOOL_RETURN',
         entity_type: 'Tool',
         entity_id: toolId,
-        description: `Tool ${toolId} was returned.`
+        description:
+          `Tool "${tool.name}" was returned.`
       },
       client
     )
 
     await client.query('COMMIT')
 
+    return assignment
   } catch (error) {
     await client.query('ROLLBACK')
     throw error
@@ -152,15 +236,34 @@ export async function returnTool(
 export async function transferTool(
   toolId: number,
   newJobsiteId: number,
-  notes: string
+  notes: string,
+  userId: number
 ) {
   const client = await pool.connect()
 
   try {
     await client.query('BEGIN')
 
-    const currentResult = await client.query(
-      `SELECT assignment_id, jobsite_id
+    const toolResult = await client.query(
+      `SELECT
+         tool_id,
+         name
+       FROM tools
+       WHERE tool_id = $1
+       FOR UPDATE`,
+      [toolId]
+    )
+
+    const tool = toolResult.rows[0]
+
+    if (!tool) {
+      throw new Error('Tool not found')
+    }
+
+    const activeAssignmentResult = await client.query(
+      `SELECT
+         assignment_id,
+         jobsite_id
        FROM tool_assignments
        WHERE tool_id = $1
          AND released_at IS NULL
@@ -168,46 +271,99 @@ export async function transferTool(
       [toolId]
     )
 
-    if (currentResult.rowCount === 0) {
-      throw new Error('NO_ACTIVE_ASSIGNMENT')
+    const activeAssignment =
+      activeAssignmentResult.rows[0]
+
+    if (!activeAssignment) {
+      throw new Error(
+        'Tool does not have an active assignment'
+      )
     }
 
-    const currentAssignment = currentResult.rows[0]
+    if (
+      Number(activeAssignment.jobsite_id) ===
+      newJobsiteId
+    ) {
+      throw new Error(
+        'Tool is already assigned to this jobsite'
+      )
+    }
 
-    if (currentAssignment.jobsite_id === newJobsiteId) {
-      throw new Error('SAME_JOBSITE')
+    const oldJobsiteResult = await client.query(
+      `SELECT name
+       FROM jobsites
+       WHERE jobsite_id = $1`,
+      [activeAssignment.jobsite_id]
+    )
+
+    const newJobsiteResult = await client.query(
+      `SELECT
+         jobsite_id,
+         name
+       FROM jobsites
+       WHERE jobsite_id = $1`,
+      [newJobsiteId]
+    )
+
+    const oldJobsite = oldJobsiteResult.rows[0]
+    const newJobsite = newJobsiteResult.rows[0]
+
+    if (!newJobsite) {
+      throw new Error('New jobsite not found')
     }
 
     await client.query(
       `UPDATE tool_assignments
-       SET released_at = CURRENT_TIMESTAMP,
-           status = 'Transferred'
+       SET
+         released_at = CURRENT_TIMESTAMP,
+         status = 'Transferred'
        WHERE assignment_id = $1`,
-      [currentAssignment.assignment_id]
+      [activeAssignment.assignment_id]
     )
 
     const result = await client.query(
       `INSERT INTO tool_assignments
-        (tool_id, jobsite_id, status, notes)
-       VALUES ($1, $2, 'Assigned', $3)
+        (
+          tool_id,
+          jobsite_id,
+          status,
+          notes
+        )
+       VALUES ($1, $2, 'Checked Out', $3)
        RETURNING *`,
-      [toolId, newJobsiteId, notes]
+      [
+        toolId,
+        newJobsiteId,
+        notes || null
+      ]
+    )
+
+    const assignment = result.rows[0]
+
+    await client.query(
+      `UPDATE tools
+       SET
+         status = 'Checked Out',
+         updated_at = CURRENT_TIMESTAMP
+       WHERE tool_id = $1`,
+      [toolId]
     )
 
     await createAuditLog(
       {
-        user_id: null,
-        action: 'TRANSFER',
+        user_id: userId,
+        action: 'TOOL_TRANSFER',
         entity_type: 'Tool',
         entity_id: toolId,
-        description: `Tool ${toolId} was transferred to jobsite ${newJobsiteId}.`
+        description:
+          `Tool "${tool.name}" was transferred from "${oldJobsite?.name ?? 'Unknown Jobsite'}" to "${newJobsite.name}".`
       },
       client
     )
 
     await client.query('COMMIT')
 
-    return result.rows[0]
+    return assignment
   } catch (error) {
     await client.query('ROLLBACK')
     throw error

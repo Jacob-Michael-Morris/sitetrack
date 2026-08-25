@@ -26,6 +26,12 @@ function Sidebar() {
   const isSafetyPersonnel =
     role === 'Safety Personnel'
 
+  const canViewReports =
+    isAdministrator ||
+    isEquipmentManager ||
+    isMaintenanceTechnician ||
+    isSafetyPersonnel
+
   async function handleLogout() {
     try {
       await logout()
@@ -51,60 +57,57 @@ function Sidebar() {
           Tools
         </NavLink>
 
-        {(isAdministrator || isEquipmentManager) && (
+        {(isAdministrator ||
+          isEquipmentManager) && (
           <NavLink to="/jobsites">
             Jobsites
           </NavLink>
         )}
 
-        {(
-          isAdministrator ||
+        {(isAdministrator ||
           isEquipmentManager ||
-          isWorker
-        ) && (
+          isWorker) && (
           <NavLink to="/assignments">
             Assignments
           </NavLink>
         )}
 
-        {(
-          isAdministrator ||
+        {(isAdministrator ||
           isMaintenanceTechnician ||
-          isSafetyPersonnel
-        ) && (
+          isSafetyPersonnel) && (
           <NavLink to="/inspections">
             Inspections
           </NavLink>
         )}
 
-        {(
-          isAdministrator ||
+        {(isAdministrator ||
           isMaintenanceTechnician ||
           isWorker ||
-          isSafetyPersonnel
-        ) && (
+          isSafetyPersonnel) && (
           <NavLink to="/damage-reports">
             Damage Reports
           </NavLink>
         )}
 
-        {(
-          isAdministrator ||
-          isMaintenanceTechnician
-        ) && (
+        {(isAdministrator ||
+          isMaintenanceTechnician) && (
           <NavLink to="/maintenance">
             Maintenance
           </NavLink>
         )}
 
-        {(
-          isAdministrator ||
+        {(isAdministrator ||
           isEquipmentManager ||
           isMaintenanceTechnician ||
-          isSafetyPersonnel
-        ) && (
+          isSafetyPersonnel) && (
           <NavLink to="/alerts">
             Alerts
+          </NavLink>
+        )}
+
+        {canViewReports && (
+          <NavLink to="/reports">
+            Reports
           </NavLink>
         )}
 

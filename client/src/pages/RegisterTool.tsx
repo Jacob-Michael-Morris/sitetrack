@@ -1,28 +1,42 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { createTool } from '../services/tools.service'
-import type { ToolInput } from '../types/Tool'
+
+import {
+  createTool
+} from '../services/tools.service.js'
+
+import type {
+  ToolInput
+} from '../types/Tool.js'
 
 function RegisterTool() {
   const navigate = useNavigate()
 
-  const [form, setForm] = useState<ToolInput>({
-    name: '',
-    serial_number: '',
-    category: '',
-    status: 'Available',
-    condition: 'Good',
-    purchase_date: ''
-  })
+  const [form, setForm] =
+    useState<ToolInput>({
+      name: '',
+      serial_number: '',
+      category: '',
+      status: 'Available',
+      condition: 'Good',
+      purchase_date: ''
+    })
 
   const [error, setError] = useState('')
 
+  const [submitting, setSubmitting] =
+    useState(false)
+
   function handleChange(
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    event: React.ChangeEvent<
+      HTMLInputElement |
+      HTMLSelectElement
+    >
   ) {
     setForm({
       ...form,
-      [event.target.name]: event.target.value
+      [event.target.name]:
+        event.target.value
     })
   }
 
@@ -31,21 +45,86 @@ function RegisterTool() {
   ) {
     event.preventDefault()
 
+    const cleanName = form.name.trim()
+
+    const cleanSerialNumber =
+      form.serial_number.trim()
+
+    const cleanCategory =
+      form.category.trim()
+
+    if (!cleanName) {
+      setError('Tool name is required.')
+      return
+    }
+
+    if (!cleanSerialNumber) {
+      setError('Serial number is required.')
+      return
+    }
+
+    if (!cleanCategory) {
+      setError('Category is required.')
+      return
+    }
+
+    if (form.purchase_date) {
+      const purchaseDate = new Date(
+        `${form.purchase_date}T00:00:00`
+      )
+
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      if (purchaseDate > today) {
+        setError(
+          'Purchase date cannot be in the future.'
+        )
+        return
+      }
+    }
+
     try {
-      const tool = await createTool(form)
+      setSubmitting(true)
+      setError('')
+
+      const tool = await createTool({
+        ...form,
+        name: cleanName,
+        serial_number: cleanSerialNumber,
+        category: cleanCategory
+      })
+
       navigate(`/tools/${tool.tool_id}`)
-    } catch {
-      setError('Unable to register tool.')
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to register tool.'
+      )
+    } finally {
+      setSubmitting(false)
     }
   }
+
+  const today = new Date()
+    .toISOString()
+    .slice(0, 10)
 
   return (
     <div>
       <h1>Register Tool</h1>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
 
-      <form className="tool-form" onSubmit={handleSubmit}>
+      <form
+        className="tool-form"
+        onSubmit={handleSubmit}
+      >
         <label>
           Tool Name
           <input
@@ -53,6 +132,7 @@ function RegisterTool() {
             value={form.name}
             onChange={handleChange}
             required
+            maxLength={150}
           />
         </label>
 
@@ -63,6 +143,7 @@ function RegisterTool() {
             value={form.serial_number}
             onChange={handleChange}
             required
+            maxLength={100}
           />
         </label>
 
@@ -72,6 +153,8 @@ function RegisterTool() {
             name="category"
             value={form.category}
             onChange={handleChange}
+            required
+            maxLength={100}
           />
         </label>
 
@@ -110,11 +193,17 @@ function RegisterTool() {
             name="purchase_date"
             value={form.purchase_date}
             onChange={handleChange}
+            max={today}
           />
         </label>
 
-        <button type="submit">
-          Register Tool
+        <button
+          type="submit"
+          disabled={submitting}
+        >
+          {submitting
+            ? 'Registering...'
+            : 'Register Tool'}
         </button>
       </form>
     </div>

@@ -70,16 +70,21 @@ export async function addWorkOrder(
       return
     }
 
-    const workOrder = await createWorkOrder({
-      tool_id: Number(tool_id),
-      damage_report_id: damage_report_id
-        ? Number(damage_report_id)
-        : null,
-      description,
-      priority: priority || 'Medium',
-      assigned_to: assigned_to || '',
-      notes: notes || ''
-    })
+    const userId = Number(res.locals.auth.userId)
+
+    const workOrder = await createWorkOrder(
+      {
+        tool_id: Number(tool_id),
+        damage_report_id: damage_report_id
+          ? Number(damage_report_id)
+          : null,
+        description,
+        priority: priority || 'Medium',
+        assigned_to: assigned_to || '',
+        notes: notes || ''
+      },
+      userId
+    )
 
     res.status(201).json(workOrder)
   } catch (error) {
@@ -97,8 +102,12 @@ export async function completeWorkOrderRequest(
 ) {
   try {
     const id = Number(req.params.id)
+    const userId = Number(res.locals.auth.userId)
 
-    const workOrder = await completeWorkOrder(id)
+    const workOrder = await completeWorkOrder(
+      id,
+      userId
+    )
 
     if (!workOrder) {
       res.status(404).json({
@@ -123,8 +132,12 @@ export async function returnToService(
 ) {
   try {
     const id = Number(req.params.id)
+    const userId = Number(res.locals.auth.userId)
 
-    await returnToolToService(id)
+    await returnToolToService(
+      id,
+      userId
+    )
 
     res.json({
       message: 'Tool returned to service successfully'

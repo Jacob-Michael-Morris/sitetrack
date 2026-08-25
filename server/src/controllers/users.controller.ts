@@ -7,6 +7,22 @@ import {
   updateUser
 } from '../services/users.service.js'
 
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+function getDatabaseErrorCode(error: unknown) {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error
+  ) {
+    return String(error.code)
+  }
+
+  return null
+}
+
 export async function getUsers(
   req: Request,
   res: Response
@@ -29,6 +45,14 @@ export async function getUser(
 ) {
   try {
     const id = Number(req.params.id)
+
+    if (!Number.isInteger(id) || id <= 0) {
+      res.status(400).json({
+        message: 'Invalid user ID'
+      })
+      return
+    }
+
     const user = await getUserById(id)
 
     if (!user) {
@@ -60,21 +84,66 @@ export async function addUser(
       role_id
     } = req.body
 
-    if (!name || !email || !password || !role_id) {
+    const cleanName = String(name ?? '').trim()
+    const cleanEmail = String(email ?? '')
+      .trim()
+      .toLowerCase()
+
+    const roleId = Number(role_id)
+
+    if (!cleanName) {
       res.status(400).json({
-        message: 'Name, email, password, and role are required'
+        message: 'Name is required'
       })
       return
     }
 
-    const actorUserId = Number(res.locals.auth.userId)
+    if (!cleanEmail) {
+      res.status(400).json({
+        message: 'Email is required'
+      })
+      return
+    }
+
+    if (!isValidEmail(cleanEmail)) {
+      res.status(400).json({
+        message: 'Enter a valid email address'
+      })
+      return
+    }
+
+    if (!password) {
+      res.status(400).json({
+        message: 'Password is required'
+      })
+      return
+    }
+
+    if (String(password).length < 8) {
+      res.status(400).json({
+        message:
+          'Password must be at least 8 characters long'
+      })
+      return
+    }
+
+    if (!Number.isInteger(roleId) || roleId <= 0) {
+      res.status(400).json({
+        message: 'A valid role is required'
+      })
+      return
+    }
+
+    const actorUserId = Number(
+      res.locals.auth.userId
+    )
 
     const user = await createUser(
       {
-        name,
-        email,
-        password,
-        role_id: Number(role_id)
+        name: cleanName,
+        email: cleanEmail,
+        password: String(password),
+        role_id: roleId
       },
       actorUserId
     )
@@ -82,6 +151,21 @@ export async function addUser(
     res.status(201).json(user)
   } catch (error) {
     console.error(error)
+
+    if (getDatabaseErrorCode(error) === '23505') {
+      res.status(409).json({
+        message:
+          'A user with this email address already exists'
+      })
+      return
+    }
+
+    if (getDatabaseErrorCode(error) === '23503') {
+      res.status(400).json({
+        message: 'The selected role does not exist'
+      })
+      return
+    }
 
     res.status(500).json({
       message: 'Unable to create user'
@@ -103,21 +187,59 @@ export async function editUser(
       is_active
     } = req.body
 
-    if (!name || !email || !role_id) {
+    if (!Number.isInteger(id) || id <= 0) {
       res.status(400).json({
-        message: 'Name, email, and role are required'
+        message: 'Invalid user ID'
       })
       return
     }
 
-    const actorUserId = Number(res.locals.auth.userId)
+    const cleanName = String(name ?? '').trim()
+    const cleanEmail = String(email ?? '')
+      .trim()
+      .toLowerCase()
+
+    const roleId = Number(role_id)
+
+    if (!cleanName) {
+      res.status(400).json({
+        message: 'Name is required'
+      })
+      return
+    }
+
+    if (!isValidEmail(cleanEmail)) {
+      res.status(400).json({
+        message: 'Enter a valid email address'
+      })
+      return
+    }
+
+    if (!Number.isInteger(roleId) || roleId <= 0) {
+      res.status(400).json({
+        message: 'A valid role is required'
+      })
+      return
+    }
+
+    if (typeof is_active !== 'boolean') {
+      res.status(400).json({
+        message: 'Account status is required'
+      })
+      return
+    }
+
+    const actorUserId = Number(
+      res.locals.auth.userId
+    )
 
     if (
       id === actorUserId &&
       is_active === false
     ) {
       res.status(400).json({
-        message: 'You cannot deactivate your own account'
+        message:
+          'You cannot deactivate your own account'
       })
       return
     }
@@ -125,10 +247,10 @@ export async function editUser(
     const user = await updateUser(
       id,
       {
-        name,
-        email,
-        role_id: Number(role_id),
-        is_active: Boolean(is_active)
+        name: cleanName,
+        email: cleanEmail,
+        role_id: roleId,
+        is_active
       },
       actorUserId
     )
@@ -143,6 +265,21 @@ export async function editUser(
     res.json(user)
   } catch (error) {
     console.error(error)
+
+    if (getDatabaseErrorCode(error) === '23505') {
+      res.status(409).json({
+        message:
+          'A user with this email address already exists'
+      })
+      return
+    }
+
+    if (getDatabaseErrorCode(error) === '23503') {
+      res.status(400).json({
+        message: 'The selected role does not exist'
+      })
+      return
+    }
 
     res.status(500).json({
       message: 'Unable to update user'

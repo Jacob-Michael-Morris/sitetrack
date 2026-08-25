@@ -147,6 +147,7 @@ GET /api/tools/:id/audit-logs
 
 # Dashboard
 
+GET /api/dashboard
 GET /api/dashboard/summary
 GET /api/dashboard/tool-status
 GET /api/dashboard/jobsite-summary
@@ -155,8 +156,8 @@ GET /api/dashboard/recent-alerts
 
 # Reports
 
-GET /api/reports/tools
-GET /api/reports/assignments
-GET /api/reports/inspections
-GET /api/reports/maintenance
-GET /api/reports/damage
+GET /api/reports/tool-inventory
+GET /api/reports/current-assignments
+GET /api/reports/maintenance-history
+GET /api/reports/inspection-status
+GET /api/reports/damage-history

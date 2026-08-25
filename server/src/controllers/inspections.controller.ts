@@ -67,13 +67,18 @@ export async function addInspection(
       return
     }
 
-    const inspection = await createInspection({
-      tool_id: Number(tool_id),
-      result,
-      condition,
-      notes: notes || '',
-      next_inspection_date: next_inspection_date || null
-    })
+    const userId = Number(res.locals.auth.userId)
+
+    const inspection = await createInspection(
+      {
+        tool_id: Number(tool_id),
+        result,
+        condition,
+        notes: notes || '',
+        next_inspection_date: next_inspection_date || null
+      },
+      userId
+    )
 
     res.status(201).json(inspection)
   } catch (error) {

@@ -19,7 +19,7 @@ function RequireRole({
   }
 
   if (!allowedRoles.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/forbidden" replace />
   }
 
   return <Outlet />

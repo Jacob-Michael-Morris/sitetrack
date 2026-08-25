@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs'
-import pool from '../database/pool.js'
 
+import pool from '../database/pool.js'
 import { createAuditLog } from './audit-logs.service.js'
 
 export async function getAllUsers() {
@@ -51,7 +51,10 @@ export async function createUser(
   },
   actorUserId: number
 ) {
-  const passwordHash = await bcrypt.hash(user.password, 12)
+  const passwordHash = await bcrypt.hash(
+    user.password,
+    12
+  )
 
   const result = await pool.query(
     `INSERT INTO users
@@ -85,7 +88,8 @@ export async function createUser(
     action: 'USER_CREATED',
     entity_type: 'User',
     entity_id: createdUser.user_id,
-    description: `User "${createdUser.name}" was created.`
+    description:
+      `User "${createdUser.name}" was created.`
   })
 
   return createdUser
@@ -137,8 +141,9 @@ export async function updateUser(
     user_id: actorUserId,
     action: 'USER_UPDATED',
     entity_type: 'User',
-    entity_id: id,
-    description: `User "${updatedUser.name}" was updated.`
+    entity_id: updatedUser.user_id,
+    description:
+      `User "${updatedUser.name}" was updated.`
   })
 
   return updatedUser
