@@ -1,68 +1,69 @@
 import type {
-  Jobsite,
-  JobsiteInput
-} from '../types/Jobsite.js'
+  AdminUser,
+  CreateUserInput,
+  UpdateUserInput
+} from '../types/AdminUser.js'
 
-const API_URL = 'http://localhost:3000/api/jobsites'
+const API_URL = 'http://localhost:3000/api/users'
 
-export async function getJobsites(): Promise<Jobsite[]> {
+export async function getUsers(): Promise<AdminUser[]> {
   const response = await fetch(API_URL, {
     credentials: 'include'
   })
 
   if (!response.ok) {
-    throw new Error('Unable to retrieve jobsites')
+    throw new Error('Unable to retrieve users')
   }
 
   return response.json()
 }
 
-export async function getJobsite(id: string): Promise<Jobsite> {
+export async function getUser(id: string): Promise<AdminUser> {
   const response = await fetch(`${API_URL}/${id}`, {
     credentials: 'include'
   })
 
   if (!response.ok) {
-    throw new Error('Unable to retrieve jobsite')
+    throw new Error('Unable to retrieve user')
   }
 
   return response.json()
 }
 
-export async function createJobsite(
-  jobsite: JobsiteInput
-): Promise<Jobsite> {
+export async function createUser(
+  user: CreateUserInput
+): Promise<AdminUser> {
   const response = await fetch(API_URL, {
     method: 'POST',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(jobsite)
+    body: JSON.stringify(user)
   })
 
   if (!response.ok) {
-    throw new Error('Unable to create jobsite')
+    throw new Error('Unable to create user')
   }
 
   return response.json()
 }
 
-export async function updateJobsite(
+export async function updateUser(
   id: string,
-  jobsite: JobsiteInput
-): Promise<Jobsite> {
+  user: UpdateUserInput
+): Promise<AdminUser> {
   const response = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(jobsite)
+    body: JSON.stringify(user)
   })
 
   if (!response.ok) {
-    throw new Error('Unable to update jobsite')
+    throw new Error('Unable to update user')
   }
 
   return response.json()

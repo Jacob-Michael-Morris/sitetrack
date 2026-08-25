@@ -3,7 +3,9 @@ import type { Alert } from '../types/Alert.js'
 const API_URL = 'http://localhost:3000/api/alerts'
 
 export async function getAlerts(): Promise<Alert[]> {
-  const response = await fetch(API_URL)
+  const response = await fetch(API_URL, {
+    credentials: 'include'
+  })
 
   if (!response.ok) {
     throw new Error('Unable to retrieve alerts')
@@ -14,7 +16,8 @@ export async function getAlerts(): Promise<Alert[]> {
 
 export async function markAlertRead(id: number): Promise<Alert> {
   const response = await fetch(`${API_URL}/${id}/read`, {
-    method: 'PUT'
+    method: 'PUT',
+    credentials: 'include'
   })
 
   if (!response.ok) {
@@ -26,7 +29,8 @@ export async function markAlertRead(id: number): Promise<Alert> {
 
 export async function markAllAlertsRead() {
   const response = await fetch(`${API_URL}/read-all`, {
-    method: 'PUT'
+    method: 'PUT',
+    credentials: 'include'
   })
 
   if (!response.ok) {

@@ -6,7 +6,9 @@ import type {
 const API_URL = 'http://localhost:3000/api/work-orders'
 
 export async function getWorkOrders(): Promise<WorkOrder[]> {
-  const response = await fetch(API_URL)
+  const response = await fetch(API_URL, {
+    credentials: 'include'
+  })
 
   if (!response.ok) {
     throw new Error('Unable to retrieve work orders')
@@ -20,6 +22,7 @@ export async function createWorkOrder(
 ): Promise<WorkOrder> {
   const response = await fetch(API_URL, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -35,7 +38,8 @@ export async function createWorkOrder(
 
 export async function completeWorkOrder(id: number) {
   const response = await fetch(`${API_URL}/${id}/complete`, {
-    method: 'PUT'
+    method: 'PUT',
+    credentials: 'include'
   })
 
   if (!response.ok) {
@@ -49,7 +53,8 @@ export async function returnToService(id: number) {
   const response = await fetch(
     `${API_URL}/${id}/return-to-service`,
     {
-      method: 'PUT'
+      method: 'PUT',
+      credentials: 'include'
     }
   )
 

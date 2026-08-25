@@ -166,3 +166,37 @@ button {
   padding: 24px;
   margin: 20px 0;
 }
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 450px;
+  background-color: white;
+  padding: 32px;
+}
+
+.login-card h1 {
+  margin-bottom: 5px;
+}
+
+.sidebar-user {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #444;
+}
+
+.sidebar-user p {
+  margin: 5px 0;
+}
+
+.sidebar-user button {
+  margin-top: 12px;
+  width: 100%;
+}

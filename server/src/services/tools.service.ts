@@ -1,4 +1,5 @@
 import pool from '../database/pool.js'
+import { createAuditLog } from './audit-logs.service.js'
 
 export async function getAllTools() {
   const result = await pool.query(
@@ -40,7 +41,17 @@ export async function createTool(tool: {
     ]
   )
 
-  return result.rows[0]
+const createdTool = result.rows[0]
+
+await createAuditLog({
+  user_id: null,
+  action: 'CREATE',
+  entity_type: 'Tool',
+  entity_id: createdTool.tool_id,
+  description: `Tool "${createdTool.name}" was registered.`
+})
+
+return createdTool
 }
 
 export async function updateTool(
@@ -77,5 +88,15 @@ export async function updateTool(
     ]
   )
 
-  return result.rows[0]
+const updatedTool = result.rows[0]
+
+await createAuditLog({
+  user_id: null,
+  action: 'UPDATE',
+  entity_type: 'Tool',
+  entity_id: updatedTool.tool_id,
+  description: `Tool "${updatedTool.name}" was updated.`
+})
+
+return updatedTool
 }
