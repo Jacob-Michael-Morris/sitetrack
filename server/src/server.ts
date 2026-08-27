@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
@@ -17,11 +19,16 @@ import dashboardRouter from './routes/dashboard.routes.js'
 import reportsRouter from './routes/reports.routes.js'
 
 const app = express()
-const PORT = 3000
+
+const PORT = Number(process.env.PORT) || 3000
+
+const CLIENT_URL =
+  process.env.CLIENT_URL ||
+  'http://localhost:5173'
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: CLIENT_URL,
     credentials: true
   })
 )
@@ -37,7 +44,6 @@ app.get('/api/health', (req, res) => {
 })
 
 app.use('/api/auth', authRouter)
-
 app.use('/api/dashboard', dashboardRouter)
 app.use('/api/tools', toolsRouter)
 app.use('/api/jobsites', jobsitesRouter)
@@ -51,8 +57,8 @@ app.use('/api/users', usersRouter)
 app.use('/api/roles', rolesRouter)
 app.use('/api/reports', reportsRouter)
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(
-    `SiteTrack API running at http://localhost:${PORT}`
+    `SiteTrack API running on port ${PORT}`
   )
 })
