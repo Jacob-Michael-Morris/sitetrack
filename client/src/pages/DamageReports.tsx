@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import StatusBadge from '../components/StatusBadge.js'
+
 import {
   createDamageReport,
   getDamageReports
@@ -40,7 +42,9 @@ function DamageReports() {
       getTools()
     ])
       .then(([reportData, toolData]) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
 
         setReports(reportData)
         setTools(toolData)
@@ -75,7 +79,9 @@ function DamageReports() {
       setSeverity('Medium')
       setNotes('')
       setError('')
-      setMessage('Damage report created successfully.')
+      setMessage(
+        'Damage report created successfully.'
+      )
 
       await loadData()
     } catch {
@@ -88,20 +94,32 @@ function DamageReports() {
     <div>
       <h1>Damage Reports</h1>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
+
       {message && <p>{message}</p>}
 
       <h2>Report Damaged Tool</h2>
 
-      <form className="tool-form" onSubmit={handleSubmit}>
+      <form
+        className="tool-form"
+        onSubmit={handleSubmit}
+      >
         <label>
           Tool
           <select
             value={toolId}
-            onChange={(event) => setToolId(event.target.value)}
+            onChange={(event) =>
+              setToolId(event.target.value)
+            }
             required
           >
-            <option value="">Select Tool</option>
+            <option value="">
+              Select Tool
+            </option>
 
             {tools.map((tool) => (
               <option
@@ -118,7 +136,9 @@ function DamageReports() {
           Severity
           <select
             value={severity}
-            onChange={(event) => setSeverity(event.target.value)}
+            onChange={(event) =>
+              setSeverity(event.target.value)
+            }
           >
             <option>Low</option>
             <option>Medium</option>
@@ -131,7 +151,9 @@ function DamageReports() {
           Description
           <textarea
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
+            onChange={(event) =>
+              setDescription(event.target.value)
+            }
             required
           />
         </label>
@@ -140,7 +162,9 @@ function DamageReports() {
           Notes
           <textarea
             value={notes}
-            onChange={(event) => setNotes(event.target.value)}
+            onChange={(event) =>
+              setNotes(event.target.value)
+            }
           />
         </label>
 
@@ -167,17 +191,36 @@ function DamageReports() {
           {reports.map((report) => (
             <tr key={report.damage_report_id}>
               <td>{report.tool_name}</td>
+
               <td>{report.serial_number}</td>
-              <td>{report.severity}</td>
-              <td>{report.status}</td>
+
               <td>
-                {new Date(report.reported_at).toLocaleDateString()}
+                <StatusBadge
+                  value={report.severity}
+                />
               </td>
+
+              <td>
+                <StatusBadge
+                  value={report.status}
+                />
+              </td>
+
+              <td>
+                {new Date(
+                  report.reported_at
+                ).toLocaleDateString()}
+              </td>
+
               <td>{report.description}</td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {reports.length === 0 && (
+        <p>No damage reports found.</p>
+      )}
     </div>
   )
 }

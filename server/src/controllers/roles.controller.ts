@@ -1,21 +1,32 @@
-import type { Request, Response } from 'express'
+import type {
+  Request,
+  Response
+} from 'express'
 
 import {
-  getAllRoles
+  roleService
 } from '../services/roles.service.js'
 
-export async function getRoles(
-  req: Request,
-  res: Response
-) {
-  try {
-    const roles = await getAllRoles()
-    res.json(roles)
-  } catch (error) {
-    console.error(error)
+export class RolesController {
+  async getAll(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const roles =
+        await roleService.getAll()
 
-    res.status(500).json({
-      message: 'Unable to retrieve roles'
-    })
+      res.json(roles)
+    } catch (error) {
+      console.error(error)
+
+      res.status(500).json({
+        message:
+          'Unable to retrieve roles'
+      })
+    }
   }
 }
+
+export const rolesController =
+  new RolesController()

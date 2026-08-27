@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import StatusBadge from '../components/StatusBadge.js'
 import { useAuth } from '../context/useAuth.js'
 
 import {
@@ -311,7 +312,11 @@ function Reports() {
     }
 
     if (error) {
-      return <p>{error}</p>
+      return (
+        <p role="alert">
+          {error}
+        </p>
+      )
     }
 
     if (reportType === 'tool-inventory') {
@@ -337,8 +342,19 @@ function Reports() {
                 <td>{row.name}</td>
                 <td>{row.serial_number}</td>
                 <td>{row.category}</td>
-                <td>{row.status}</td>
-                <td>{row.condition}</td>
+
+                <td>
+                  <StatusBadge
+                    value={row.status}
+                  />
+                </td>
+
+                <td>
+                  <StatusBadge
+                    value={row.condition}
+                  />
+                </td>
+
                 <td>
                   {row.current_jobsite ?? 'N/A'}
                 </td>
@@ -372,11 +388,20 @@ function Reports() {
                 <td>{row.tool_name}</td>
                 <td>{row.serial_number}</td>
                 <td>{row.jobsite_name}</td>
+
                 <td>
                   {formatDate(row.assigned_at)}
                 </td>
-                <td>{row.status}</td>
-                <td>{row.notes || 'N/A'}</td>
+
+                <td>
+                  <StatusBadge
+                    value={row.status}
+                  />
+                </td>
+
+                <td>
+                  {row.notes || 'N/A'}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -406,15 +431,29 @@ function Reports() {
             {rows.map((row) => (
               <tr key={row.work_order_id}>
                 <td>#{row.work_order_id}</td>
+
                 <td>{row.tool_name}</td>
-                <td>{row.priority}</td>
-                <td>{row.status}</td>
+
+                <td>
+                  <StatusBadge
+                    value={row.priority}
+                  />
+                </td>
+
+                <td>
+                  <StatusBadge
+                    value={row.status}
+                  />
+                </td>
+
                 <td>
                   {row.assigned_to || 'Unassigned'}
                 </td>
+
                 <td>
                   {formatDate(row.opened_at)}
                 </td>
+
                 <td>
                   {formatDate(row.completed_at)}
                 </td>
@@ -447,23 +486,37 @@ function Reports() {
             {rows.map((row) => (
               <tr key={row.tool_id}>
                 <td>{row.tool_name}</td>
+
                 <td>{row.serial_number}</td>
+
                 <td>
                   {formatDate(
                     row.inspection_date
                   )}
                 </td>
-                <td>{row.result ?? 'N/A'}</td>
+
                 <td>
-                  {row.condition ?? 'N/A'}
+                  <StatusBadge
+                    value={row.result}
+                  />
                 </td>
+
+                <td>
+                  <StatusBadge
+                    value={row.condition}
+                  />
+                </td>
+
                 <td>
                   {formatDate(
                     row.next_inspection_date
                   )}
                 </td>
+
                 <td>
-                  {row.inspection_status}
+                  <StatusBadge
+                    value={row.inspection_status}
+                  />
                 </td>
               </tr>
             ))}
@@ -492,14 +545,30 @@ function Reports() {
         <tbody>
           {rows.map((row) => (
             <tr key={row.damage_report_id}>
-              <td>#{row.damage_report_id}</td>
+              <td>
+                #{row.damage_report_id}
+              </td>
+
               <td>{row.tool_name}</td>
-              <td>{row.severity}</td>
-              <td>{row.status}</td>
+
+              <td>
+                <StatusBadge
+                  value={row.severity}
+                />
+              </td>
+
+              <td>
+                <StatusBadge
+                  value={row.status}
+                />
+              </td>
+
               <td>{row.description}</td>
+
               <td>
                 {formatDate(row.reported_at)}
               </td>
+
               <td>
                 {formatDate(row.resolved_at)}
               </td>

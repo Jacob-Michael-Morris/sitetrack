@@ -1,22 +1,32 @@
-import type { Request, Response } from 'express'
+import type {
+  Request,
+  Response
+} from 'express'
 
 import {
-  getDashboardSummary
+  dashboardService
 } from '../services/dashboard.service.js'
 
-export async function getDashboard(
-  req: Request,
-  res: Response
-) {
-  try {
-    const dashboard = await getDashboardSummary()
+export class DashboardController {
+  async getDashboard(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const dashboard =
+        await dashboardService.getSummary()
 
-    res.json(dashboard)
-  } catch (error) {
-    console.error(error)
+      res.json(dashboard)
+    } catch (error) {
+      console.error(error)
 
-    res.status(500).json({
-      message: 'Unable to retrieve dashboard data'
-    })
+      res.status(500).json({
+        message:
+          'Unable to retrieve dashboard data'
+      })
+    }
   }
 }
+
+export const dashboardController =
+  new DashboardController()

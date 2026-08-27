@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { getTools } from '../services/tools.service'
-import type { Tool } from '../types/Tool'
+
+import StatusBadge from '../components/StatusBadge.js'
+import { getTools } from '../services/tools.service.js'
+
+import type { Tool } from '../types/Tool.js'
 
 function Tools() {
   const [tools, setTools] = useState<Tool[]>([])
@@ -26,9 +29,11 @@ function Tools() {
   }, [])
 
   const filteredTools = tools.filter((tool) => {
+    const searchValue = search.toLowerCase()
+
     const matchesSearch =
-      tool.name.toLowerCase().includes(search.toLowerCase()) ||
-      tool.serial_number.toLowerCase().includes(search.toLowerCase())
+      tool.name.toLowerCase().includes(searchValue) ||
+      tool.serial_number.toLowerCase().includes(searchValue)
 
     const matchesStatus =
       statusFilter === 'All' ||
@@ -42,7 +47,7 @@ function Tools() {
   }
 
   if (error) {
-    return <p>{error}</p>
+    return <p role="alert">{error}</p>
   }
 
   return (
@@ -63,18 +68,24 @@ function Tools() {
           type="text"
           placeholder="Search tools..."
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) =>
+            setSearch(event.target.value)
+          }
         />
 
         <select
           value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value)}
+          onChange={(event) =>
+            setStatusFilter(event.target.value)
+          }
         >
           <option value="All">All Statuses</option>
           <option value="Available">Available</option>
           <option value="Checked Out">Checked Out</option>
           <option value="Maintenance">Maintenance</option>
-          <option value="Out of Service">Out of Service</option>
+          <option value="Out of Service">
+            Out of Service
+          </option>
         </select>
       </div>
 
@@ -96,8 +107,15 @@ function Tools() {
               <td>{tool.name}</td>
               <td>{tool.serial_number}</td>
               <td>{tool.category}</td>
-              <td>{tool.status}</td>
-              <td>{tool.condition}</td>
+
+              <td>
+                <StatusBadge value={tool.status} />
+              </td>
+
+              <td>
+                <StatusBadge value={tool.condition} />
+              </td>
+
               <td>
                 <Link to={`/tools/${tool.tool_id}`}>
                   View

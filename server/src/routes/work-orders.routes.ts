@@ -1,11 +1,7 @@
 import { Router } from 'express'
 
 import {
-  addWorkOrder,
-  completeWorkOrderRequest,
-  getWorkOrder,
-  getWorkOrders,
-  returnToService
+  workOrdersController
 } from '../controllers/work-orders.controller.js'
 
 import {
@@ -24,10 +20,50 @@ router.use(
   )
 )
 
-router.get('/', getWorkOrders)
-router.get('/:id', getWorkOrder)
-router.post('/', addWorkOrder)
-router.put('/:id/complete', completeWorkOrderRequest)
-router.put('/:id/return-to-service', returnToService)
+router.get(
+  '/',
+  (req, res) =>
+    workOrdersController.getAll(
+      req,
+      res
+    )
+)
+
+router.get(
+  '/:id',
+  (req, res) =>
+    workOrdersController.getById(
+      req,
+      res
+    )
+)
+
+router.post(
+  '/',
+  (req, res) =>
+    workOrdersController.create(
+      req,
+      res
+    )
+)
+
+router.put(
+  '/:id/complete',
+  (req, res) =>
+    workOrdersController.complete(
+      req,
+      res
+    )
+)
+
+router.put(
+  '/:id/return-to-service',
+  (req, res) =>
+    workOrdersController
+      .returnToService(
+        req,
+        res
+      )
+)
 
 export default router

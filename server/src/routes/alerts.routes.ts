@@ -1,10 +1,7 @@
 import { Router } from 'express'
 
 import {
-  getAlert,
-  getAlerts,
-  readAlert,
-  readAllAlerts
+  alertsController
 } from '../controllers/alerts.controller.js'
 
 import {
@@ -25,9 +22,40 @@ router.use(
   )
 )
 
-router.get('/', getAlerts)
-router.get('/:id', getAlert)
-router.put('/read-all', readAllAlerts)
-router.put('/:id/read', readAlert)
+router.get(
+  '/',
+  (req, res) =>
+    alertsController.getAll(
+      req,
+      res
+    )
+)
+
+router.get(
+  '/:id',
+  (req, res) =>
+    alertsController.getById(
+      req,
+      res
+    )
+)
+
+router.put(
+  '/read-all',
+  (req, res) =>
+    alertsController.markAllRead(
+      req,
+      res
+    )
+)
+
+router.put(
+  '/:id/read',
+  (req, res) =>
+    alertsController.markRead(
+      req,
+      res
+    )
+)
 
 export default router

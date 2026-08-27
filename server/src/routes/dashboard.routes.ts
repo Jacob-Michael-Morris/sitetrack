@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import {
-  getDashboard
+  dashboardController
 } from '../controllers/dashboard.controller.js'
 
 import {
@@ -12,6 +12,13 @@ const router = Router()
 
 router.use(requireAuth)
 
-router.get('/', getDashboard)
+router.get(
+  '/',
+  (req, res) =>
+    dashboardController.getDashboard(
+      req,
+      res
+    )
+)
 
 export default router

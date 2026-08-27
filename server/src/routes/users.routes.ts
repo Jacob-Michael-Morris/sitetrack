@@ -1,10 +1,7 @@
 import { Router } from 'express'
 
 import {
-  addUser,
-  editUser,
-  getUser,
-  getUsers
+  usersController
 } from '../controllers/users.controller.js'
 
 import {
@@ -15,11 +12,33 @@ import {
 const router = Router()
 
 router.use(requireAuth)
-router.use(requireRole('Administrator'))
 
-router.get('/', getUsers)
-router.get('/:id', getUser)
-router.post('/', addUser)
-router.put('/:id', editUser)
+router.use(
+  requireRole('Administrator')
+)
+
+router.get(
+  '/',
+  (req, res) =>
+    usersController.getAll(req, res)
+)
+
+router.get(
+  '/:id',
+  (req, res) =>
+    usersController.getById(req, res)
+)
+
+router.post(
+  '/',
+  (req, res) =>
+    usersController.create(req, res)
+)
+
+router.put(
+  '/:id',
+  (req, res) =>
+    usersController.update(req, res)
+)
 
 export default router

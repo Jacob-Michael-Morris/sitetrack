@@ -1,9 +1,7 @@
 import { Router } from 'express'
 
 import {
-  addInspection,
-  getInspection,
-  getInspections
+  inspectionsController
 } from '../controllers/inspections.controller.js'
 
 import {
@@ -23,8 +21,31 @@ router.use(
   )
 )
 
-router.get('/', getInspections)
-router.get('/:id', getInspection)
-router.post('/', addInspection)
+router.get(
+  '/',
+  (req, res) =>
+    inspectionsController.getAll(
+      req,
+      res
+    )
+)
+
+router.get(
+  '/:id',
+  (req, res) =>
+    inspectionsController.getById(
+      req,
+      res
+    )
+)
+
+router.post(
+  '/',
+  (req, res) =>
+    inspectionsController.create(
+      req,
+      res
+    )
+)
 
 export default router
