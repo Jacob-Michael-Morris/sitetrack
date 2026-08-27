@@ -1,14 +1,23 @@
 import pool from '../database/pool.js'
 
-export async function getAllRoles() {
-  const result = await pool.query(
-    `SELECT
-       role_id,
-       name,
-       description
-     FROM roles
-     ORDER BY role_id`
-  )
+export class RoleService {
+  async getAll() {
+    const result = await pool.query(
+      `SELECT
+         role_id,
+         name,
+         description
+       FROM roles
+       ORDER BY role_id`
+    )
 
-  return result.rows
+    return result.rows
+  }
+}
+
+export const roleService =
+  new RoleService()
+
+export async function getAllRoles() {
+  return roleService.getAll()
 }

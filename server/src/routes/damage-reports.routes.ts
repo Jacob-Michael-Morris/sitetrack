@@ -1,9 +1,7 @@
 import { Router } from 'express'
 
 import {
-  addDamageReport,
-  getDamageReport,
-  getDamageReports
+  damageReportsController
 } from '../controllers/damage-reports.controller.js'
 
 import {
@@ -24,8 +22,31 @@ router.use(
   )
 )
 
-router.get('/', getDamageReports)
-router.get('/:id', getDamageReport)
-router.post('/', addDamageReport)
+router.get(
+  '/',
+  (req, res) =>
+    damageReportsController.getAll(
+      req,
+      res
+    )
+)
+
+router.get(
+  '/:id',
+  (req, res) =>
+    damageReportsController.getById(
+      req,
+      res
+    )
+)
+
+router.post(
+  '/',
+  (req, res) =>
+    damageReportsController.create(
+      req,
+      res
+    )
+)
 
 export default router

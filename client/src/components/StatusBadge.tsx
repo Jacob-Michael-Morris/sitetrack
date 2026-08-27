@@ -35,7 +35,8 @@ function StatusBadge({
       'fair',
       'needs repair',
       'medium',
-      'due today'
+      'due today',
+      'unread'
     ].includes(normalizedValue)
   ) {
     badgeType = 'warning'
@@ -64,7 +65,8 @@ function StatusBadge({
       'returned',
       'transferred',
       'not scheduled',
-      'no inspection'
+      'no inspection',
+      'read'
     ].includes(normalizedValue)
   ) {
     badgeType = 'muted'

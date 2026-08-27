@@ -1,10 +1,7 @@
 import { Router } from 'express'
 
 import {
-  checkout,
-  getAssignments,
-  returnAssignment,
-  transfer
+  assignmentsController
 } from '../controllers/assignments.controller.js'
 
 import {
@@ -24,9 +21,41 @@ router.use(
   )
 )
 
-router.get('/', getAssignments)
-router.post('/checkout', checkout)
-router.post('/return', returnAssignment)
-router.post('/transfer', transfer)
+router.get(
+  '/',
+  (req, res) =>
+    assignmentsController.getAll(
+      req,
+      res
+    )
+)
+
+router.post(
+  '/checkout',
+  (req, res) =>
+    assignmentsController.checkout(
+      req,
+      res
+    )
+)
+
+router.post(
+  '/return',
+  (req, res) =>
+    assignmentsController
+      .returnAssignment(
+        req,
+        res
+      )
+)
+
+router.post(
+  '/transfer',
+  (req, res) =>
+    assignmentsController.transfer(
+      req,
+      res
+    )
+)
 
 export default router

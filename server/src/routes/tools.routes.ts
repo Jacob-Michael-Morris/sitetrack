@@ -1,10 +1,7 @@
 import { Router } from 'express'
 
 import {
-  addTool,
-  editTool,
-  getTool,
-  getTools
+  toolsController
 } from '../controllers/tools.controller.js'
 
 import {
@@ -16,8 +13,17 @@ const router = Router()
 
 router.use(requireAuth)
 
-router.get('/', getTools)
-router.get('/:id', getTool)
+router.get(
+  '/',
+  (req, res) =>
+    toolsController.getAll(req, res)
+)
+
+router.get(
+  '/:id',
+  (req, res) =>
+    toolsController.getById(req, res)
+)
 
 router.post(
   '/',
@@ -25,7 +31,8 @@ router.post(
     'Administrator',
     'Equipment Manager'
   ),
-  addTool
+  (req, res) =>
+    toolsController.create(req, res)
 )
 
 router.put(
@@ -34,7 +41,8 @@ router.put(
     'Administrator',
     'Equipment Manager'
   ),
-  editTool
+  (req, res) =>
+    toolsController.update(req, res)
 )
 
 export default router

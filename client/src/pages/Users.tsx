@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
+import StatusBadge from '../components/StatusBadge.js'
 import { getUsers } from '../services/users.service.js'
 
 import type { AdminUser } from '../types/AdminUser.js'
@@ -63,7 +64,11 @@ function Users() {
         </Link>
       </div>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
 
       <div className="toolbar">
         <input
@@ -102,13 +107,21 @@ function Users() {
           {filteredUsers.map((user) => (
             <tr key={user.user_id}>
               <td>{user.name}</td>
+
               <td>{user.email}</td>
+
               <td>{user.role_name}</td>
+
               <td>
-                {user.is_active
-                  ? 'Active'
-                  : 'Inactive'}
+                <StatusBadge
+                  value={
+                    user.is_active
+                      ? 'Active'
+                      : 'Inactive'
+                  }
+                />
               </td>
+
               <td>
                 <Link to={`/users/${user.user_id}`}>
                   Select User

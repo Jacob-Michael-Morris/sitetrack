@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
+
+import StatusBadge from '../components/StatusBadge.js'
 import { getJobsites } from '../services/jobsites.service.js'
+
 import type { Jobsite } from '../types/Jobsite.js'
 
 function Jobsites() {
@@ -26,11 +29,13 @@ function Jobsites() {
   }, [])
 
   const filteredJobsites = jobsites.filter((jobsite) => {
+    const searchValue = search.toLowerCase()
+
     const matchesSearch =
-      jobsite.name.toLowerCase().includes(search.toLowerCase()) ||
+      jobsite.name.toLowerCase().includes(searchValue) ||
       (jobsite.location || '')
         .toLowerCase()
-        .includes(search.toLowerCase())
+        .includes(searchValue)
 
     const matchesStatus =
       statusFilter === 'All' ||
@@ -39,8 +44,13 @@ function Jobsites() {
     return matchesSearch && matchesStatus
   })
 
-  if (loading) return <p>Loading jobsites...</p>
-  if (error) return <p>{error}</p>
+  if (loading) {
+    return <p>Loading jobsites...</p>
+  }
+
+  if (error) {
+    return <p role="alert">{error}</p>
+  }
 
   return (
     <div>
@@ -60,12 +70,16 @@ function Jobsites() {
           type="text"
           placeholder="Search jobsites..."
           value={search}
-          onChange={(event) => setSearch(event.target.value)}
+          onChange={(event) =>
+            setSearch(event.target.value)
+          }
         />
 
         <select
           value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value)}
+          onChange={(event) =>
+            setStatusFilter(event.target.value)
+          }
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>
@@ -90,14 +104,23 @@ function Jobsites() {
             <tr key={jobsite.jobsite_id}>
               <td>{jobsite.name}</td>
               <td>{jobsite.location || 'N/A'}</td>
-              <td>{jobsite.status}</td>
+
+              <td>
+                <StatusBadge value={jobsite.status} />
+              </td>
+
               <td>
                 {jobsite.start_date
-                  ? new Date(jobsite.start_date).toLocaleDateString()
+                  ? new Date(
+                      jobsite.start_date
+                    ).toLocaleDateString()
                   : 'N/A'}
               </td>
+
               <td>
-                <Link to={`/jobsites/${jobsite.jobsite_id}`}>
+                <Link
+                  to={`/jobsites/${jobsite.jobsite_id}`}
+                >
                   View
                 </Link>
               </td>
@@ -105,6 +128,10 @@ function Jobsites() {
           ))}
         </tbody>
       </table>
+
+      {filteredJobsites.length === 0 && (
+        <p>No jobsites match your search.</p>
+      )}
     </div>
   )
 }

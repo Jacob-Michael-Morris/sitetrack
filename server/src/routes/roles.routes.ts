@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import {
-  getRoles
+  rolesController
 } from '../controllers/roles.controller.js'
 
 import {
@@ -12,8 +12,18 @@ import {
 const router = Router()
 
 router.use(requireAuth)
-router.use(requireRole('Administrator'))
 
-router.get('/', getRoles)
+router.use(
+  requireRole('Administrator')
+)
+
+router.get(
+  '/',
+  (req, res) =>
+    rolesController.getAll(
+      req,
+      res
+    )
+)
 
 export default router

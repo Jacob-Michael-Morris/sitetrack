@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import StatusBadge from '../components/StatusBadge.js'
+
 import {
   getAlerts,
   markAlertRead,
@@ -9,7 +11,9 @@ import {
 import type { Alert } from '../types/Alert.js'
 
 function Alerts() {
-  const [alerts, setAlerts] = useState<Alert[]>([])
+  const [alerts, setAlerts] =
+    useState<Alert[]>([])
+
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
@@ -30,10 +34,15 @@ function Alerts() {
     try {
       await markAlertRead(id)
       await loadAlerts()
+
       setError('')
-      setMessage('Alert marked as read.')
+      setMessage(
+        'Alert marked as read.'
+      )
     } catch {
-      setError('Unable to update alert.')
+      setError(
+        'Unable to update alert.'
+      )
       setMessage('')
     }
   }
@@ -42,10 +51,15 @@ function Alerts() {
     try {
       await markAllAlertsRead()
       await loadAlerts()
+
       setError('')
-      setMessage('All alerts marked as read.')
+      setMessage(
+        'All alerts marked as read.'
+      )
     } catch {
-      setError('Unable to update alerts.')
+      setError(
+        'Unable to update alerts.'
+      )
       setMessage('')
     }
   }
@@ -59,7 +73,10 @@ function Alerts() {
       <div className="page-header">
         <div>
           <h1>Alerts</h1>
-          <p>{unreadCount} unread alert(s)</p>
+
+          <p>
+            {unreadCount} unread alert(s)
+          </p>
         </div>
 
         <button
@@ -70,7 +87,12 @@ function Alerts() {
         </button>
       </div>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
+
       {message && <p>{message}</p>}
 
       <table>
@@ -90,18 +112,53 @@ function Alerts() {
         <tbody>
           {alerts.map((alert) => (
             <tr key={alert.alert_id}>
-              <td>{alert.alert_type}</td>
-              <td>{alert.severity}</td>
-              <td>{alert.tool_name || 'N/A'}</td>
-              <td>{alert.jobsite_name || 'N/A'}</td>
-              <td>{alert.message}</td>
               <td>
-                {new Date(alert.created_at).toLocaleDateString()}
+                {alert.alert_type}
               </td>
-              <td>{alert.is_read ? 'Read' : 'Unread'}</td>
+
+              <td>
+                <StatusBadge
+                  value={alert.severity}
+                />
+              </td>
+
+              <td>
+                {alert.tool_name || 'N/A'}
+              </td>
+
+              <td>
+                {alert.jobsite_name || 'N/A'}
+              </td>
+
+              <td>
+                {alert.message}
+              </td>
+
+              <td>
+                {new Date(
+                  alert.created_at
+                ).toLocaleString()}
+              </td>
+
+              <td>
+                <StatusBadge
+                  value={
+                    alert.is_read
+                      ? 'Read'
+                      : 'Unread'
+                  }
+                />
+              </td>
+
               <td>
                 {!alert.is_read ? (
-                  <button onClick={() => handleRead(alert.alert_id)}>
+                  <button
+                    onClick={() =>
+                      handleRead(
+                        alert.alert_id
+                      )
+                    }
+                  >
                     Mark Read
                   </button>
                 ) : (
@@ -112,6 +169,10 @@ function Alerts() {
           ))}
         </tbody>
       </table>
+
+      {alerts.length === 0 && (
+        <p>No alerts found.</p>
+      )}
     </div>
   )
 }

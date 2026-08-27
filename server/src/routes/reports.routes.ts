@@ -1,11 +1,7 @@
 import { Router } from 'express'
 
 import {
-  getCurrentAssignments,
-  getDamageHistory,
-  getInspectionStatus,
-  getMaintenanceHistory,
-  getToolInventory
+  reportsController
 } from '../controllers/reports.controller.js'
 
 import {
@@ -25,7 +21,12 @@ router.get(
     'Maintenance Technician',
     'Safety Personnel'
   ),
-  getToolInventory
+  (req, res) =>
+    reportsController
+      .getToolInventory(
+        req,
+        res
+      )
 )
 
 router.get(
@@ -34,7 +35,12 @@ router.get(
     'Administrator',
     'Equipment Manager'
   ),
-  getCurrentAssignments
+  (req, res) =>
+    reportsController
+      .getCurrentAssignments(
+        req,
+        res
+      )
 )
 
 router.get(
@@ -44,7 +50,12 @@ router.get(
     'Equipment Manager',
     'Maintenance Technician'
   ),
-  getMaintenanceHistory
+  (req, res) =>
+    reportsController
+      .getMaintenanceHistory(
+        req,
+        res
+      )
 )
 
 router.get(
@@ -55,7 +66,12 @@ router.get(
     'Maintenance Technician',
     'Safety Personnel'
   ),
-  getInspectionStatus
+  (req, res) =>
+    reportsController
+      .getInspectionStatus(
+        req,
+        res
+      )
 )
 
 router.get(
@@ -66,7 +82,12 @@ router.get(
     'Maintenance Technician',
     'Safety Personnel'
   ),
-  getDamageHistory
+  (req, res) =>
+    reportsController
+      .getDamageHistory(
+        req,
+        res
+      )
 )
 
 export default router

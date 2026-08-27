@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import StatusBadge from '../components/StatusBadge.js'
+
 import {
   createInspection,
   getInspections
@@ -41,7 +43,9 @@ function Inspections() {
       getTools()
     ])
       .then(([inspectionData, toolData]) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
 
         setInspections(inspectionData)
         setTools(toolData)
@@ -90,20 +94,32 @@ function Inspections() {
     <div>
       <h1>Inspections</h1>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
+
       {message && <p>{message}</p>}
 
       <h2>Perform Inspection</h2>
 
-      <form className="tool-form" onSubmit={handleSubmit}>
+      <form
+        className="tool-form"
+        onSubmit={handleSubmit}
+      >
         <label>
           Tool
           <select
             value={toolId}
-            onChange={(event) => setToolId(event.target.value)}
+            onChange={(event) =>
+              setToolId(event.target.value)
+            }
             required
           >
-            <option value="">Select Tool</option>
+            <option value="">
+              Select Tool
+            </option>
 
             {tools.map((tool) => (
               <option
@@ -120,7 +136,9 @@ function Inspections() {
           Result
           <select
             value={result}
-            onChange={(event) => setResult(event.target.value)}
+            onChange={(event) =>
+              setResult(event.target.value)
+            }
           >
             <option>Passed</option>
             <option>Failed</option>
@@ -131,7 +149,9 @@ function Inspections() {
           Condition
           <select
             value={condition}
-            onChange={(event) => setCondition(event.target.value)}
+            onChange={(event) =>
+              setCondition(event.target.value)
+            }
           >
             <option>Good</option>
             <option>Fair</option>
@@ -146,7 +166,9 @@ function Inspections() {
             type="date"
             value={nextInspectionDate}
             onChange={(event) =>
-              setNextInspectionDate(event.target.value)
+              setNextInspectionDate(
+                event.target.value
+              )
             }
           />
         </label>
@@ -155,7 +177,9 @@ function Inspections() {
           Notes
           <textarea
             value={notes}
-            onChange={(event) => setNotes(event.target.value)}
+            onChange={(event) =>
+              setNotes(event.target.value)
+            }
           />
         </label>
 
@@ -182,14 +206,27 @@ function Inspections() {
           {inspections.map((inspection) => (
             <tr key={inspection.inspection_id}>
               <td>{inspection.tool_name}</td>
+
               <td>{inspection.serial_number}</td>
+
               <td>
                 {new Date(
                   inspection.inspection_date
                 ).toLocaleDateString()}
               </td>
-              <td>{inspection.result}</td>
-              <td>{inspection.condition}</td>
+
+              <td>
+                <StatusBadge
+                  value={inspection.result}
+                />
+              </td>
+
+              <td>
+                <StatusBadge
+                  value={inspection.condition}
+                />
+              </td>
+
               <td>
                 {inspection.next_inspection_date
                   ? new Date(
@@ -201,6 +238,10 @@ function Inspections() {
           ))}
         </tbody>
       </table>
+
+      {inspections.length === 0 && (
+        <p>No inspection records found.</p>
+      )}
     </div>
   )
 }

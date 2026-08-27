@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 
+import StatusBadge from '../components/StatusBadge.js'
+
 import {
   completeWorkOrder,
   createWorkOrder,
   getWorkOrders,
   returnToService
-} from '../services/work-orders.service.ts'
+} from '../services/work-orders.service.js'
 
 import { getTools } from '../services/tools.service.js'
 
@@ -13,8 +15,11 @@ import type { Tool } from '../types/Tool.js'
 import type { WorkOrder } from '../types/WorkOrder.js'
 
 function Maintenance() {
-  const [workOrders, setWorkOrders] = useState<WorkOrder[]>([])
-  const [tools, setTools] = useState<Tool[]>([])
+  const [workOrders, setWorkOrders] =
+    useState<WorkOrder[]>([])
+
+  const [tools, setTools] =
+    useState<Tool[]>([])
 
   const [toolId, setToolId] = useState('')
   const [description, setDescription] = useState('')
@@ -26,10 +31,11 @@ function Maintenance() {
   const [message, setMessage] = useState('')
 
   async function loadData() {
-    const [workOrderData, toolData] = await Promise.all([
-      getWorkOrders(),
-      getTools()
-    ])
+    const [workOrderData, toolData] =
+      await Promise.all([
+        getWorkOrders(),
+        getTools()
+      ])
 
     setWorkOrders(workOrderData)
     setTools(toolData)
@@ -43,14 +49,18 @@ function Maintenance() {
       getTools()
     ])
       .then(([workOrderData, toolData]) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
 
         setWorkOrders(workOrderData)
         setTools(toolData)
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Unable to load maintenance data.')
+          setError(
+            'Unable to load maintenance data.'
+          )
         }
       })
 
@@ -80,11 +90,15 @@ function Maintenance() {
       setAssignedTo('')
       setNotes('')
       setError('')
-      setMessage('Work order created successfully.')
+      setMessage(
+        'Work order created successfully.'
+      )
 
       await loadData()
     } catch {
-      setError('Unable to create work order.')
+      setError(
+        'Unable to create work order.'
+      )
       setMessage('')
     }
   }
@@ -92,22 +106,34 @@ function Maintenance() {
   async function handleComplete(id: number) {
     try {
       await completeWorkOrder(id)
+
       setMessage('Work order completed.')
       setError('')
+
       await loadData()
     } catch {
-      setError('Unable to complete work order.')
+      setError(
+        'Unable to complete work order.'
+      )
     }
   }
 
-  async function handleReturnToService(id: number) {
+  async function handleReturnToService(
+    id: number
+  ) {
     try {
       await returnToService(id)
-      setMessage('Tool returned to service.')
+
+      setMessage(
+        'Tool returned to service.'
+      )
       setError('')
+
       await loadData()
     } catch {
-      setError('Unable to return tool to service.')
+      setError(
+        'Unable to return tool to service.'
+      )
     }
   }
 
@@ -121,23 +147,38 @@ function Maintenance() {
     <div>
       <h1>Maintenance</h1>
 
-      {error && <p>{error}</p>}
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
+
       {message && <p>{message}</p>}
 
       <h2>Create Work Order</h2>
 
-      <form className="tool-form" onSubmit={handleSubmit}>
+      <form
+        className="tool-form"
+        onSubmit={handleSubmit}
+      >
         <label>
           Tool
           <select
             value={toolId}
-            onChange={(event) => setToolId(event.target.value)}
+            onChange={(event) =>
+              setToolId(event.target.value)
+            }
             required
           >
-            <option value="">Select Tool</option>
+            <option value="">
+              Select Tool
+            </option>
 
             {maintenanceTools.map((tool) => (
-              <option key={tool.tool_id} value={tool.tool_id}>
+              <option
+                key={tool.tool_id}
+                value={tool.tool_id}
+              >
                 {tool.name} - {tool.serial_number}
               </option>
             ))}
@@ -148,7 +189,9 @@ function Maintenance() {
           Priority
           <select
             value={priority}
-            onChange={(event) => setPriority(event.target.value)}
+            onChange={(event) =>
+              setPriority(event.target.value)
+            }
           >
             <option>Low</option>
             <option>Medium</option>
@@ -161,7 +204,9 @@ function Maintenance() {
           Assigned To
           <input
             value={assignedTo}
-            onChange={(event) => setAssignedTo(event.target.value)}
+            onChange={(event) =>
+              setAssignedTo(event.target.value)
+            }
           />
         </label>
 
@@ -169,7 +214,9 @@ function Maintenance() {
           Description
           <textarea
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
+            onChange={(event) =>
+              setDescription(event.target.value)
+            }
             required
           />
         </label>
@@ -178,7 +225,9 @@ function Maintenance() {
           Notes
           <textarea
             value={notes}
-            onChange={(event) => setNotes(event.target.value)}
+            onChange={(event) =>
+              setNotes(event.target.value)
+            }
           />
         </label>
 
@@ -205,23 +254,43 @@ function Maintenance() {
           {workOrders.map((workOrder) => (
             <tr key={workOrder.work_order_id}>
               <td>{workOrder.tool_name}</td>
-              <td>{workOrder.priority}</td>
-              <td>{workOrder.status}</td>
-              <td>{workOrder.assigned_to || 'Unassigned'}</td>
-              <td>{workOrder.description}</td>
+
+              <td>
+                <StatusBadge
+                  value={workOrder.priority}
+                />
+              </td>
+
+              <td>
+                <StatusBadge
+                  value={workOrder.status}
+                />
+              </td>
+
+              <td>
+                {workOrder.assigned_to ||
+                  'Unassigned'}
+              </td>
+
+              <td>
+                {workOrder.description}
+              </td>
 
               <td>
                 {workOrder.status === 'Open' && (
                   <button
                     onClick={() =>
-                      handleComplete(workOrder.work_order_id)
+                      handleComplete(
+                        workOrder.work_order_id
+                      )
                     }
                   >
                     Complete
                   </button>
                 )}
 
-                {workOrder.status === 'Completed' && (
+                {workOrder.status ===
+                  'Completed' && (
                   <button
                     onClick={() =>
                       handleReturnToService(
@@ -234,13 +303,17 @@ function Maintenance() {
                 )}
 
                 {workOrder.status === 'Closed' && (
-                  <span>Closed</span>
+                  <StatusBadge value="Closed" />
                 )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {workOrders.length === 0 && (
+        <p>No work orders found.</p>
+      )}
     </div>
   )
 }

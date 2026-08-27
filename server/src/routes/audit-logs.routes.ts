@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import {
-  getAuditLogs
+  auditLogsController
 } from '../controllers/audit-logs.controller.js'
 
 import {
@@ -12,8 +12,18 @@ import {
 const router = Router()
 
 router.use(requireAuth)
-router.use(requireRole('Administrator'))
 
-router.get('/', getAuditLogs)
+router.use(
+  requireRole('Administrator')
+)
+
+router.get(
+  '/',
+  (req, res) =>
+    auditLogsController.getAll(
+      req,
+      res
+    )
+)
 
 export default router

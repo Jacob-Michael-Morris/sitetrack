@@ -1,89 +1,113 @@
-import type { Request, Response } from 'express'
+import type {
+  Request,
+  Response
+} from 'express'
 
 import {
-  getCurrentAssignmentsReport,
-  getDamageHistoryReport,
-  getInspectionStatusReport,
-  getMaintenanceHistoryReport,
-  getToolInventoryReport
+  reportService
 } from '../services/reports.service.js'
 
-export async function getToolInventory(
-  req: Request,
-  res: Response
-) {
-  try {
-    const report = await getToolInventoryReport()
-    res.json(report)
-  } catch (error) {
-    console.error(error)
+export class ReportsController {
+  async getToolInventory(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const report =
+        await reportService
+          .getToolInventory()
 
-    res.status(500).json({
-      message: 'Unable to generate tool inventory report'
-    })
+      res.json(report)
+    } catch (error) {
+      console.error(error)
+
+      res.status(500).json({
+        message:
+          'Unable to retrieve tool inventory report'
+      })
+    }
+  }
+
+  async getCurrentAssignments(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const report =
+        await reportService
+          .getCurrentAssignments()
+
+      res.json(report)
+    } catch (error) {
+      console.error(error)
+
+      res.status(500).json({
+        message:
+          'Unable to retrieve current assignments report'
+      })
+    }
+  }
+
+  async getMaintenanceHistory(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const report =
+        await reportService
+          .getMaintenanceHistory()
+
+      res.json(report)
+    } catch (error) {
+      console.error(error)
+
+      res.status(500).json({
+        message:
+          'Unable to retrieve maintenance history report'
+      })
+    }
+  }
+
+  async getInspectionStatus(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const report =
+        await reportService
+          .getInspectionStatus()
+
+      res.json(report)
+    } catch (error) {
+      console.error(error)
+
+      res.status(500).json({
+        message:
+          'Unable to retrieve inspection status report'
+      })
+    }
+  }
+
+  async getDamageHistory(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const report =
+        await reportService
+          .getDamageHistory()
+
+      res.json(report)
+    } catch (error) {
+      console.error(error)
+
+      res.status(500).json({
+        message:
+          'Unable to retrieve damage history report'
+      })
+    }
   }
 }
 
-export async function getCurrentAssignments(
-  req: Request,
-  res: Response
-) {
-  try {
-    const report = await getCurrentAssignmentsReport()
-    res.json(report)
-  } catch (error) {
-    console.error(error)
-
-    res.status(500).json({
-      message: 'Unable to generate assignments report'
-    })
-  }
-}
-
-export async function getMaintenanceHistory(
-  req: Request,
-  res: Response
-) {
-  try {
-    const report = await getMaintenanceHistoryReport()
-    res.json(report)
-  } catch (error) {
-    console.error(error)
-
-    res.status(500).json({
-      message: 'Unable to generate maintenance report'
-    })
-  }
-}
-
-export async function getInspectionStatus(
-  req: Request,
-  res: Response
-) {
-  try {
-    const report = await getInspectionStatusReport()
-    res.json(report)
-  } catch (error) {
-    console.error(error)
-
-    res.status(500).json({
-      message: 'Unable to generate inspection report'
-    })
-  }
-}
-
-export async function getDamageHistory(
-  req: Request,
-  res: Response
-) {
-  try {
-    const report = await getDamageHistoryReport()
-    res.json(report)
-  } catch (error) {
-    console.error(error)
-
-    res.status(500).json({
-      message: 'Unable to generate damage report'
-    })
-  }
-}
+export const reportsController =
+  new ReportsController()
