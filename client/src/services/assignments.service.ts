@@ -1,6 +1,7 @@
 import type { ToolAssignment } from '../types/ToolAssignment.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/assignments'
+const API_URL = `${API_BASE_URL}/assignments`
 
 export async function getAssignments(): Promise<ToolAssignment[]> {
   const response = await fetch(API_URL, {

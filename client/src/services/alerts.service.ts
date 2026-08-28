@@ -1,6 +1,7 @@
 import type { Alert } from '../types/Alert.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/alerts'
+const API_URL = `${API_BASE_URL}/alerts`
 
 export async function getAlerts(): Promise<Alert[]> {
   const response = await fetch(API_URL, {

@@ -2,9 +2,9 @@ import type {
   Jobsite,
   JobsiteInput
 } from '../types/Jobsite.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL =
-  'http://localhost:3000/api/jobsites'
+const API_URL = `${API_BASE_URL}/jobsites`
 
 async function getErrorMessage(
   response: Response,

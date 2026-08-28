@@ -2,8 +2,9 @@ import type {
   DamageReport,
   DamageReportInput
 } from '../types/DamageReport.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/damage-reports'
+const API_URL = `${API_BASE_URL}/damage-reports`
 
 export async function getDamageReports(): Promise<DamageReport[]> {
   const response = await fetch(API_URL, {

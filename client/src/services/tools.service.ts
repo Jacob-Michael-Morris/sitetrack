@@ -2,9 +2,9 @@ import type {
   Tool,
   ToolInput
 } from '../types/Tool.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL =
-  'http://localhost:3000/api/tools'
+const API_URL = `${API_BASE_URL}/tools`
 
 async function getErrorMessage(
   response: Response,

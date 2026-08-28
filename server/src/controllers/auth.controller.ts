@@ -8,6 +8,18 @@ import {
   authService
 } from '../services/auth.service.js'
 
+const isProduction =
+  process.env.NODE_ENV === 'production'
+
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: isProduction
+    ? ('none' as const)
+    : ('lax' as const),
+  secure: isProduction,
+  path: '/'
+}
+
 export class AuthController {
   async login(
     req: Request,
@@ -29,11 +41,7 @@ export class AuthController {
         'sitetrack_token',
         result.token,
         {
-          httpOnly: true,
-          sameSite: 'lax',
-          secure:
-            process.env.NODE_ENV ===
-            'production',
+          ...cookieOptions,
           maxAge:
             8 * 60 * 60 * 1000
         }
@@ -68,13 +76,7 @@ export class AuthController {
   ) {
     res.clearCookie(
       'sitetrack_token',
-      {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure:
-          process.env.NODE_ENV ===
-          'production'
-      }
+      cookieOptions
     )
 
     res.json({

@@ -2,8 +2,9 @@ import type {
   WorkOrder,
   WorkOrderInput
 } from '../types/WorkOrder.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/work-orders'
+const API_URL = `${API_BASE_URL}/work-orders`
 
 export async function getWorkOrders(): Promise<WorkOrder[]> {
   const response = await fetch(API_URL, {

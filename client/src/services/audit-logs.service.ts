@@ -1,6 +1,7 @@
 import type { AuditLog } from '../types/AuditLog.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/audit-logs'
+const API_URL = `${API_BASE_URL}/audit-logs`
 
 export async function getAuditLogs(): Promise<AuditLog[]> {
   const response = await fetch(API_URL, {
