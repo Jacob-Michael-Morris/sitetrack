@@ -17,6 +17,7 @@ const cookieOptions = {
     ? ('none' as const)
     : ('lax' as const),
   secure: isProduction,
+  partitioned: isProduction,
   path: '/'
 }
 
