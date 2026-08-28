@@ -5,8 +5,9 @@ import type {
   MaintenanceReport,
   ToolInventoryReport
 } from '../types/Report.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/reports'
+const API_URL = `${API_BASE_URL}/reports`
 
 async function getReport<T>(
   endpoint: string

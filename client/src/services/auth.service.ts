@@ -1,6 +1,7 @@
 import type { User } from '../types/User.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/auth'
+const API_URL = `${API_BASE_URL}/auth`
 
 export async function login(
   email: string,

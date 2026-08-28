@@ -3,8 +3,9 @@ import type {
   CreateUserInput,
   UpdateUserInput
 } from '../types/AdminUser.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/users'
+const API_URL = `${API_BASE_URL}/users`
 
 async function getErrorMessage(
   response: Response,

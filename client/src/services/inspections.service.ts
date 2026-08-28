@@ -2,8 +2,9 @@ import type {
   Inspection,
   InspectionInput
 } from '../types/Inspection.js'
+import API_BASE_URL from '../config/api.js'
 
-const API_URL = 'http://localhost:3000/api/inspections'
+const API_URL = `${API_BASE_URL}/inspections`
 
 export async function getInspections(): Promise<Inspection[]> {
   const response = await fetch(API_URL, {
