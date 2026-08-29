@@ -81,7 +81,3 @@ export async function createAuditLog(
     client
   )
 }
-
-export async function getAllAuditLogs() {
-  return auditLogService.getAll()
-}
