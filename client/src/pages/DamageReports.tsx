@@ -13,19 +13,37 @@ import type { DamageReport } from '../types/DamageReport.js'
 import type { Tool } from '../types/Tool.js'
 
 function DamageReports() {
-  const [reports, setReports] = useState<DamageReport[]>([])
-  const [tools, setTools] = useState<Tool[]>([])
+  const [reports, setReports] =
+    useState<DamageReport[]>([])
 
-  const [toolId, setToolId] = useState('')
-  const [description, setDescription] = useState('')
-  const [severity, setSeverity] = useState('Medium')
-  const [notes, setNotes] = useState('')
+  const [tools, setTools] =
+    useState<Tool[]>([])
 
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
+  const [toolId, setToolId] =
+    useState('')
+
+  const [
+    description,
+    setDescription
+  ] = useState('')
+
+  const [severity, setSeverity] =
+    useState('Medium')
+
+  const [notes, setNotes] =
+    useState('')
+
+  const [error, setError] =
+    useState('')
+
+  const [message, setMessage] =
+    useState('')
 
   async function loadData() {
-    const [reportData, toolData] = await Promise.all([
+    const [
+      reportData,
+      toolData
+    ] = await Promise.all([
       getDamageReports(),
       getTools()
     ])
@@ -41,17 +59,24 @@ function DamageReports() {
       getDamageReports(),
       getTools()
     ])
-      .then(([reportData, toolData]) => {
-        if (cancelled) {
-          return
-        }
+      .then(
+        ([
+          reportData,
+          toolData
+        ]) => {
+          if (cancelled) {
+            return
+          }
 
-        setReports(reportData)
-        setTools(toolData)
-      })
+          setReports(reportData)
+          setTools(toolData)
+        }
+      )
       .catch(() => {
         if (!cancelled) {
-          setError('Unable to load damage reports.')
+          setError(
+            'Unable to load damage reports.'
+          )
         }
       })
 
@@ -61,7 +86,8 @@ function DamageReports() {
   }, [])
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -79,20 +105,33 @@ function DamageReports() {
       setSeverity('Medium')
       setNotes('')
       setError('')
+
       setMessage(
         'Damage report created successfully.'
       )
 
       await loadData()
     } catch {
-      setError('Unable to create damage report.')
+      setError(
+        'Unable to create damage report.'
+      )
+
       setMessage('')
     }
   }
 
   return (
     <div>
-      <h1>Damage Reports</h1>
+      <div className="page-header">
+        <div>
+          <h1>Damage Reports</h1>
+
+          <p>
+            Report damaged tools and
+            review damage history.
+          </p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert">
@@ -100,7 +139,9 @@ function DamageReports() {
         </p>
       )}
 
-      {message && <p>{message}</p>}
+      {message && (
+        <p>{message}</p>
+      )}
 
       <h2>Report Damaged Tool</h2>
 
@@ -110,10 +151,13 @@ function DamageReports() {
       >
         <label>
           Tool
+
           <select
             value={toolId}
             onChange={(event) =>
-              setToolId(event.target.value)
+              setToolId(
+                event.target.value
+              )
             }
             required
           >
@@ -126,7 +170,8 @@ function DamageReports() {
                 key={tool.tool_id}
                 value={tool.tool_id}
               >
-                {tool.name} - {tool.serial_number}
+                {tool.name} -{' '}
+                {tool.serial_number}
               </option>
             ))}
           </select>
@@ -134,10 +179,13 @@ function DamageReports() {
 
         <label>
           Severity
+
           <select
             value={severity}
             onChange={(event) =>
-              setSeverity(event.target.value)
+              setSeverity(
+                event.target.value
+              )
             }
           >
             <option>Low</option>
@@ -149,10 +197,13 @@ function DamageReports() {
 
         <label>
           Description
+
           <textarea
             value={description}
             onChange={(event) =>
-              setDescription(event.target.value)
+              setDescription(
+                event.target.value
+              )
             }
             required
           />
@@ -160,10 +211,13 @@ function DamageReports() {
 
         <label>
           Notes
+
           <textarea
             value={notes}
             onChange={(event) =>
-              setNotes(event.target.value)
+              setNotes(
+                event.target.value
+              )
             }
           />
         </label>
@@ -175,51 +229,158 @@ function DamageReports() {
 
       <h2>Damage Report History</h2>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Tool</th>
-            <th>Serial Number</th>
-            <th>Severity</th>
-            <th>Status</th>
-            <th>Reported</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {reports.map((report) => (
-            <tr key={report.damage_report_id}>
-              <td>{report.tool_name}</td>
-
-              <td>{report.serial_number}</td>
-
-              <td>
-                <StatusBadge
-                  value={report.severity}
-                />
-              </td>
-
-              <td>
-                <StatusBadge
-                  value={report.status}
-                />
-              </td>
-
-              <td>
-                {new Date(
-                  report.reported_at
-                ).toLocaleDateString()}
-              </td>
-
-              <td>{report.description}</td>
+      <div className="responsive-table-view">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Serial Number</th>
+              <th>Severity</th>
+              <th>Status</th>
+              <th>Reported</th>
+              <th>Description</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {reports.map(
+              (report) => (
+                <tr
+                  key={
+                    report.damage_report_id
+                  }
+                >
+                  <td>
+                    {report.tool_name}
+                  </td>
+
+                  <td>
+                    {
+                      report.serial_number
+                    }
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      value={
+                        report.severity
+                      }
+                    />
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      value={
+                        report.status
+                      }
+                    />
+                  </td>
+
+                  <td>
+                    {new Date(
+                      report.reported_at
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td>
+                    {report.description}
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mobile-card-list">
+        {reports.map(
+          (report) => (
+            <article
+              className="mobile-data-card"
+              key={
+                report.damage_report_id
+              }
+            >
+              <div className="mobile-data-card-header">
+                <h2>
+                  {report.tool_name}
+                </h2>
+
+                <StatusBadge
+                  value={
+                    report.severity
+                  }
+                />
+              </div>
+
+              <div className="mobile-data-card-body">
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Serial Number
+                  </span>
+
+                  <span>
+                    {
+                      report.serial_number
+                    }
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Severity
+                  </span>
+
+                  <StatusBadge
+                    value={
+                      report.severity
+                    }
+                  />
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Status
+                  </span>
+
+                  <StatusBadge
+                    value={
+                      report.status
+                    }
+                  />
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Reported
+                  </span>
+
+                  <span>
+                    {new Date(
+                      report.reported_at
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Description
+                  </span>
+
+                  <span>
+                    {report.description}
+                  </span>
+                </div>
+              </div>
+            </article>
+          )
+        )}
+      </div>
 
       {reports.length === 0 && (
-        <p>No damage reports found.</p>
+        <p>
+          No damage reports found.
+        </p>
       )}
     </div>
   )

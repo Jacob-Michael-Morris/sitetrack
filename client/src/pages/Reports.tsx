@@ -40,8 +40,11 @@ function Reports() {
   const [data, setData] =
     useState<ReportData>([])
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loading, setLoading] =
+    useState(true)
+
+  const [error, setError] =
+    useState('')
 
   const role = user?.role
 
@@ -64,23 +67,28 @@ function Reports() {
 
     switch (reportType) {
       case 'current-assignments':
-        request = getCurrentAssignmentsReport()
+        request =
+          getCurrentAssignmentsReport()
         break
 
       case 'maintenance-history':
-        request = getMaintenanceHistoryReport()
+        request =
+          getMaintenanceHistoryReport()
         break
 
       case 'inspection-status':
-        request = getInspectionStatusReport()
+        request =
+          getInspectionStatusReport()
         break
 
       case 'damage-history':
-        request = getDamageHistoryReport()
+        request =
+          getDamageHistoryReport()
         break
 
       default:
-        request = getToolInventoryReport()
+        request =
+          getToolInventoryReport()
     }
 
     request
@@ -93,7 +101,10 @@ function Reports() {
       .catch(() => {
         if (!cancelled) {
           setData([])
-          setError('Unable to load report.')
+
+          setError(
+            'Unable to load report.'
+          )
         }
       })
       .finally(() => {
@@ -108,7 +119,8 @@ function Reports() {
   }, [reportType])
 
   function handleReportChange(
-    event: React.ChangeEvent<HTMLSelectElement>
+    event:
+      React.ChangeEvent<HTMLSelectElement>
   ) {
     setLoading(true)
 
@@ -124,7 +136,9 @@ function Reports() {
       return 'N/A'
     }
 
-    return new Date(value).toLocaleString()
+    return new Date(
+      value
+    ).toLocaleString()
   }
 
   function getExportDate() {
@@ -140,7 +154,10 @@ function Reports() {
 
     const date = getExportDate()
 
-    if (reportType === 'tool-inventory') {
+    if (
+      reportType ===
+      'tool-inventory'
+    ) {
       const rows =
         data as ToolInventoryReport[]
 
@@ -164,16 +181,22 @@ function Reports() {
           row.status,
           row.condition,
           row.purchase_date
-            ? formatDate(row.purchase_date)
+            ? formatDate(
+                row.purchase_date
+              )
             : 'N/A',
-          row.current_jobsite ?? 'N/A'
+          row.current_jobsite ??
+            'N/A'
         ])
       )
 
       return
     }
 
-    if (reportType === 'current-assignments') {
+    if (
+      reportType ===
+      'current-assignments'
+    ) {
       const rows =
         data as AssignmentReport[]
 
@@ -193,7 +216,9 @@ function Reports() {
           row.tool_name,
           row.serial_number,
           row.jobsite_name,
-          formatDate(row.assigned_at),
+          formatDate(
+            row.assigned_at
+          ),
           row.status,
           row.notes ?? 'N/A'
         ])
@@ -202,7 +227,10 @@ function Reports() {
       return
     }
 
-    if (reportType === 'maintenance-history') {
+    if (
+      reportType ===
+      'maintenance-history'
+    ) {
       const rows =
         data as MaintenanceReport[]
 
@@ -225,13 +253,19 @@ function Reports() {
           row.work_order_id,
           row.tool_name,
           row.serial_number,
-          row.damage_report_id ?? 'N/A',
+          row.damage_report_id ??
+            'N/A',
           row.description,
           row.priority,
           row.status,
-          row.assigned_to || 'Unassigned',
-          formatDate(row.opened_at),
-          formatDate(row.completed_at),
+          row.assigned_to ||
+            'Unassigned',
+          formatDate(
+            row.opened_at
+          ),
+          formatDate(
+            row.completed_at
+          ),
           row.notes ?? 'N/A'
         ])
       )
@@ -239,7 +273,10 @@ function Reports() {
       return
     }
 
-    if (reportType === 'inspection-status') {
+    if (
+      reportType ===
+      'inspection-status'
+    ) {
       const rows =
         data as InspectionReport[]
 
@@ -260,8 +297,11 @@ function Reports() {
           row.tool_id,
           row.tool_name,
           row.serial_number,
-          row.inspection_id ?? 'N/A',
-          formatDate(row.inspection_date),
+          row.inspection_id ??
+            'N/A',
+          formatDate(
+            row.inspection_date
+          ),
           row.result ?? 'N/A',
           row.condition ?? 'N/A',
           formatDate(
@@ -295,31 +335,27 @@ function Reports() {
         row.damage_report_id,
         row.tool_name,
         row.serial_number,
-        row.inspection_id ?? 'N/A',
+        row.inspection_id ??
+          'N/A',
         row.description,
         row.severity,
         row.status,
-        formatDate(row.reported_at),
-        formatDate(row.resolved_at),
+        formatDate(
+          row.reported_at
+        ),
+        formatDate(
+          row.resolved_at
+        ),
         row.notes ?? 'N/A'
       ])
     )
   }
 
-  function renderReport() {
-    if (loading) {
-      return <p>Loading report...</p>
-    }
-
-    if (error) {
-      return (
-        <p role="alert">
-          {error}
-        </p>
-      )
-    }
-
-    if (reportType === 'tool-inventory') {
+  function renderDesktopReport() {
+    if (
+      reportType ===
+      'tool-inventory'
+    ) {
       const rows =
         data as ToolInventoryReport[]
 
@@ -332,7 +368,9 @@ function Reports() {
               <th>Category</th>
               <th>Status</th>
               <th>Condition</th>
-              <th>Current Jobsite</th>
+              <th>
+                Current Jobsite
+              </th>
             </tr>
           </thead>
 
@@ -340,8 +378,14 @@ function Reports() {
             {rows.map((row) => (
               <tr key={row.tool_id}>
                 <td>{row.name}</td>
-                <td>{row.serial_number}</td>
-                <td>{row.category}</td>
+
+                <td>
+                  {row.serial_number}
+                </td>
+
+                <td>
+                  {row.category}
+                </td>
 
                 <td>
                   <StatusBadge
@@ -351,12 +395,15 @@ function Reports() {
 
                 <td>
                   <StatusBadge
-                    value={row.condition}
+                    value={
+                      row.condition
+                    }
                   />
                 </td>
 
                 <td>
-                  {row.current_jobsite ?? 'N/A'}
+                  {row.current_jobsite ??
+                    'N/A'}
                 </td>
               </tr>
             ))}
@@ -365,7 +412,10 @@ function Reports() {
       )
     }
 
-    if (reportType === 'current-assignments') {
+    if (
+      reportType ===
+      'current-assignments'
+    ) {
       const rows =
         data as AssignmentReport[]
 
@@ -384,13 +434,27 @@ function Reports() {
 
           <tbody>
             {rows.map((row) => (
-              <tr key={row.assignment_id}>
-                <td>{row.tool_name}</td>
-                <td>{row.serial_number}</td>
-                <td>{row.jobsite_name}</td>
+              <tr
+                key={
+                  row.assignment_id
+                }
+              >
+                <td>
+                  {row.tool_name}
+                </td>
 
                 <td>
-                  {formatDate(row.assigned_at)}
+                  {row.serial_number}
+                </td>
+
+                <td>
+                  {row.jobsite_name}
+                </td>
+
+                <td>
+                  {formatDate(
+                    row.assigned_at
+                  )}
                 </td>
 
                 <td>
@@ -400,7 +464,8 @@ function Reports() {
                 </td>
 
                 <td>
-                  {row.notes || 'N/A'}
+                  {row.notes ||
+                    'N/A'}
                 </td>
               </tr>
             ))}
@@ -409,7 +474,10 @@ function Reports() {
       )
     }
 
-    if (reportType === 'maintenance-history') {
+    if (
+      reportType ===
+      'maintenance-history'
+    ) {
       const rows =
         data as MaintenanceReport[]
 
@@ -429,14 +497,24 @@ function Reports() {
 
           <tbody>
             {rows.map((row) => (
-              <tr key={row.work_order_id}>
-                <td>#{row.work_order_id}</td>
+              <tr
+                key={
+                  row.work_order_id
+                }
+              >
+                <td>
+                  #{row.work_order_id}
+                </td>
 
-                <td>{row.tool_name}</td>
+                <td>
+                  {row.tool_name}
+                </td>
 
                 <td>
                   <StatusBadge
-                    value={row.priority}
+                    value={
+                      row.priority
+                    }
                   />
                 </td>
 
@@ -447,15 +525,20 @@ function Reports() {
                 </td>
 
                 <td>
-                  {row.assigned_to || 'Unassigned'}
+                  {row.assigned_to ||
+                    'Unassigned'}
                 </td>
 
                 <td>
-                  {formatDate(row.opened_at)}
+                  {formatDate(
+                    row.opened_at
+                  )}
                 </td>
 
                 <td>
-                  {formatDate(row.completed_at)}
+                  {formatDate(
+                    row.completed_at
+                  )}
                 </td>
               </tr>
             ))}
@@ -464,7 +547,10 @@ function Reports() {
       )
     }
 
-    if (reportType === 'inspection-status') {
+    if (
+      reportType ===
+      'inspection-status'
+    ) {
       const rows =
         data as InspectionReport[]
 
@@ -474,10 +560,14 @@ function Reports() {
             <tr>
               <th>Tool</th>
               <th>Serial Number</th>
-              <th>Last Inspection</th>
+              <th>
+                Last Inspection
+              </th>
               <th>Result</th>
               <th>Condition</th>
-              <th>Next Inspection</th>
+              <th>
+                Next Inspection
+              </th>
               <th>Status</th>
             </tr>
           </thead>
@@ -485,9 +575,13 @@ function Reports() {
           <tbody>
             {rows.map((row) => (
               <tr key={row.tool_id}>
-                <td>{row.tool_name}</td>
+                <td>
+                  {row.tool_name}
+                </td>
 
-                <td>{row.serial_number}</td>
+                <td>
+                  {row.serial_number}
+                </td>
 
                 <td>
                   {formatDate(
@@ -496,15 +590,27 @@ function Reports() {
                 </td>
 
                 <td>
-                  <StatusBadge
-                    value={row.result}
-                  />
+                  {row.result ? (
+                    <StatusBadge
+                      value={
+                        row.result
+                      }
+                    />
+                  ) : (
+                    'N/A'
+                  )}
                 </td>
 
                 <td>
-                  <StatusBadge
-                    value={row.condition}
-                  />
+                  {row.condition ? (
+                    <StatusBadge
+                      value={
+                        row.condition
+                      }
+                    />
+                  ) : (
+                    'N/A'
+                  )}
                 </td>
 
                 <td>
@@ -515,7 +621,9 @@ function Reports() {
 
                 <td>
                   <StatusBadge
-                    value={row.inspection_status}
+                    value={
+                      row.inspection_status
+                    }
                   />
                 </td>
               </tr>
@@ -544,16 +652,24 @@ function Reports() {
 
         <tbody>
           {rows.map((row) => (
-            <tr key={row.damage_report_id}>
+            <tr
+              key={
+                row.damage_report_id
+              }
+            >
               <td>
                 #{row.damage_report_id}
               </td>
 
-              <td>{row.tool_name}</td>
+              <td>
+                {row.tool_name}
+              </td>
 
               <td>
                 <StatusBadge
-                  value={row.severity}
+                  value={
+                    row.severity
+                  }
                 />
               </td>
 
@@ -563,14 +679,20 @@ function Reports() {
                 />
               </td>
 
-              <td>{row.description}</td>
-
               <td>
-                {formatDate(row.reported_at)}
+                {row.description}
               </td>
 
               <td>
-                {formatDate(row.resolved_at)}
+                {formatDate(
+                  row.reported_at
+                )}
+              </td>
+
+              <td>
+                {formatDate(
+                  row.resolved_at
+                )}
               </td>
             </tr>
           ))}
@@ -579,14 +701,375 @@ function Reports() {
     )
   }
 
+  function renderMobileReport() {
+    if (
+      reportType ===
+      'tool-inventory'
+    ) {
+      const rows =
+        data as ToolInventoryReport[]
+
+      return rows.map((row) => (
+        <article
+          className="report-mobile-card"
+          key={row.tool_id}
+        >
+          <div className="report-mobile-card-header">
+            <div>
+              <h2>{row.name}</h2>
+
+              <span>
+                {row.serial_number}
+              </span>
+            </div>
+
+            <StatusBadge
+              value={row.status}
+            />
+          </div>
+
+          <div className="report-mobile-card-body">
+            <div className="report-mobile-row">
+              <span>Category</span>
+              <strong>
+                {row.category}
+              </strong>
+            </div>
+
+            <div className="report-mobile-row">
+              <span>Status</span>
+
+              <StatusBadge
+                value={row.status}
+              />
+            </div>
+
+            <div className="report-mobile-row">
+              <span>Condition</span>
+
+              <StatusBadge
+                value={
+                  row.condition
+                }
+              />
+            </div>
+
+            <div className="report-mobile-row">
+              <span>
+                Current Jobsite
+              </span>
+
+              <strong>
+                {row.current_jobsite ??
+                  'N/A'}
+              </strong>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+
+    if (
+      reportType ===
+      'current-assignments'
+    ) {
+      const rows =
+        data as AssignmentReport[]
+
+      return rows.map((row) => (
+        <article
+          className="report-mobile-card"
+          key={row.assignment_id}
+        >
+          <div className="report-mobile-card-header">
+            <div>
+              <h2>
+                {row.tool_name}
+              </h2>
+
+              <span>
+                {row.serial_number}
+              </span>
+            </div>
+
+            <StatusBadge
+              value={row.status}
+            />
+          </div>
+
+          <div className="report-mobile-card-body">
+            <div className="report-mobile-row">
+              <span>Jobsite</span>
+
+              <strong>
+                {row.jobsite_name}
+              </strong>
+            </div>
+
+            <div className="report-mobile-row">
+              <span>Assigned</span>
+
+              <strong>
+                {formatDate(
+                  row.assigned_at
+                )}
+              </strong>
+            </div>
+
+            <div className="report-mobile-row">
+              <span>Status</span>
+
+              <StatusBadge
+                value={row.status}
+              />
+            </div>
+
+            <div className="report-mobile-row report-mobile-row-stacked">
+              <span>Notes</span>
+
+              <strong>
+                {row.notes ||
+                  'N/A'}
+              </strong>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+
+    if (
+      reportType ===
+      'maintenance-history'
+    ) {
+      const rows =
+        data as MaintenanceReport[]
+
+      return rows.map((row) => (
+        <article
+          className="report-mobile-card"
+          key={row.work_order_id}
+        >
+          <div className="report-mobile-card-header">
+            <div>
+              <h2>
+                {row.tool_name}
+              </h2>
+
+              <span>
+                Work Order #
+                {row.work_order_id}
+              </span>
+            </div>
+
+            <StatusBadge
+              value={row.priority}
+            />
+          </div>
+
+          <div className="report-mobile-card-body">
+            <div className="report-mobile-row">
+              <span>Status</span>
+
+              <StatusBadge
+                value={row.status}
+              />
+            </div>
+
+            <div className="report-mobile-row">
+              <span>
+                Assigned To
+              </span>
+
+              <strong>
+                {row.assigned_to ||
+                  'Unassigned'}
+              </strong>
+            </div>
+
+            <div className="report-mobile-row">
+              <span>Opened</span>
+
+              <strong>
+                {formatDate(
+                  row.opened_at
+                )}
+              </strong>
+            </div>
+
+            <div className="report-mobile-row">
+              <span>Completed</span>
+
+              <strong>
+                {formatDate(
+                  row.completed_at
+                )}
+              </strong>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+
+    if (
+      reportType ===
+      'inspection-status'
+    ) {
+      const rows =
+        data as InspectionReport[]
+
+      return rows.map((row) => (
+        <article
+          className="report-mobile-card"
+          key={row.tool_id}
+        >
+          <div className="report-mobile-card-header">
+            <div>
+              <h2>
+                {row.tool_name}
+              </h2>
+
+              <span>
+                {row.serial_number}
+              </span>
+            </div>
+
+            <StatusBadge
+              value={
+                row.inspection_status
+              }
+            />
+          </div>
+
+          <div className="report-mobile-card-body">
+            <div className="report-mobile-row">
+              <span>
+                Last Inspection
+              </span>
+
+              <strong>
+                {formatDate(
+                  row.inspection_date
+                )}
+              </strong>
+            </div>
+
+            <div className="report-mobile-row">
+              <span>Result</span>
+
+              {row.result ? (
+                <StatusBadge
+                  value={row.result}
+                />
+              ) : (
+                <strong>N/A</strong>
+              )}
+            </div>
+
+            <div className="report-mobile-row">
+              <span>Condition</span>
+
+              {row.condition ? (
+                <StatusBadge
+                  value={
+                    row.condition
+                  }
+                />
+              ) : (
+                <strong>N/A</strong>
+              )}
+            </div>
+
+            <div className="report-mobile-row">
+              <span>
+                Next Inspection
+              </span>
+
+              <strong>
+                {formatDate(
+                  row.next_inspection_date
+                )}
+              </strong>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+
+    const rows =
+      data as DamageReport[]
+
+    return rows.map((row) => (
+      <article
+        className="report-mobile-card"
+        key={row.damage_report_id}
+      >
+        <div className="report-mobile-card-header">
+          <div>
+            <h2>
+              {row.tool_name}
+            </h2>
+
+            <span>
+              Damage Report #
+              {row.damage_report_id}
+            </span>
+          </div>
+
+          <StatusBadge
+            value={row.severity}
+          />
+        </div>
+
+        <div className="report-mobile-card-body">
+          <div className="report-mobile-row">
+            <span>Status</span>
+
+            <StatusBadge
+              value={row.status}
+            />
+          </div>
+
+          <div className="report-mobile-row">
+            <span>Reported</span>
+
+            <strong>
+              {formatDate(
+                row.reported_at
+              )}
+            </strong>
+          </div>
+
+          <div className="report-mobile-row">
+            <span>Resolved</span>
+
+            <strong>
+              {formatDate(
+                row.resolved_at
+              )}
+            </strong>
+          </div>
+
+          <div className="report-mobile-row report-mobile-row-stacked">
+            <span>Description</span>
+
+            <strong>
+              {row.description}
+            </strong>
+          </div>
+        </div>
+      </article>
+    ))
+  }
+
   return (
     <div className="reports-page">
       <div>
         <h1>Reports</h1>
 
         <p>
-          View and export current and historical
-          SiteTrack information.
+          View and export current and
+          historical SiteTrack
+          information.
         </p>
       </div>
 
@@ -596,7 +1079,9 @@ function Reports() {
 
           <select
             value={reportType}
-            onChange={handleReportChange}
+            onChange={
+              handleReportChange
+            }
           >
             <option value="tool-inventory">
               Tool Inventory
@@ -651,9 +1136,38 @@ function Reports() {
         </button>
       </div>
 
-      <div className="reports-table-container">
-        {renderReport()}
-      </div>
+      {loading && (
+        <p>Loading report...</p>
+      )}
+
+      {!loading && error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
+
+      {!loading &&
+        !error &&
+        data.length === 0 && (
+          <p>
+            No records found for this
+            report.
+          </p>
+        )}
+
+      {!loading &&
+        !error &&
+        data.length > 0 && (
+          <>
+            <div className="reports-table-container">
+              {renderDesktopReport()}
+            </div>
+
+            <div className="reports-mobile-cards">
+              {renderMobileReport()}
+            </div>
+          </>
+        )}
     </div>
   )
 }

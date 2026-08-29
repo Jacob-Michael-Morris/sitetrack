@@ -21,21 +21,39 @@ function Maintenance() {
   const [tools, setTools] =
     useState<Tool[]>([])
 
-  const [toolId, setToolId] = useState('')
-  const [description, setDescription] = useState('')
-  const [priority, setPriority] = useState('Medium')
-  const [assignedTo, setAssignedTo] = useState('')
-  const [notes, setNotes] = useState('')
+  const [toolId, setToolId] =
+    useState('')
 
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
+  const [
+    description,
+    setDescription
+  ] = useState('')
+
+  const [priority, setPriority] =
+    useState('Medium')
+
+  const [
+    assignedTo,
+    setAssignedTo
+  ] = useState('')
+
+  const [notes, setNotes] =
+    useState('')
+
+  const [error, setError] =
+    useState('')
+
+  const [message, setMessage] =
+    useState('')
 
   async function loadData() {
-    const [workOrderData, toolData] =
-      await Promise.all([
-        getWorkOrders(),
-        getTools()
-      ])
+    const [
+      workOrderData,
+      toolData
+    ] = await Promise.all([
+      getWorkOrders(),
+      getTools()
+    ])
 
     setWorkOrders(workOrderData)
     setTools(toolData)
@@ -48,14 +66,22 @@ function Maintenance() {
       getWorkOrders(),
       getTools()
     ])
-      .then(([workOrderData, toolData]) => {
-        if (cancelled) {
-          return
-        }
+      .then(
+        ([
+          workOrderData,
+          toolData
+        ]) => {
+          if (cancelled) {
+            return
+          }
 
-        setWorkOrders(workOrderData)
-        setTools(toolData)
-      })
+          setWorkOrders(
+            workOrderData
+          )
+
+          setTools(toolData)
+        }
+      )
       .catch(() => {
         if (!cancelled) {
           setError(
@@ -70,7 +96,8 @@ function Maintenance() {
   }, [])
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -90,6 +117,7 @@ function Maintenance() {
       setAssignedTo('')
       setNotes('')
       setError('')
+
       setMessage(
         'Work order created successfully.'
       )
@@ -99,15 +127,21 @@ function Maintenance() {
       setError(
         'Unable to create work order.'
       )
+
       setMessage('')
     }
   }
 
-  async function handleComplete(id: number) {
+  async function handleComplete(
+    id: number
+  ) {
     try {
       await completeWorkOrder(id)
 
-      setMessage('Work order completed.')
+      setMessage(
+        'Work order completed.'
+      )
+
       setError('')
 
       await loadData()
@@ -115,6 +149,8 @@ function Maintenance() {
       setError(
         'Unable to complete work order.'
       )
+
+      setMessage('')
     }
   }
 
@@ -127,6 +163,7 @@ function Maintenance() {
       setMessage(
         'Tool returned to service.'
       )
+
       setError('')
 
       await loadData()
@@ -134,18 +171,33 @@ function Maintenance() {
       setError(
         'Unable to return tool to service.'
       )
+
+      setMessage('')
     }
   }
 
-  const maintenanceTools = tools.filter(
-    (tool) =>
-      tool.status === 'Out of Service' ||
-      tool.status === 'Maintenance'
-  )
+  const maintenanceTools =
+    tools.filter(
+      (tool) =>
+        tool.status ===
+          'Out of Service' ||
+        tool.status ===
+          'Maintenance'
+    )
 
   return (
     <div>
-      <h1>Maintenance</h1>
+      <div className="page-header">
+        <div>
+          <h1>Maintenance</h1>
+
+          <p>
+            Create work orders and
+            manage tools undergoing
+            maintenance.
+          </p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert">
@@ -153,7 +205,9 @@ function Maintenance() {
         </p>
       )}
 
-      {message && <p>{message}</p>}
+      {message && (
+        <p>{message}</p>
+      )}
 
       <h2>Create Work Order</h2>
 
@@ -163,10 +217,13 @@ function Maintenance() {
       >
         <label>
           Tool
+
           <select
             value={toolId}
             onChange={(event) =>
-              setToolId(event.target.value)
+              setToolId(
+                event.target.value
+              )
             }
             required
           >
@@ -174,23 +231,29 @@ function Maintenance() {
               Select Tool
             </option>
 
-            {maintenanceTools.map((tool) => (
-              <option
-                key={tool.tool_id}
-                value={tool.tool_id}
-              >
-                {tool.name} - {tool.serial_number}
-              </option>
-            ))}
+            {maintenanceTools.map(
+              (tool) => (
+                <option
+                  key={tool.tool_id}
+                  value={tool.tool_id}
+                >
+                  {tool.name} -{' '}
+                  {tool.serial_number}
+                </option>
+              )
+            )}
           </select>
         </label>
 
         <label>
           Priority
+
           <select
             value={priority}
             onChange={(event) =>
-              setPriority(event.target.value)
+              setPriority(
+                event.target.value
+              )
             }
           >
             <option>Low</option>
@@ -202,20 +265,26 @@ function Maintenance() {
 
         <label>
           Assigned To
+
           <input
             value={assignedTo}
             onChange={(event) =>
-              setAssignedTo(event.target.value)
+              setAssignedTo(
+                event.target.value
+              )
             }
           />
         </label>
 
         <label>
           Description
+
           <textarea
             value={description}
             onChange={(event) =>
-              setDescription(event.target.value)
+              setDescription(
+                event.target.value
+              )
             }
             required
           />
@@ -223,10 +292,13 @@ function Maintenance() {
 
         <label>
           Notes
+
           <textarea
             value={notes}
             onChange={(event) =>
-              setNotes(event.target.value)
+              setNotes(
+                event.target.value
+              )
             }
           />
         </label>
@@ -238,81 +310,228 @@ function Maintenance() {
 
       <h2>Work Orders</h2>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Tool</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Assigned To</th>
-            <th>Description</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {workOrders.map((workOrder) => (
-            <tr key={workOrder.work_order_id}>
-              <td>{workOrder.tool_name}</td>
-
-              <td>
-                <StatusBadge
-                  value={workOrder.priority}
-                />
-              </td>
-
-              <td>
-                <StatusBadge
-                  value={workOrder.status}
-                />
-              </td>
-
-              <td>
-                {workOrder.assigned_to ||
-                  'Unassigned'}
-              </td>
-
-              <td>
-                {workOrder.description}
-              </td>
-
-              <td>
-                {workOrder.status === 'Open' && (
-                  <button
-                    onClick={() =>
-                      handleComplete(
-                        workOrder.work_order_id
-                      )
-                    }
-                  >
-                    Complete
-                  </button>
-                )}
-
-                {workOrder.status ===
-                  'Completed' && (
-                  <button
-                    onClick={() =>
-                      handleReturnToService(
-                        workOrder.work_order_id
-                      )
-                    }
-                  >
-                    Return to Service
-                  </button>
-                )}
-
-                {workOrder.status === 'Closed' && (
-                  <StatusBadge value="Closed" />
-                )}
-              </td>
+      <div className="responsive-table-view">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Assigned To</th>
+              <th>Description</th>
+              <th>Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {workOrders.map(
+              (workOrder) => (
+                <tr
+                  key={
+                    workOrder.work_order_id
+                  }
+                >
+                  <td>
+                    {
+                      workOrder.tool_name
+                    }
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      value={
+                        workOrder.priority
+                      }
+                    />
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      value={
+                        workOrder.status
+                      }
+                    />
+                  </td>
+
+                  <td>
+                    {workOrder.assigned_to ||
+                      'Unassigned'}
+                  </td>
+
+                  <td>
+                    {
+                      workOrder.description
+                    }
+                  </td>
+
+                  <td>
+                    {workOrder.status ===
+                      'Open' && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleComplete(
+                            workOrder.work_order_id
+                          )
+                        }
+                      >
+                        Complete
+                      </button>
+                    )}
+
+                    {workOrder.status ===
+                      'Completed' && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleReturnToService(
+                            workOrder.work_order_id
+                          )
+                        }
+                      >
+                        Return to Service
+                      </button>
+                    )}
+
+                    {workOrder.status ===
+                      'Closed' && (
+                      <StatusBadge
+                        value="Closed"
+                      />
+                    )}
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mobile-card-list">
+        {workOrders.map(
+          (workOrder) => (
+            <article
+              className="mobile-data-card"
+              key={
+                workOrder.work_order_id
+              }
+            >
+              <div className="mobile-data-card-header">
+                <div>
+                  <h2>
+                    {
+                      workOrder.tool_name
+                    }
+                  </h2>
+                </div>
+
+                <StatusBadge
+                  value={
+                    workOrder.priority
+                  }
+                />
+              </div>
+
+              <div className="mobile-data-card-body">
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Work Order
+                  </span>
+
+                  <span>
+                    #
+                    {
+                      workOrder.work_order_id
+                    }
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Priority
+                  </span>
+
+                  <StatusBadge
+                    value={
+                      workOrder.priority
+                    }
+                  />
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Status
+                  </span>
+
+                  <StatusBadge
+                    value={
+                      workOrder.status
+                    }
+                  />
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Assigned To
+                  </span>
+
+                  <span>
+                    {workOrder.assigned_to ||
+                      'Unassigned'}
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Description
+                  </span>
+
+                  <span>
+                    {
+                      workOrder.description
+                    }
+                  </span>
+                </div>
+              </div>
+
+              {workOrder.status ===
+                'Open' && (
+                <button
+                  type="button"
+                  className="mobile-card-action"
+                  onClick={() =>
+                    handleComplete(
+                      workOrder.work_order_id
+                    )
+                  }
+                >
+                  Complete Work Order
+                </button>
+              )}
+
+              {workOrder.status ===
+                'Completed' && (
+                <button
+                  type="button"
+                  className="mobile-card-action"
+                  onClick={() =>
+                    handleReturnToService(
+                      workOrder.work_order_id
+                    )
+                  }
+                >
+                  Return to Service
+                </button>
+              )}
+            </article>
+          )
+        )}
+      </div>
 
       {workOrders.length === 0 && (
-        <p>No work orders found.</p>
+        <p>
+          No work orders found.
+        </p>
       )}
     </div>
   )

@@ -17,13 +17,19 @@
 
 .dashboard-heading p {
   margin: 0;
+  color: #6b7280;
 }
 
 .dashboard-role {
+  flex-shrink: 0;
+
   padding: 8px 14px;
+
   border: 1px solid #d1d5db;
   border-radius: 6px;
+
   background-color: #ffffff;
+
   font-size: 14px;
   font-weight: 600;
 }
@@ -41,10 +47,13 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(180px, 1fr)
-  );
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(180px, 1fr)
+    );
+
   gap: 16px;
 }
 
@@ -52,63 +61,89 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  min-width: 0;
   padding: 20px;
+
   border: 1px solid #d1d5db;
   border-radius: 8px;
+
   background-color: #ffffff;
 }
 
 .dashboard-card span {
-  font-size: 14px;
   color: #4b5563;
+  font-size: 14px;
 }
 
 .dashboard-card strong {
+  color: #1f2937;
   font-size: 30px;
 }
 
 .dashboard-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(160px, max-content)
+    );
+
   gap: 12px;
 }
 
 .dashboard-action {
-  display: inline-block;
+  display: block;
+
   padding: 10px 16px;
+
   border: 1px solid #d1d5db;
   border-radius: 6px;
+
   background-color: #ffffff;
+
+  color: #1f2937;
+  text-align: center;
   text-decoration: none;
-  color: inherit;
   font-weight: 600;
 }
 
 .dashboard-action:hover {
-  background-color: #f3f4f6;
+  border-color: #1f2937;
+
+  background-color: #1f2937;
+  color: #ffffff;
 }
 
 .dashboard-section-heading {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+
   gap: 16px;
 }
 
 .dashboard-table-container {
+  width: 100%;
   overflow-x: auto;
 }
 
 .dashboard-table {
   width: 100%;
+
   border-collapse: collapse;
+
   background-color: #ffffff;
 }
 
 .dashboard-table th,
 .dashboard-table td {
   padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
+
+  border-bottom:
+    1px solid #e5e7eb;
+
   text-align: left;
   vertical-align: top;
 }
@@ -121,22 +156,132 @@
   font-size: 14px;
 }
 
-@media (max-width: 700px) {
-  .dashboard-heading {
-    align-items: flex-start;
-    flex-direction: column;
+.dashboard-alert-cards {
+  display: none;
+}
+
+.dashboard-alert-card {
+  padding: 16px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  background-color: #ffffff;
+}
+
+.dashboard-alert-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 12px;
+}
+
+.dashboard-alert-card-header h3 {
+  margin: 0 0 4px;
+
+  color: #1f2937;
+  font-size: 16px;
+}
+
+.dashboard-alert-card-header span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.dashboard-alert-message {
+  margin: 14px 0;
+
+  color: #374151;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.dashboard-alert-time {
+  padding-top: 10px;
+
+  border-top:
+    1px solid #f3f4f6;
+
+  color: #6b7280;
+  font-size: 12px;
+}
+
+@media (max-width: 850px) {
+  .dashboard-page {
+    gap: 24px;
   }
 
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
   .dashboard-actions {
-    flex-direction: column;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
   .dashboard-action {
     width: 100%;
-    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-page {
+    gap: 22px;
+  }
+
+  .dashboard-heading {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+  .dashboard-role {
+    align-self: flex-start;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+
+    gap: 12px;
+  }
+
+  .dashboard-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 16px;
+  }
+
+  .dashboard-card span {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .dashboard-card strong {
+    font-size: 26px;
+  }
+
+  .dashboard-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-section-heading {
+    align-items: center;
+  }
+
+  .dashboard-table-container {
+    display: none;
+  }
+
+  .dashboard-alert-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 }

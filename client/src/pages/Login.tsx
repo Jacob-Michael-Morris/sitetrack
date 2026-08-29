@@ -1,4 +1,5 @@
 import { useState } from 'react'
+
 import {
   Navigate,
   useNavigate
@@ -10,17 +11,30 @@ function Login() {
   const { user, login } = useAuth()
   const navigate = useNavigate()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const [email, setEmail] =
+    useState('')
+
+  const [password, setPassword] =
+    useState('')
+
+  const [error, setError] =
+    useState('')
+
+  const [submitting, setSubmitting] =
+    useState(false)
 
   if (user) {
-    return <Navigate to="/dashboard" replace />
+    return (
+      <Navigate
+        to="/dashboard"
+        replace
+      />
+    )
   }
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -28,11 +42,16 @@ function Login() {
       setSubmitting(true)
       setError('')
 
-      await login(email, password)
+      await login(
+        email,
+        password
+      )
 
       navigate('/dashboard')
     } catch {
-      setError('Invalid email or password.')
+      setError(
+        'Invalid email or password.'
+      )
     } finally {
       setSubmitting(false)
     }
@@ -41,35 +60,53 @@ function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>SiteTrack</h1>
-        <p>Jobsite Tool and Maintenance Management</p>
+        <div className="login-heading">
+          <h1>SiteTrack</h1>
 
-        {error && <p>{error}</p>}
+          <p>
+            Jobsite Tool and
+            Maintenance Management
+          </p>
+        </div>
+
+        {error && (
+          <p role="alert">
+            {error}
+          </p>
+        )}
 
         <form
-          className="tool-form"
+          className="login-form"
           onSubmit={handleSubmit}
         >
           <label>
             Email
+
             <input
               type="email"
               value={email}
               onChange={(event) =>
-                setEmail(event.target.value)
+                setEmail(
+                  event.target.value
+                )
               }
+              autoComplete="email"
               required
             />
           </label>
 
           <label>
             Password
+
             <input
               type="password"
               value={password}
               onChange={(event) =>
-                setPassword(event.target.value)
+                setPassword(
+                  event.target.value
+                )
               }
+              autoComplete="current-password"
               required
             />
           </label>
@@ -78,7 +115,9 @@ function Login() {
             type="submit"
             disabled={submitting}
           >
-            {submitting ? 'Signing In...' : 'Sign In'}
+            {submitting
+              ? 'Signing In...'
+              : 'Sign In'}
           </button>
         </form>
       </div>

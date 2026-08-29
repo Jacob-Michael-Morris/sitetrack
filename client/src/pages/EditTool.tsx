@@ -37,28 +37,37 @@ function EditTool() {
   const [submitting, setSubmitting] =
     useState(false)
 
-  const [error, setError] = useState('')
+  const [error, setError] =
+    useState('')
 
   useEffect(() => {
     async function loadTool() {
       if (!id) {
         setLoading(false)
-        setError('Invalid tool ID.')
+        setError(
+          'Invalid tool ID.'
+        )
         return
       }
 
       try {
-        const tool = await getTool(id)
+        const tool =
+          await getTool(id)
 
         setForm({
           name: tool.name,
-          serial_number: tool.serial_number,
-          category: tool.category || '',
+          serial_number:
+            tool.serial_number,
+          category:
+            tool.category || '',
           status: tool.status,
-          condition: tool.condition,
-          purchase_date: tool.purchase_date
-            ? tool.purchase_date.substring(0, 10)
-            : ''
+          condition:
+            tool.condition,
+          purchase_date:
+            tool.purchase_date
+              ? tool.purchase_date
+                  .substring(0, 10)
+              : ''
         })
       } catch (error) {
         setError(
@@ -88,7 +97,8 @@ function EditTool() {
   }
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -96,7 +106,8 @@ function EditTool() {
       return
     }
 
-    const cleanName = form.name.trim()
+    const cleanName =
+      form.name.trim()
 
     const cleanSerialNumber =
       form.serial_number.trim()
@@ -105,24 +116,31 @@ function EditTool() {
       form.category.trim()
 
     if (!cleanName) {
-      setError('Tool name is required.')
+      setError(
+        'Tool name is required.'
+      )
       return
     }
 
     if (!cleanSerialNumber) {
-      setError('Serial number is required.')
+      setError(
+        'Serial number is required.'
+      )
       return
     }
 
     if (!cleanCategory) {
-      setError('Category is required.')
+      setError(
+        'Category is required.'
+      )
       return
     }
 
     if (form.purchase_date) {
-      const purchaseDate = new Date(
-        `${form.purchase_date}T00:00:00`
-      )
+      const purchaseDate =
+        new Date(
+          `${form.purchase_date}T00:00:00`
+        )
 
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -144,7 +162,8 @@ function EditTool() {
         {
           ...form,
           name: cleanName,
-          serial_number: cleanSerialNumber,
+          serial_number:
+            cleanSerialNumber,
           category: cleanCategory
         }
       )
@@ -170,8 +189,17 @@ function EditTool() {
     .slice(0, 10)
 
   return (
-    <div>
-      <h1>Edit Tool</h1>
+    <div className="form-page">
+      <div className="page-header">
+        <div>
+          <h1>Edit Tool</h1>
+
+          <p>
+            Update tool information,
+            status, or condition.
+          </p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert">
@@ -185,6 +213,7 @@ function EditTool() {
       >
         <label>
           Tool Name
+
           <input
             name="name"
             value={form.name}
@@ -196,9 +225,12 @@ function EditTool() {
 
         <label>
           Serial Number
+
           <input
             name="serial_number"
-            value={form.serial_number}
+            value={
+              form.serial_number
+            }
             onChange={handleChange}
             required
             maxLength={100}
@@ -207,6 +239,7 @@ function EditTool() {
 
         <label>
           Category
+
           <input
             name="category"
             value={form.category}
@@ -218,20 +251,33 @@ function EditTool() {
 
         <label>
           Status
+
           <select
             name="status"
             value={form.status}
             onChange={handleChange}
           >
-            <option>Available</option>
-            <option>Checked Out</option>
-            <option>Maintenance</option>
-            <option>Out of Service</option>
+            <option>
+              Available
+            </option>
+
+            <option>
+              Checked Out
+            </option>
+
+            <option>
+              Maintenance
+            </option>
+
+            <option>
+              Out of Service
+            </option>
           </select>
         </label>
 
         <label>
           Condition
+
           <select
             name="condition"
             value={form.condition}
@@ -239,17 +285,26 @@ function EditTool() {
           >
             <option>Good</option>
             <option>Fair</option>
-            <option>Needs Repair</option>
-            <option>Damaged</option>
+
+            <option>
+              Needs Repair
+            </option>
+
+            <option>
+              Damaged
+            </option>
           </select>
         </label>
 
         <label>
           Purchase Date
+
           <input
             type="date"
             name="purchase_date"
-            value={form.purchase_date}
+            value={
+              form.purchase_date
+            }
             onChange={handleChange}
             max={today}
           />

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import StatusBadge from '../components/StatusBadge.js'
+
 import {
   checkoutTool,
   getAssignments,
@@ -15,71 +17,119 @@ import type { Jobsite } from '../types/Jobsite.js'
 import type { ToolAssignment } from '../types/ToolAssignment.js'
 
 function Assignments() {
-  const [assignments, setAssignments] = useState<ToolAssignment[]>([])
-  const [tools, setTools] = useState<Tool[]>([])
-  const [jobsites, setJobsites] = useState<Jobsite[]>([])
+  const [assignments, setAssignments] =
+    useState<ToolAssignment[]>([])
 
-  const [checkoutToolId, setCheckoutToolId] = useState('')
-  const [checkoutJobsiteId, setCheckoutJobsiteId] = useState('')
+  const [tools, setTools] =
+    useState<Tool[]>([])
 
-  const [returnToolId, setReturnToolId] = useState('')
+  const [jobsites, setJobsites] =
+    useState<Jobsite[]>([])
 
-  const [transferToolId, setTransferToolId] = useState('')
-  const [transferJobsiteId, setTransferJobsiteId] = useState('')
+  const [
+    checkoutToolId,
+    setCheckoutToolId
+  ] = useState('')
 
-  const [notes, setNotes] = useState('')
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
+  const [
+    checkoutJobsiteId,
+    setCheckoutJobsiteId
+  ] = useState('')
+
+  const [
+    returnToolId,
+    setReturnToolId
+  ] = useState('')
+
+  const [
+    transferToolId,
+    setTransferToolId
+  ] = useState('')
+
+  const [
+    transferJobsiteId,
+    setTransferJobsiteId
+  ] = useState('')
+
+  const [notes, setNotes] =
+    useState('')
+
+  const [error, setError] =
+    useState('')
+
+  const [message, setMessage] =
+    useState('')
 
   async function loadData() {
-    const [assignmentData, toolData, jobsiteData] =
-      await Promise.all([
-        getAssignments(),
-        getTools(),
-        getJobsites()
-      ])
+    const [
+      assignmentData,
+      toolData,
+      jobsiteData
+    ] = await Promise.all([
+      getAssignments(),
+      getTools(),
+      getJobsites()
+    ])
 
     setAssignments(assignmentData)
     setTools(toolData)
     setJobsites(jobsiteData)
   }
 
-useEffect(() => {
-  let cancelled = false
+  useEffect(() => {
+    let cancelled = false
 
-  Promise.all([
-    getAssignments(),
-    getTools(),
-    getJobsites()
-  ])
-    .then(([assignmentData, toolData, jobsiteData]) => {
-      if (cancelled) return
+    Promise.all([
+      getAssignments(),
+      getTools(),
+      getJobsites()
+    ])
+      .then(
+        ([
+          assignmentData,
+          toolData,
+          jobsiteData
+        ]) => {
+          if (cancelled) {
+            return
+          }
 
-      setAssignments(assignmentData)
-      setTools(toolData)
-      setJobsites(jobsiteData)
-    })
-    .catch(() => {
-      if (!cancelled) {
-        setError('Unable to load assignment data.')
-      }
-    })
+          setAssignments(
+            assignmentData
+          )
 
-  return () => {
-    cancelled = true
-  }
-}, [])
+          setTools(toolData)
+          setJobsites(jobsiteData)
+        }
+      )
+      .catch(() => {
+        if (!cancelled) {
+          setError(
+            'Unable to load assignment data.'
+          )
+        }
+      })
 
-  const availableTools = tools.filter(
-    (tool) => tool.status === 'Available'
-  )
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  const activeAssignments = assignments.filter(
-    (assignment) => assignment.released_at === null
-  )
+  const availableTools =
+    tools.filter(
+      (tool) =>
+        tool.status === 'Available'
+    )
+
+  const activeAssignments =
+    assignments.filter(
+      (assignment) =>
+        assignment.released_at === null
+    )
 
   async function handleCheckout(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -94,17 +144,24 @@ useEffect(() => {
       setCheckoutJobsiteId('')
       setNotes('')
       setError('')
-      setMessage('Tool checked out successfully.')
+
+      setMessage(
+        'Tool checked out successfully.'
+      )
 
       await loadData()
     } catch {
-      setError('Unable to check out tool.')
+      setError(
+        'Unable to check out tool.'
+      )
+
       setMessage('')
     }
   }
 
   async function handleReturn(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -117,17 +174,24 @@ useEffect(() => {
       setReturnToolId('')
       setNotes('')
       setError('')
-      setMessage('Tool returned successfully.')
+
+      setMessage(
+        'Tool returned successfully.'
+      )
 
       await loadData()
     } catch {
-      setError('Unable to return tool.')
+      setError(
+        'Unable to return tool.'
+      )
+
       setMessage('')
     }
   }
 
   async function handleTransfer(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -142,66 +206,110 @@ useEffect(() => {
       setTransferJobsiteId('')
       setNotes('')
       setError('')
-      setMessage('Tool transferred successfully.')
+
+      setMessage(
+        'Tool transferred successfully.'
+      )
 
       await loadData()
     } catch {
-      setError('Unable to transfer tool.')
+      setError(
+        'Unable to transfer tool.'
+      )
+
       setMessage('')
     }
   }
 
   return (
     <div>
-      <h1>Tool Assignments</h1>
+      <div className="page-header">
+        <div>
+          <h1>Tool Assignments</h1>
 
-      {error && <p>{error}</p>}
-      {message && <p>{message}</p>}
+          <p>
+            Check out, return, and
+            transfer SiteTrack tools.
+          </p>
+        </div>
+      </div>
+
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
+
+      {message && (
+        <p>{message}</p>
+      )}
 
       <h2>Check Out Tool</h2>
 
-      <form className="tool-form" onSubmit={handleCheckout}>
+      <form
+        className="tool-form"
+        onSubmit={handleCheckout}
+      >
         <label>
           Tool
+
           <select
             value={checkoutToolId}
             onChange={(event) =>
-              setCheckoutToolId(event.target.value)
+              setCheckoutToolId(
+                event.target.value
+              )
             }
             required
           >
-            <option value="">Select Tool</option>
+            <option value="">
+              Select Tool
+            </option>
 
-            {availableTools.map((tool) => (
-              <option
-                key={tool.tool_id}
-                value={tool.tool_id}
-              >
-                {tool.name} - {tool.serial_number}
-              </option>
-            ))}
+            {availableTools.map(
+              (tool) => (
+                <option
+                  key={tool.tool_id}
+                  value={tool.tool_id}
+                >
+                  {tool.name} -{' '}
+                  {tool.serial_number}
+                </option>
+              )
+            )}
           </select>
         </label>
 
         <label>
           Jobsite
+
           <select
             value={checkoutJobsiteId}
             onChange={(event) =>
-              setCheckoutJobsiteId(event.target.value)
+              setCheckoutJobsiteId(
+                event.target.value
+              )
             }
             required
           >
-            <option value="">Select Jobsite</option>
+            <option value="">
+              Select Jobsite
+            </option>
 
-            {jobsites.map((jobsite) => (
-              <option
-                key={jobsite.jobsite_id}
-                value={jobsite.jobsite_id}
-              >
-                {jobsite.name}
-              </option>
-            ))}
+            {jobsites.map(
+              (jobsite) => (
+                <option
+                  key={
+                    jobsite.jobsite_id
+                  }
+                  value={
+                    jobsite.jobsite_id
+                  }
+                >
+                  {jobsite.name}
+                </option>
+              )
+            )}
           </select>
         </label>
 
@@ -212,26 +320,46 @@ useEffect(() => {
 
       <h2>Return Tool</h2>
 
-      <form className="tool-form" onSubmit={handleReturn}>
+      <form
+        className="tool-form"
+        onSubmit={handleReturn}
+      >
         <label>
           Tool
+
           <select
             value={returnToolId}
             onChange={(event) =>
-              setReturnToolId(event.target.value)
+              setReturnToolId(
+                event.target.value
+              )
             }
             required
           >
-            <option value="">Select Tool</option>
+            <option value="">
+              Select Tool
+            </option>
 
-            {activeAssignments.map((assignment) => (
-              <option
-                key={assignment.assignment_id}
-                value={assignment.tool_id}
-              >
-                {assignment.tool_name} - {assignment.jobsite_name}
-              </option>
-            ))}
+            {activeAssignments.map(
+              (assignment) => (
+                <option
+                  key={
+                    assignment.assignment_id
+                  }
+                  value={
+                    assignment.tool_id
+                  }
+                >
+                  {
+                    assignment.tool_name
+                  }{' '}
+                  -{' '}
+                  {
+                    assignment.jobsite_name
+                  }
+                </option>
+              )
+            )}
           </select>
         </label>
 
@@ -242,48 +370,81 @@ useEffect(() => {
 
       <h2>Transfer Tool</h2>
 
-      <form className="tool-form" onSubmit={handleTransfer}>
+      <form
+        className="tool-form"
+        onSubmit={handleTransfer}
+      >
         <label>
           Tool
+
           <select
             value={transferToolId}
             onChange={(event) =>
-              setTransferToolId(event.target.value)
+              setTransferToolId(
+                event.target.value
+              )
             }
             required
           >
-            <option value="">Select Tool</option>
+            <option value="">
+              Select Tool
+            </option>
 
-            {activeAssignments.map((assignment) => (
-              <option
-                key={assignment.assignment_id}
-                value={assignment.tool_id}
-              >
-                {assignment.tool_name} - {assignment.jobsite_name}
-              </option>
-            ))}
+            {activeAssignments.map(
+              (assignment) => (
+                <option
+                  key={
+                    assignment.assignment_id
+                  }
+                  value={
+                    assignment.tool_id
+                  }
+                >
+                  {
+                    assignment.tool_name
+                  }{' '}
+                  -{' '}
+                  {
+                    assignment.jobsite_name
+                  }
+                </option>
+              )
+            )}
           </select>
         </label>
 
         <label>
           New Jobsite
+
           <select
-            value={transferJobsiteId}
+            value={
+              transferJobsiteId
+            }
             onChange={(event) =>
-              setTransferJobsiteId(event.target.value)
+              setTransferJobsiteId(
+                event.target.value
+              )
             }
             required
           >
-            <option value="">Select Jobsite</option>
+            <option value="">
+              Select Jobsite
+            </option>
 
-            {jobsites.map((jobsite) => (
-              <option
-                key={jobsite.jobsite_id}
-                value={jobsite.jobsite_id}
-              >
-                {jobsite.name}
-              </option>
-            ))}
+            {jobsites.map(
+              (jobsite) => (
+                <option
+                  key={
+                    jobsite.jobsite_id
+                  }
+                  value={
+                    jobsite.jobsite_id
+                  }
+                >
+                  {jobsite.name}
+                </option>
+              )
+            )}
           </select>
         </label>
 
@@ -294,33 +455,147 @@ useEffect(() => {
 
       <h2>Current Assignments</h2>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Tool</th>
-            <th>Serial Number</th>
-            <th>Jobsite</th>
-            <th>Assigned</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {activeAssignments.map((assignment) => (
-            <tr key={assignment.assignment_id}>
-              <td>{assignment.tool_name}</td>
-              <td>{assignment.serial_number}</td>
-              <td>{assignment.jobsite_name}</td>
-              <td>
-                {new Date(
-                  assignment.assigned_at
-                ).toLocaleDateString()}
-              </td>
-              <td>{assignment.status}</td>
+      <div className="responsive-table-view">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Serial Number</th>
+              <th>Jobsite</th>
+              <th>Assigned</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {activeAssignments.map(
+              (assignment) => (
+                <tr
+                  key={
+                    assignment.assignment_id
+                  }
+                >
+                  <td>
+                    {
+                      assignment.tool_name
+                    }
+                  </td>
+
+                  <td>
+                    {
+                      assignment.serial_number
+                    }
+                  </td>
+
+                  <td>
+                    {
+                      assignment.jobsite_name
+                    }
+                  </td>
+
+                  <td>
+                    {new Date(
+                      assignment.assigned_at
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      value={
+                        assignment.status
+                      }
+                    />
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mobile-card-list">
+        {activeAssignments.map(
+          (assignment) => (
+            <article
+              className="mobile-data-card"
+              key={
+                assignment.assignment_id
+              }
+            >
+              <div className="mobile-data-card-header">
+                <h2>
+                  {
+                    assignment.tool_name
+                  }
+                </h2>
+
+                <StatusBadge
+                  value={
+                    assignment.status
+                  }
+                />
+              </div>
+
+              <div className="mobile-data-card-body">
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Serial Number
+                  </span>
+
+                  <span>
+                    {
+                      assignment.serial_number
+                    }
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Jobsite
+                  </span>
+
+                  <span>
+                    {
+                      assignment.jobsite_name
+                    }
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Assigned
+                  </span>
+
+                  <span>
+                    {new Date(
+                      assignment.assigned_at
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Status
+                  </span>
+
+                  <StatusBadge
+                    value={
+                      assignment.status
+                    }
+                  />
+                </div>
+              </div>
+            </article>
+          )
+        )}
+      </div>
+
+      {activeAssignments.length === 0 && (
+        <p>
+          No tools are currently
+          assigned.
+        </p>
+      )}
     </div>
   )
 }

@@ -5,7 +5,15 @@ import {
 
 import { useAuth } from '../context/useAuth.js'
 
-function Sidebar() {
+interface SidebarProps {
+  mobileOpen: boolean
+  onClose: () => void
+}
+
+function Sidebar({
+  mobileOpen,
+  onClose
+}: SidebarProps) {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -35,31 +43,66 @@ function Sidebar() {
   async function handleLogout() {
     try {
       await logout()
+      onClose()
       navigate('/login')
     } catch {
-      console.error('Unable to log out')
+      console.error(
+        'Unable to log out'
+      )
     }
   }
 
   return (
-    <aside className="sidebar">
+    <aside
+      className={
+        mobileOpen
+          ? 'sidebar sidebar--open'
+          : 'sidebar'
+      }
+    >
       <div className="sidebar-header">
-        <h2>SiteTrack</h2>
-        <p>Tool Management</p>
+        <div>
+          <h2>SiteTrack</h2>
+          <p>Tool Management</p>
+        </div>
+
+        <button
+          type="button"
+          className="sidebar-close-button"
+          aria-label="Close navigation menu"
+          onClick={onClose}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M6 6l12 12" />
+            <path d="M18 6 6 18" />
+          </svg>
+        </button>
       </div>
 
       <nav className="sidebar-nav">
-        <NavLink to="/dashboard">
+        <NavLink
+          to="/dashboard"
+          onClick={onClose}
+        >
           Dashboard
         </NavLink>
 
-        <NavLink to="/tools">
+        <NavLink
+          to="/tools"
+          onClick={onClose}
+        >
           Tools
         </NavLink>
 
         {(isAdministrator ||
           isEquipmentManager) && (
-          <NavLink to="/jobsites">
+          <NavLink
+            to="/jobsites"
+            onClick={onClose}
+          >
             Jobsites
           </NavLink>
         )}
@@ -67,7 +110,10 @@ function Sidebar() {
         {(isAdministrator ||
           isEquipmentManager ||
           isWorker) && (
-          <NavLink to="/assignments">
+          <NavLink
+            to="/assignments"
+            onClick={onClose}
+          >
             Assignments
           </NavLink>
         )}
@@ -75,7 +121,10 @@ function Sidebar() {
         {(isAdministrator ||
           isMaintenanceTechnician ||
           isSafetyPersonnel) && (
-          <NavLink to="/inspections">
+          <NavLink
+            to="/inspections"
+            onClick={onClose}
+          >
             Inspections
           </NavLink>
         )}
@@ -84,14 +133,20 @@ function Sidebar() {
           isMaintenanceTechnician ||
           isWorker ||
           isSafetyPersonnel) && (
-          <NavLink to="/damage-reports">
+          <NavLink
+            to="/damage-reports"
+            onClick={onClose}
+          >
             Damage Reports
           </NavLink>
         )}
 
         {(isAdministrator ||
           isMaintenanceTechnician) && (
-          <NavLink to="/maintenance">
+          <NavLink
+            to="/maintenance"
+            onClick={onClose}
+          >
             Maintenance
           </NavLink>
         )}
@@ -100,24 +155,36 @@ function Sidebar() {
           isEquipmentManager ||
           isMaintenanceTechnician ||
           isSafetyPersonnel) && (
-          <NavLink to="/alerts">
+          <NavLink
+            to="/alerts"
+            onClick={onClose}
+          >
             Alerts
           </NavLink>
         )}
 
         {canViewReports && (
-          <NavLink to="/reports">
+          <NavLink
+            to="/reports"
+            onClick={onClose}
+          >
             Reports
           </NavLink>
         )}
 
         {isAdministrator && (
           <>
-            <NavLink to="/users">
+            <NavLink
+              to="/users"
+              onClick={onClose}
+            >
               Users
             </NavLink>
 
-            <NavLink to="/audit-log">
+            <NavLink
+              to="/audit-log"
+              onClick={onClose}
+            >
               Audit Log
             </NavLink>
           </>

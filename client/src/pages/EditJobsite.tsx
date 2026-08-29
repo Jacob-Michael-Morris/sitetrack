@@ -37,13 +37,16 @@ function EditJobsite() {
   const [submitting, setSubmitting] =
     useState(false)
 
-  const [error, setError] = useState('')
+  const [error, setError] =
+    useState('')
 
   useEffect(() => {
     async function loadJobsite() {
       if (!id) {
         setLoading(false)
-        setError('Invalid jobsite ID.')
+        setError(
+          'Invalid jobsite ID.'
+        )
         return
       }
 
@@ -58,17 +61,13 @@ function EditJobsite() {
           status: jobsite.status,
           start_date:
             jobsite.start_date
-              ? jobsite.start_date.substring(
-                  0,
-                  10
-                )
+              ? jobsite.start_date
+                  .substring(0, 10)
               : '',
           end_date:
             jobsite.end_date
-              ? jobsite.end_date.substring(
-                  0,
-                  10
-                )
+              ? jobsite.end_date
+                  .substring(0, 10)
               : '',
           description:
             jobsite.description || ''
@@ -102,7 +101,8 @@ function EditJobsite() {
   }
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -110,7 +110,8 @@ function EditJobsite() {
       return
     }
 
-    const cleanName = form.name.trim()
+    const cleanName =
+      form.name.trim()
 
     const cleanLocation =
       form.location.trim()
@@ -119,7 +120,9 @@ function EditJobsite() {
       form.description.trim()
 
     if (!cleanName) {
-      setError('Jobsite name is required.')
+      setError(
+        'Jobsite name is required.'
+      )
       return
     }
 
@@ -133,7 +136,8 @@ function EditJobsite() {
     if (
       form.start_date &&
       form.end_date &&
-      form.end_date < form.start_date
+      form.end_date <
+        form.start_date
     ) {
       setError(
         'End date cannot be before start date.'
@@ -151,11 +155,14 @@ function EditJobsite() {
           ...form,
           name: cleanName,
           location: cleanLocation,
-          description: cleanDescription
+          description:
+            cleanDescription
         }
       )
 
-      navigate(`/jobsites/${id}`)
+      navigate(
+        `/jobsites/${id}`
+      )
     } catch (error) {
       setError(
         error instanceof Error
@@ -168,12 +175,23 @@ function EditJobsite() {
   }
 
   if (loading) {
-    return <p>Loading jobsite...</p>
+    return (
+      <p>Loading jobsite...</p>
+    )
   }
 
   return (
-    <div>
-      <h1>Edit Jobsite</h1>
+    <div className="form-page">
+      <div className="page-header">
+        <div>
+          <h1>Edit Jobsite</h1>
+
+          <p>
+            Update jobsite information,
+            dates, or status.
+          </p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert">
@@ -187,6 +205,7 @@ function EditJobsite() {
       >
         <label>
           Jobsite Name
+
           <input
             name="name"
             value={form.name}
@@ -197,6 +216,7 @@ function EditJobsite() {
 
         <label>
           Location
+
           <input
             name="location"
             value={form.location}
@@ -207,6 +227,7 @@ function EditJobsite() {
 
         <label>
           Status
+
           <select
             name="status"
             value={form.status}
@@ -220,6 +241,7 @@ function EditJobsite() {
 
         <label>
           Start Date
+
           <input
             type="date"
             name="start_date"
@@ -230,17 +252,22 @@ function EditJobsite() {
 
         <label>
           End Date
+
           <input
             type="date"
             name="end_date"
             value={form.end_date}
             onChange={handleChange}
-            min={form.start_date || undefined}
+            min={
+              form.start_date ||
+              undefined
+            }
           />
         </label>
 
         <label>
           Description
+
           <textarea
             name="description"
             value={form.description}

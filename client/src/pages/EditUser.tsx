@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import {
   useNavigate,
   useParams
@@ -17,15 +18,29 @@ function EditUser() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [roles, setRoles] = useState<Role[]>([])
+  const [roles, setRoles] =
+    useState<Role[]>([])
 
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [roleId, setRoleId] = useState('')
-  const [isActive, setIsActive] = useState(true)
+  const [name, setName] =
+    useState('')
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [email, setEmail] =
+    useState('')
+
+  const [roleId, setRoleId] =
+    useState('')
+
+  const [isActive, setIsActive] =
+    useState(true)
+
+  const [loading, setLoading] =
+    useState(true)
+
+  const [submitting, setSubmitting] =
+    useState(false)
+
+  const [error, setError] =
+    useState('')
 
   useEffect(() => {
     if (!id) {
@@ -38,20 +53,31 @@ function EditUser() {
       getUser(id),
       getRoles()
     ])
-      .then(([user, roleData]) => {
-        if (cancelled) {
-          return
-        }
+      .then(
+        ([user, roleData]) => {
+          if (cancelled) {
+            return
+          }
 
-        setName(user.name)
-        setEmail(user.email)
-        setRoleId(String(user.role_id))
-        setIsActive(user.is_active)
-        setRoles(roleData)
-      })
+          setName(user.name)
+          setEmail(user.email)
+
+          setRoleId(
+            String(user.role_id)
+          )
+
+          setIsActive(
+            user.is_active
+          )
+
+          setRoles(roleData)
+        }
+      )
       .catch(() => {
         if (!cancelled) {
-          setError('Unable to load user.')
+          setError(
+            'Unable to load user.'
+          )
         }
       })
       .finally(() => {
@@ -66,7 +92,8 @@ function EditUser() {
   }, [id])
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -74,18 +101,66 @@ function EditUser() {
       return
     }
 
+    const cleanName =
+      name.trim()
+
+    const cleanEmail =
+      email.trim()
+
+    if (!cleanName) {
+      setError(
+        'Name is required.'
+      )
+      return
+    }
+
+    if (!cleanEmail) {
+      setError(
+        'Email is required.'
+      )
+      return
+    }
+
+    if (!roleId) {
+      setError(
+        'Select a role.'
+      )
+      return
+    }
+
     try {
+      setSubmitting(true)
+      setError('')
+
       await updateUser(id, {
-        name,
-        email,
-        role_id: Number(roleId),
-        is_active: isActive
+        name: cleanName,
+        email: cleanEmail,
+        role_id:
+          Number(roleId),
+        is_active:
+          isActive
       })
 
-      navigate(`/users/${id}`)
-    } catch {
-      setError('Unable to update user.')
+      navigate(
+        `/users/${id}`
+      )
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to update user.'
+      )
+    } finally {
+      setSubmitting(false)
     }
+  }
+
+  if (!id) {
+    return (
+      <p role="alert">
+        Invalid user ID.
+      </p>
+    )
   }
 
   if (loading) {
@@ -93,10 +168,23 @@ function EditUser() {
   }
 
   return (
-    <div>
-      <h1>Edit User</h1>
+    <div className="form-page">
+      <div className="page-header">
+        <div>
+          <h1>Edit User</h1>
 
-      {error && <p>{error}</p>}
+          <p>
+            Update account information,
+            role, or account status.
+          </p>
+        </div>
+      </div>
+
+      {error && (
+        <p role="alert">
+          {error}
+        </p>
+      )}
 
       <form
         className="tool-form"
@@ -104,33 +192,44 @@ function EditUser() {
       >
         <label>
           Name
+
           <input
             value={name}
             onChange={(event) =>
-              setName(event.target.value)
+              setName(
+                event.target.value
+              )
             }
             required
+            maxLength={150}
           />
         </label>
 
         <label>
           Email
+
           <input
             type="email"
             value={email}
             onChange={(event) =>
-              setEmail(event.target.value)
+              setEmail(
+                event.target.value
+              )
             }
             required
+            maxLength={255}
           />
         </label>
 
         <label>
           Role
+
           <select
             value={roleId}
             onChange={(event) =>
-              setRoleId(event.target.value)
+              setRoleId(
+                event.target.value
+              )
             }
             required
           >
@@ -151,6 +250,7 @@ function EditUser() {
 
         <label>
           Account Status
+
           <select
             value={
               isActive
@@ -159,7 +259,8 @@ function EditUser() {
             }
             onChange={(event) =>
               setIsActive(
-                event.target.value === 'Active'
+                event.target.value ===
+                  'Active'
               )
             }
           >
@@ -173,8 +274,13 @@ function EditUser() {
           </select>
         </label>
 
-        <button type="submit">
-          Save Changes
+        <button
+          type="submit"
+          disabled={submitting}
+        >
+          {submitting
+            ? 'Saving...'
+            : 'Save Changes'}
         </button>
       </form>
     </div>
