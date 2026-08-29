@@ -22,7 +22,8 @@ function RegisterJobsite() {
       description: ''
     })
 
-  const [error, setError] = useState('')
+  const [error, setError] =
+    useState('')
 
   const [submitting, setSubmitting] =
     useState(false)
@@ -42,11 +43,13 @@ function RegisterJobsite() {
   }
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
-    const cleanName = form.name.trim()
+    const cleanName =
+      form.name.trim()
 
     const cleanLocation =
       form.location.trim()
@@ -55,7 +58,9 @@ function RegisterJobsite() {
       form.description.trim()
 
     if (!cleanName) {
-      setError('Jobsite name is required.')
+      setError(
+        'Jobsite name is required.'
+      )
       return
     }
 
@@ -69,7 +74,8 @@ function RegisterJobsite() {
     if (
       form.start_date &&
       form.end_date &&
-      form.end_date < form.start_date
+      form.end_date <
+        form.start_date
     ) {
       setError(
         'End date cannot be before start date.'
@@ -81,12 +87,14 @@ function RegisterJobsite() {
       setSubmitting(true)
       setError('')
 
-      const jobsite = await createJobsite({
-        ...form,
-        name: cleanName,
-        location: cleanLocation,
-        description: cleanDescription
-      })
+      const jobsite =
+        await createJobsite({
+          ...form,
+          name: cleanName,
+          location: cleanLocation,
+          description:
+            cleanDescription
+        })
 
       navigate(
         `/jobsites/${jobsite.jobsite_id}`
@@ -103,8 +111,17 @@ function RegisterJobsite() {
   }
 
   return (
-    <div>
-      <h1>Add Jobsite</h1>
+    <div className="form-page">
+      <div className="page-header">
+        <div>
+          <h1>Add Jobsite</h1>
+
+          <p>
+            Add a new construction
+            jobsite to SiteTrack.
+          </p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert">
@@ -118,6 +135,7 @@ function RegisterJobsite() {
       >
         <label>
           Jobsite Name
+
           <input
             name="name"
             value={form.name}
@@ -128,6 +146,7 @@ function RegisterJobsite() {
 
         <label>
           Location
+
           <input
             name="location"
             value={form.location}
@@ -138,6 +157,7 @@ function RegisterJobsite() {
 
         <label>
           Status
+
           <select
             name="status"
             value={form.status}
@@ -151,6 +171,7 @@ function RegisterJobsite() {
 
         <label>
           Start Date
+
           <input
             type="date"
             name="start_date"
@@ -161,17 +182,22 @@ function RegisterJobsite() {
 
         <label>
           End Date
+
           <input
             type="date"
             name="end_date"
             value={form.end_date}
             onChange={handleChange}
-            min={form.start_date || undefined}
+            min={
+              form.start_date ||
+              undefined
+            }
           />
         </label>
 
         <label>
           Description
+
           <textarea
             name="description"
             value={form.description}

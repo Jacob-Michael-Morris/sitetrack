@@ -9,14 +9,24 @@ import type { Role } from '../types/Role.js'
 function RegisterUser() {
   const navigate = useNavigate()
 
-  const [roles, setRoles] = useState<Role[]>([])
+  const [roles, setRoles] =
+    useState<Role[]>([])
 
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [roleId, setRoleId] = useState('')
+  const [name, setName] =
+    useState('')
 
-  const [error, setError] = useState('')
+  const [email, setEmail] =
+    useState('')
+
+  const [password, setPassword] =
+    useState('')
+
+  const [roleId, setRoleId] =
+    useState('')
+
+  const [error, setError] =
+    useState('')
+
   const [submitting, setSubmitting] =
     useState(false)
 
@@ -31,7 +41,9 @@ function RegisterUser() {
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Unable to load roles.')
+          setError(
+            'Unable to load roles.'
+          )
         }
       })
 
@@ -41,15 +53,28 @@ function RegisterUser() {
   }, [])
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
-    const cleanName = name.trim()
-    const cleanEmail = email.trim()
+    const cleanName =
+      name.trim()
+
+    const cleanEmail =
+      email.trim()
 
     if (!cleanName) {
-      setError('Name is required.')
+      setError(
+        'Name is required.'
+      )
+      return
+    }
+
+    if (!cleanEmail) {
+      setError(
+        'Email is required.'
+      )
       return
     }
 
@@ -61,7 +86,9 @@ function RegisterUser() {
     }
 
     if (!roleId) {
-      setError('Select a role.')
+      setError(
+        'Select a role.'
+      )
       return
     }
 
@@ -69,14 +96,18 @@ function RegisterUser() {
       setSubmitting(true)
       setError('')
 
-      const user = await createUser({
-        name: cleanName,
-        email: cleanEmail,
-        password,
-        role_id: Number(roleId)
-      })
+      const user =
+        await createUser({
+          name: cleanName,
+          email: cleanEmail,
+          password,
+          role_id:
+            Number(roleId)
+        })
 
-      navigate(`/users/${user.user_id}`)
+      navigate(
+        `/users/${user.user_id}`
+      )
     } catch (error) {
       setError(
         error instanceof Error
@@ -89,8 +120,17 @@ function RegisterUser() {
   }
 
   return (
-    <div>
-      <h1>Create User</h1>
+    <div className="form-page">
+      <div className="page-header">
+        <div>
+          <h1>Create User</h1>
+
+          <p>
+            Create a SiteTrack account
+            and assign a user role.
+          </p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert">
@@ -104,10 +144,13 @@ function RegisterUser() {
       >
         <label>
           Name
+
           <input
             value={name}
             onChange={(event) =>
-              setName(event.target.value)
+              setName(
+                event.target.value
+              )
             }
             required
             maxLength={150}
@@ -116,11 +159,14 @@ function RegisterUser() {
 
         <label>
           Email
+
           <input
             type="email"
             value={email}
             onChange={(event) =>
-              setEmail(event.target.value)
+              setEmail(
+                event.target.value
+              )
             }
             required
             maxLength={255}
@@ -129,11 +175,14 @@ function RegisterUser() {
 
         <label>
           Temporary Password
+
           <input
             type="password"
             value={password}
             onChange={(event) =>
-              setPassword(event.target.value)
+              setPassword(
+                event.target.value
+              )
             }
             required
             minLength={8}
@@ -142,10 +191,13 @@ function RegisterUser() {
 
         <label>
           Role
+
           <select
             value={roleId}
             onChange={(event) =>
-              setRoleId(event.target.value)
+              setRoleId(
+                event.target.value
+              )
             }
             required
           >

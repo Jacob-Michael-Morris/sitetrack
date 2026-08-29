@@ -13,20 +13,40 @@ import type { Inspection } from '../types/Inspection.js'
 import type { Tool } from '../types/Tool.js'
 
 function Inspections() {
-  const [inspections, setInspections] = useState<Inspection[]>([])
-  const [tools, setTools] = useState<Tool[]>([])
+  const [inspections, setInspections] =
+    useState<Inspection[]>([])
 
-  const [toolId, setToolId] = useState('')
-  const [result, setResult] = useState('Passed')
-  const [condition, setCondition] = useState('Good')
-  const [notes, setNotes] = useState('')
-  const [nextInspectionDate, setNextInspectionDate] = useState('')
+  const [tools, setTools] =
+    useState<Tool[]>([])
 
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
+  const [toolId, setToolId] =
+    useState('')
+
+  const [result, setResult] =
+    useState('Passed')
+
+  const [condition, setCondition] =
+    useState('Good')
+
+  const [notes, setNotes] =
+    useState('')
+
+  const [
+    nextInspectionDate,
+    setNextInspectionDate
+  ] = useState('')
+
+  const [error, setError] =
+    useState('')
+
+  const [message, setMessage] =
+    useState('')
 
   async function loadData() {
-    const [inspectionData, toolData] = await Promise.all([
+    const [
+      inspectionData,
+      toolData
+    ] = await Promise.all([
       getInspections(),
       getTools()
     ])
@@ -42,17 +62,27 @@ function Inspections() {
       getInspections(),
       getTools()
     ])
-      .then(([inspectionData, toolData]) => {
-        if (cancelled) {
-          return
-        }
+      .then(
+        ([
+          inspectionData,
+          toolData
+        ]) => {
+          if (cancelled) {
+            return
+          }
 
-        setInspections(inspectionData)
-        setTools(toolData)
-      })
+          setInspections(
+            inspectionData
+          )
+
+          setTools(toolData)
+        }
+      )
       .catch(() => {
         if (!cancelled) {
-          setError('Unable to load inspection data.')
+          setError(
+            'Unable to load inspection data.'
+          )
         }
       })
 
@@ -62,7 +92,8 @@ function Inspections() {
   }, [])
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
@@ -72,7 +103,8 @@ function Inspections() {
         result,
         condition,
         notes,
-        next_inspection_date: nextInspectionDate
+        next_inspection_date:
+          nextInspectionDate
       })
 
       setToolId('')
@@ -81,18 +113,33 @@ function Inspections() {
       setNotes('')
       setNextInspectionDate('')
       setError('')
-      setMessage('Inspection recorded successfully.')
+
+      setMessage(
+        'Inspection recorded successfully.'
+      )
 
       await loadData()
     } catch {
-      setError('Unable to record inspection.')
+      setError(
+        'Unable to record inspection.'
+      )
+
       setMessage('')
     }
   }
 
   return (
     <div>
-      <h1>Inspections</h1>
+      <div className="page-header">
+        <div>
+          <h1>Inspections</h1>
+
+          <p>
+            Record inspections and review
+            tool inspection history.
+          </p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert">
@@ -100,7 +147,9 @@ function Inspections() {
         </p>
       )}
 
-      {message && <p>{message}</p>}
+      {message && (
+        <p>{message}</p>
+      )}
 
       <h2>Perform Inspection</h2>
 
@@ -110,10 +159,13 @@ function Inspections() {
       >
         <label>
           Tool
+
           <select
             value={toolId}
             onChange={(event) =>
-              setToolId(event.target.value)
+              setToolId(
+                event.target.value
+              )
             }
             required
           >
@@ -126,7 +178,8 @@ function Inspections() {
                 key={tool.tool_id}
                 value={tool.tool_id}
               >
-                {tool.name} - {tool.serial_number}
+                {tool.name} -{' '}
+                {tool.serial_number}
               </option>
             ))}
           </select>
@@ -134,10 +187,13 @@ function Inspections() {
 
         <label>
           Result
+
           <select
             value={result}
             onChange={(event) =>
-              setResult(event.target.value)
+              setResult(
+                event.target.value
+              )
             }
           >
             <option>Passed</option>
@@ -147,24 +203,36 @@ function Inspections() {
 
         <label>
           Condition
+
           <select
             value={condition}
             onChange={(event) =>
-              setCondition(event.target.value)
+              setCondition(
+                event.target.value
+              )
             }
           >
             <option>Good</option>
             <option>Fair</option>
-            <option>Needs Repair</option>
-            <option>Damaged</option>
+
+            <option>
+              Needs Repair
+            </option>
+
+            <option>
+              Damaged
+            </option>
           </select>
         </label>
 
         <label>
           Next Inspection Date
+
           <input
             type="date"
-            value={nextInspectionDate}
+            value={
+              nextInspectionDate
+            }
             onChange={(event) =>
               setNextInspectionDate(
                 event.target.value
@@ -175,10 +243,13 @@ function Inspections() {
 
         <label>
           Notes
+
           <textarea
             value={notes}
             onChange={(event) =>
-              setNotes(event.target.value)
+              setNotes(
+                event.target.value
+              )
             }
           />
         </label>
@@ -190,57 +261,176 @@ function Inspections() {
 
       <h2>Inspection History</h2>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Tool</th>
-            <th>Serial Number</th>
-            <th>Date</th>
-            <th>Result</th>
-            <th>Condition</th>
-            <th>Next Inspection</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {inspections.map((inspection) => (
-            <tr key={inspection.inspection_id}>
-              <td>{inspection.tool_name}</td>
-
-              <td>{inspection.serial_number}</td>
-
-              <td>
-                {new Date(
-                  inspection.inspection_date
-                ).toLocaleDateString()}
-              </td>
-
-              <td>
-                <StatusBadge
-                  value={inspection.result}
-                />
-              </td>
-
-              <td>
-                <StatusBadge
-                  value={inspection.condition}
-                />
-              </td>
-
-              <td>
-                {inspection.next_inspection_date
-                  ? new Date(
-                      inspection.next_inspection_date
-                    ).toLocaleDateString()
-                  : 'N/A'}
-              </td>
+      <div className="responsive-table-view">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Serial Number</th>
+              <th>Date</th>
+              <th>Result</th>
+              <th>Condition</th>
+              <th>
+                Next Inspection
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {inspections.map(
+              (inspection) => (
+                <tr
+                  key={
+                    inspection.inspection_id
+                  }
+                >
+                  <td>
+                    {
+                      inspection.tool_name
+                    }
+                  </td>
+
+                  <td>
+                    {
+                      inspection.serial_number
+                    }
+                  </td>
+
+                  <td>
+                    {new Date(
+                      inspection.inspection_date
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      value={
+                        inspection.result
+                      }
+                    />
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      value={
+                        inspection.condition
+                      }
+                    />
+                  </td>
+
+                  <td>
+                    {inspection
+                      .next_inspection_date
+                      ? new Date(
+                          inspection
+                            .next_inspection_date
+                        ).toLocaleDateString()
+                      : 'N/A'}
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mobile-card-list">
+        {inspections.map(
+          (inspection) => (
+            <article
+              className="mobile-data-card"
+              key={
+                inspection.inspection_id
+              }
+            >
+              <div className="mobile-data-card-header">
+                <h2>
+                  {
+                    inspection.tool_name
+                  }
+                </h2>
+
+                <StatusBadge
+                  value={
+                    inspection.result
+                  }
+                />
+              </div>
+
+              <div className="mobile-data-card-body">
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Serial Number
+                  </span>
+
+                  <span>
+                    {
+                      inspection.serial_number
+                    }
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Inspection Date
+                  </span>
+
+                  <span>
+                    {new Date(
+                      inspection.inspection_date
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Result
+                  </span>
+
+                  <StatusBadge
+                    value={
+                      inspection.result
+                    }
+                  />
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Condition
+                  </span>
+
+                  <StatusBadge
+                    value={
+                      inspection.condition
+                    }
+                  />
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Next Inspection
+                  </span>
+
+                  <span>
+                    {inspection
+                      .next_inspection_date
+                      ? new Date(
+                          inspection
+                            .next_inspection_date
+                        ).toLocaleDateString()
+                      : 'N/A'}
+                  </span>
+                </div>
+              </div>
+            </article>
+          )
+        )}
+      </div>
 
       {inspections.length === 0 && (
-        <p>No inspection records found.</p>
+        <p>
+          No inspection records found.
+        </p>
       )}
     </div>
   )

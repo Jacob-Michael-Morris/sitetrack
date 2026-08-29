@@ -22,6 +22,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+
   font-weight: 600;
 }
 
@@ -41,19 +42,25 @@
 }
 
 .reports-table-container {
+  width: 100%;
   overflow-x: auto;
 }
 
 .reports-table {
   width: 100%;
+
   border-collapse: collapse;
+
   background-color: #ffffff;
 }
 
 .reports-table th,
 .reports-table td {
   padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
+
+  border-bottom:
+    1px solid #e5e7eb;
+
   text-align: left;
   vertical-align: top;
 }
@@ -66,17 +73,146 @@
   font-size: 14px;
 }
 
-@media (max-width: 700px) {
+.reports-mobile-cards {
+  display: none;
+}
+
+.report-mobile-card {
+  overflow: hidden;
+
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+
+  background-color: #ffffff;
+}
+
+.report-mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 12px;
+
+  padding: 16px;
+
+  border-bottom:
+    1px solid #e5e7eb;
+}
+
+.report-mobile-card-header h2 {
+  margin: 0 0 4px;
+
+  color: #1f2937;
+  font-size: 18px;
+}
+
+.report-mobile-card-header span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.report-mobile-card-body {
+  display: flex;
+  flex-direction: column;
+
+  padding: 6px 16px;
+}
+
+.report-mobile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 16px;
+
+  padding: 11px 0;
+
+  border-bottom:
+    1px solid #f3f4f6;
+}
+
+.report-mobile-row:last-child {
+  border-bottom: none;
+}
+
+.report-mobile-row > span {
+  flex-shrink: 0;
+
+  color: #6b7280;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.report-mobile-row > strong {
+  min-width: 0;
+
+  color: #1f2937;
+
+  text-align: right;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  overflow-wrap: anywhere;
+}
+
+.report-mobile-row-stacked {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-mobile-row-stacked > strong {
+  width: 100%;
+  text-align: left;
+
+  line-height: 1.45;
+}
+
+@media (max-width: 850px) {
+  .reports-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .reports-page {
+    gap: 20px;
+  }
+
   .reports-toolbar {
     flex-direction: column;
     align-items: stretch;
+
+    gap: 12px;
+  }
+
+  .reports-toolbar label {
+    width: 100%;
   }
 
   .reports-toolbar select {
     width: 100%;
+    min-width: 0;
   }
 
   .reports-export-button {
     width: 100%;
+  }
+
+  .reports-table-container {
+    display: none;
+  }
+
+  .reports-mobile-cards {
+    display: grid;
+
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+  }
+
+  .report-mobile-card-header {
+    align-items: center;
   }
 }

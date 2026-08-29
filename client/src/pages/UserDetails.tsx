@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+
 import {
   Link,
   useParams
 } from 'react-router'
 
+import StatusBadge from '../components/StatusBadge.js'
 import { getUser } from '../services/users.service.js'
 
 import type { AdminUser } from '../types/AdminUser.js'
@@ -11,8 +13,11 @@ import type { AdminUser } from '../types/AdminUser.js'
 function UserDetails() {
   const { id } = useParams()
 
-  const [user, setUser] = useState<AdminUser | null>(null)
-  const [error, setError] = useState('')
+  const [user, setUser] =
+    useState<AdminUser | null>(null)
+
+  const [error, setError] =
+    useState('')
 
   useEffect(() => {
     if (!id) {
@@ -29,7 +34,9 @@ function UserDetails() {
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Unable to load user.')
+          setError(
+            'Unable to load user.'
+          )
         }
       })
 
@@ -38,8 +45,20 @@ function UserDetails() {
     }
   }, [id])
 
+  if (!id) {
+    return (
+      <p role="alert">
+        Invalid user ID.
+      </p>
+    )
+  }
+
   if (error) {
-    return <p>{error}</p>
+    return (
+      <p role="alert">
+        {error}
+      </p>
+    )
   }
 
   if (!user) {
@@ -47,11 +66,14 @@ function UserDetails() {
   }
 
   return (
-    <div>
+    <div className="detail-page">
       <div className="page-header">
         <div>
           <h1>{user.name}</h1>
-          <p>User #{user.user_id}</p>
+
+          <p>
+            User #{user.user_id}
+          </p>
         </div>
 
         <Link
@@ -63,33 +85,62 @@ function UserDetails() {
       </div>
 
       <div className="details-card">
-        <p>
-          <strong>Email:</strong>{' '}
-          {user.email}
-        </p>
+        <div className="details-list">
+          <div className="details-row">
+            <span className="details-label">
+              Email
+            </span>
 
-        <p>
-          <strong>Role:</strong>{' '}
-          {user.role_name}
-        </p>
+            <span className="details-value">
+              {user.email}
+            </span>
+          </div>
 
-        <p>
-          <strong>Status:</strong>{' '}
-          {user.is_active
-            ? 'Active'
-            : 'Inactive'}
-        </p>
+          <div className="details-row">
+            <span className="details-label">
+              Role
+            </span>
 
-        <p>
-          <strong>Created:</strong>{' '}
-          {new Date(
-            user.created_at
-          ).toLocaleString()}
-        </p>
+            <span className="details-value">
+              {user.role_name}
+            </span>
+          </div>
+
+          <div className="details-row">
+            <span className="details-label">
+              Status
+            </span>
+
+            <span className="details-value">
+              <StatusBadge
+                value={
+                  user.is_active
+                    ? 'Active'
+                    : 'Inactive'
+                }
+              />
+            </span>
+          </div>
+
+          <div className="details-row">
+            <span className="details-label">
+              Created
+            </span>
+
+            <span className="details-value">
+              {new Date(
+                user.created_at
+              ).toLocaleString()}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <Link to="/users">
-        Back to Users
+      <Link
+        className="back-link"
+        to="/users"
+      >
+        ← Back to Users
       </Link>
     </div>
   )

@@ -88,46 +88,113 @@ function Jobsites() {
         </select>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Jobsite</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Start Date</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {filteredJobsites.map((jobsite) => (
-            <tr key={jobsite.jobsite_id}>
-              <td>{jobsite.name}</td>
-              <td>{jobsite.location || 'N/A'}</td>
-
-              <td>
-                <StatusBadge value={jobsite.status} />
-              </td>
-
-              <td>
-                {jobsite.start_date
-                  ? new Date(
-                      jobsite.start_date
-                    ).toLocaleDateString()
-                  : 'N/A'}
-              </td>
-
-              <td>
-                <Link
-                  to={`/jobsites/${jobsite.jobsite_id}`}
-                >
-                  View
-                </Link>
-              </td>
+      <div className="responsive-table-view">
+        <table>
+          <thead>
+            <tr>
+              <th>Jobsite</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Start Date</th>
+              <th>Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {filteredJobsites.map((jobsite) => (
+              <tr key={jobsite.jobsite_id}>
+                <td>{jobsite.name}</td>
+
+                <td>
+                  {jobsite.location || 'N/A'}
+                </td>
+
+                <td>
+                  <StatusBadge
+                    value={jobsite.status}
+                  />
+                </td>
+
+                <td>
+                  {jobsite.start_date
+                    ? new Date(
+                        jobsite.start_date
+                      ).toLocaleDateString()
+                    : 'N/A'}
+                </td>
+
+                <td>
+                  <Link
+                    to={`/jobsites/${jobsite.jobsite_id}`}
+                  >
+                    View
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mobile-card-list">
+        {filteredJobsites.map((jobsite) => (
+          <article
+            className="mobile-data-card"
+            key={jobsite.jobsite_id}
+          >
+            <div className="mobile-data-card-header">
+              <h2>{jobsite.name}</h2>
+
+              <StatusBadge
+                value={jobsite.status}
+              />
+            </div>
+
+            <div className="mobile-data-card-body">
+              <div className="mobile-data-row">
+                <span className="mobile-data-label">
+                  Location
+                </span>
+
+                <span>
+                  {jobsite.location || 'N/A'}
+                </span>
+              </div>
+
+              <div className="mobile-data-row">
+                <span className="mobile-data-label">
+                  Status
+                </span>
+
+                <StatusBadge
+                  value={jobsite.status}
+                />
+              </div>
+
+              <div className="mobile-data-row">
+                <span className="mobile-data-label">
+                  Start Date
+                </span>
+
+                <span>
+                  {jobsite.start_date
+                    ? new Date(
+                        jobsite.start_date
+                      ).toLocaleDateString()
+                    : 'N/A'}
+                </span>
+              </div>
+            </div>
+
+            <Link
+              className="mobile-card-action"
+              to={`/jobsites/${jobsite.jobsite_id}`}
+            >
+              View Jobsite
+            </Link>
+          </article>
+        ))}
+      </div>
 
       {filteredJobsites.length === 0 && (
         <p>No jobsites match your search.</p>

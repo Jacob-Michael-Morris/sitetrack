@@ -89,42 +89,102 @@ function Tools() {
         </select>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Tool</th>
-            <th>Serial Number</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Condition</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {filteredTools.map((tool) => (
-            <tr key={tool.tool_id}>
-              <td>{tool.name}</td>
-              <td>{tool.serial_number}</td>
-              <td>{tool.category}</td>
-
-              <td>
-                <StatusBadge value={tool.status} />
-              </td>
-
-              <td>
-                <StatusBadge value={tool.condition} />
-              </td>
-
-              <td>
-                <Link to={`/tools/${tool.tool_id}`}>
-                  View
-                </Link>
-              </td>
+      <div className="responsive-table-view">
+        <table>
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Serial Number</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Condition</th>
+              <th>Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {filteredTools.map((tool) => (
+              <tr key={tool.tool_id}>
+                <td>{tool.name}</td>
+                <td>{tool.serial_number}</td>
+                <td>{tool.category}</td>
+
+                <td>
+                  <StatusBadge value={tool.status} />
+                </td>
+
+                <td>
+                  <StatusBadge value={tool.condition} />
+                </td>
+
+                <td>
+                  <Link to={`/tools/${tool.tool_id}`}>
+                    View
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mobile-card-list">
+        {filteredTools.map((tool) => (
+          <article
+            className="mobile-data-card"
+            key={tool.tool_id}
+          >
+            <div className="mobile-data-card-header">
+              <h2>{tool.name}</h2>
+
+              <StatusBadge value={tool.status} />
+            </div>
+
+            <div className="mobile-data-card-body">
+              <div className="mobile-data-row">
+                <span className="mobile-data-label">
+                  Serial Number
+                </span>
+
+                <span>
+                  {tool.serial_number}
+                </span>
+              </div>
+
+              <div className="mobile-data-row">
+                <span className="mobile-data-label">
+                  Category
+                </span>
+
+                <span>{tool.category}</span>
+              </div>
+
+              <div className="mobile-data-row">
+                <span className="mobile-data-label">
+                  Status
+                </span>
+
+                <StatusBadge value={tool.status} />
+              </div>
+
+              <div className="mobile-data-row">
+                <span className="mobile-data-label">
+                  Condition
+                </span>
+
+                <StatusBadge value={tool.condition} />
+              </div>
+            </div>
+
+            <Link
+              className="mobile-card-action"
+              to={`/tools/${tool.tool_id}`}
+            >
+              View Tool
+            </Link>
+          </article>
+        ))}
+      </div>
 
       {filteredTools.length === 0 && (
         <p>No tools match your search.</p>

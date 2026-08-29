@@ -22,7 +22,8 @@ function RegisterTool() {
       purchase_date: ''
     })
 
-  const [error, setError] = useState('')
+  const [error, setError] =
+    useState('')
 
   const [submitting, setSubmitting] =
     useState(false)
@@ -41,11 +42,13 @@ function RegisterTool() {
   }
 
   async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
+    event:
+      React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
 
-    const cleanName = form.name.trim()
+    const cleanName =
+      form.name.trim()
 
     const cleanSerialNumber =
       form.serial_number.trim()
@@ -54,24 +57,31 @@ function RegisterTool() {
       form.category.trim()
 
     if (!cleanName) {
-      setError('Tool name is required.')
+      setError(
+        'Tool name is required.'
+      )
       return
     }
 
     if (!cleanSerialNumber) {
-      setError('Serial number is required.')
+      setError(
+        'Serial number is required.'
+      )
       return
     }
 
     if (!cleanCategory) {
-      setError('Category is required.')
+      setError(
+        'Category is required.'
+      )
       return
     }
 
     if (form.purchase_date) {
-      const purchaseDate = new Date(
-        `${form.purchase_date}T00:00:00`
-      )
+      const purchaseDate =
+        new Date(
+          `${form.purchase_date}T00:00:00`
+        )
 
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -88,14 +98,18 @@ function RegisterTool() {
       setSubmitting(true)
       setError('')
 
-      const tool = await createTool({
-        ...form,
-        name: cleanName,
-        serial_number: cleanSerialNumber,
-        category: cleanCategory
-      })
+      const tool =
+        await createTool({
+          ...form,
+          name: cleanName,
+          serial_number:
+            cleanSerialNumber,
+          category: cleanCategory
+        })
 
-      navigate(`/tools/${tool.tool_id}`)
+      navigate(
+        `/tools/${tool.tool_id}`
+      )
     } catch (error) {
       setError(
         error instanceof Error
@@ -112,8 +126,17 @@ function RegisterTool() {
     .slice(0, 10)
 
   return (
-    <div>
-      <h1>Register Tool</h1>
+    <div className="form-page">
+      <div className="page-header">
+        <div>
+          <h1>Register Tool</h1>
+
+          <p>
+            Add a new tool or piece of
+            equipment to SiteTrack.
+          </p>
+        </div>
+      </div>
 
       {error && (
         <p role="alert">
@@ -127,6 +150,7 @@ function RegisterTool() {
       >
         <label>
           Tool Name
+
           <input
             name="name"
             value={form.name}
@@ -138,6 +162,7 @@ function RegisterTool() {
 
         <label>
           Serial Number
+
           <input
             name="serial_number"
             value={form.serial_number}
@@ -149,6 +174,7 @@ function RegisterTool() {
 
         <label>
           Category
+
           <input
             name="category"
             value={form.category}
@@ -160,20 +186,33 @@ function RegisterTool() {
 
         <label>
           Status
+
           <select
             name="status"
             value={form.status}
             onChange={handleChange}
           >
-            <option>Available</option>
-            <option>Checked Out</option>
-            <option>Maintenance</option>
-            <option>Out of Service</option>
+            <option>
+              Available
+            </option>
+
+            <option>
+              Checked Out
+            </option>
+
+            <option>
+              Maintenance
+            </option>
+
+            <option>
+              Out of Service
+            </option>
           </select>
         </label>
 
         <label>
           Condition
+
           <select
             name="condition"
             value={form.condition}
@@ -181,17 +220,26 @@ function RegisterTool() {
           >
             <option>Good</option>
             <option>Fair</option>
-            <option>Needs Repair</option>
-            <option>Damaged</option>
+
+            <option>
+              Needs Repair
+            </option>
+
+            <option>
+              Damaged
+            </option>
           </select>
         </label>
 
         <label>
           Purchase Date
+
           <input
             type="date"
             name="purchase_date"
-            value={form.purchase_date}
+            value={
+              form.purchase_date
+            }
             onChange={handleChange}
             max={today}
           />

@@ -1,17 +1,28 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { getTool } from '../services/tools.service'
-import type { Tool } from '../types/Tool'
+
+import StatusBadge from '../components/StatusBadge.js'
+import { getTool } from '../services/tools.service.js'
+
+import type { Tool } from '../types/Tool.js'
 
 function ToolDetails() {
   const { id } = useParams()
-  const [tool, setTool] = useState<Tool | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+
+  const [tool, setTool] =
+    useState<Tool | null>(null)
+
+  const [loading, setLoading] =
+    useState(true)
+
+  const [error, setError] =
+    useState('')
 
   useEffect(() => {
     async function loadTool() {
       if (!id) {
+        setLoading(false)
+        setError('Invalid tool ID.')
         return
       }
 
@@ -33,15 +44,22 @@ function ToolDetails() {
   }
 
   if (error || !tool) {
-    return <p>{error || 'Tool not found.'}</p>
+    return (
+      <p role="alert">
+        {error || 'Tool not found.'}
+      </p>
+    )
   }
 
   return (
-    <div>
+    <div className="detail-page">
       <div className="page-header">
         <div>
           <h1>{tool.name}</h1>
-          <p>Tool #{tool.tool_id}</p>
+
+          <p>
+            Tool #{tool.tool_id}
+          </p>
         </div>
 
         <Link
@@ -53,20 +71,73 @@ function ToolDetails() {
       </div>
 
       <div className="details-card">
-        <p><strong>Serial Number:</strong> {tool.serial_number}</p>
-        <p><strong>Category:</strong> {tool.category || 'N/A'}</p>
-        <p><strong>Status:</strong> {tool.status}</p>
-        <p><strong>Condition:</strong> {tool.condition}</p>
+        <div className="details-list">
+          <div className="details-row">
+            <span className="details-label">
+              Serial Number
+            </span>
 
-        <p>
-          <strong>Purchase Date:</strong>{' '}
-          {tool.purchase_date
-            ? new Date(tool.purchase_date).toLocaleDateString()
-            : 'N/A'}
-        </p>
+            <span className="details-value">
+              {tool.serial_number}
+            </span>
+          </div>
+
+          <div className="details-row">
+            <span className="details-label">
+              Category
+            </span>
+
+            <span className="details-value">
+              {tool.category || 'N/A'}
+            </span>
+          </div>
+
+          <div className="details-row">
+            <span className="details-label">
+              Status
+            </span>
+
+            <span className="details-value">
+              <StatusBadge
+                value={tool.status}
+              />
+            </span>
+          </div>
+
+          <div className="details-row">
+            <span className="details-label">
+              Condition
+            </span>
+
+            <span className="details-value">
+              <StatusBadge
+                value={tool.condition}
+              />
+            </span>
+          </div>
+
+          <div className="details-row">
+            <span className="details-label">
+              Purchase Date
+            </span>
+
+            <span className="details-value">
+              {tool.purchase_date
+                ? new Date(
+                    tool.purchase_date
+                  ).toLocaleDateString()
+                : 'N/A'}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <Link to="/tools">Back to Tools</Link>
+      <Link
+        className="back-link"
+        to="/tools"
+      >
+        ← Back to Tools
+      </Link>
     </div>
   )
 }

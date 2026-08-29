@@ -28,7 +28,9 @@ function Dashboard() {
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Unable to load dashboard.')
+          setError(
+            'Unable to load dashboard.'
+          )
         }
       })
 
@@ -38,14 +40,21 @@ function Dashboard() {
   }, [])
 
   if (error) {
-    return <p>{error}</p>
+    return (
+      <p role="alert">
+        {error}
+      </p>
+    )
   }
 
   if (!dashboard) {
     return <p>Loading dashboard...</p>
   }
 
-  const { summary, recent_alerts } = dashboard
+  const {
+    summary,
+    recent_alerts
+  } = dashboard
 
   const role = user?.role
 
@@ -92,12 +101,18 @@ function Dashboard() {
         <div className="dashboard-grid">
           <div className="dashboard-card">
             <span>Total Tools</span>
-            <strong>{summary.total_tools}</strong>
+
+            <strong>
+              {summary.total_tools}
+            </strong>
           </div>
 
           <div className="dashboard-card">
             <span>Available</span>
-            <strong>{summary.available_tools}</strong>
+
+            <strong>
+              {summary.available_tools}
+            </strong>
           </div>
 
           {(isAdministrator ||
@@ -105,8 +120,11 @@ function Dashboard() {
             isWorker) && (
             <div className="dashboard-card">
               <span>Checked Out</span>
+
               <strong>
-                {summary.checked_out_tools}
+                {
+                  summary.checked_out_tools
+                }
               </strong>
             </div>
           )}
@@ -115,8 +133,11 @@ function Dashboard() {
             isMaintenanceTechnician) && (
             <div className="dashboard-card">
               <span>Maintenance</span>
+
               <strong>
-                {summary.maintenance_tools}
+                {
+                  summary.maintenance_tools
+                }
               </strong>
             </div>
           )}
@@ -126,9 +147,14 @@ function Dashboard() {
             isWorker ||
             isSafetyPersonnel) && (
             <div className="dashboard-card">
-              <span>Out of Service</span>
+              <span>
+                Out of Service
+              </span>
+
               <strong>
-                {summary.out_of_service_tools}
+                {
+                  summary.out_of_service_tools
+                }
               </strong>
             </div>
           )}
@@ -142,9 +168,14 @@ function Dashboard() {
           {(isAdministrator ||
             isEquipmentManager) && (
             <div className="dashboard-card">
-              <span>Active Jobsites</span>
+              <span>
+                Active Jobsites
+              </span>
+
               <strong>
-                {summary.active_jobsites}
+                {
+                  summary.active_jobsites
+                }
               </strong>
             </div>
           )}
@@ -154,9 +185,14 @@ function Dashboard() {
             isWorker ||
             isSafetyPersonnel) && (
             <div className="dashboard-card">
-              <span>Open Damage Reports</span>
+              <span>
+                Open Damage Reports
+              </span>
+
               <strong>
-                {summary.open_damage_reports}
+                {
+                  summary.open_damage_reports
+                }
               </strong>
             </div>
           )}
@@ -164,9 +200,14 @@ function Dashboard() {
           {(isAdministrator ||
             isMaintenanceTechnician) && (
             <div className="dashboard-card">
-              <span>Open Work Orders</span>
+              <span>
+                Open Work Orders
+              </span>
+
               <strong>
-                {summary.open_work_orders}
+                {
+                  summary.open_work_orders
+                }
               </strong>
             </div>
           )}
@@ -175,9 +216,14 @@ function Dashboard() {
             isMaintenanceTechnician ||
             isSafetyPersonnel) && (
             <div className="dashboard-card">
-              <span>Overdue Inspections</span>
+              <span>
+                Overdue Inspections
+              </span>
+
               <strong>
-                {summary.overdue_inspections}
+                {
+                  summary.overdue_inspections
+                }
               </strong>
             </div>
           )}
@@ -185,8 +231,11 @@ function Dashboard() {
           {canViewAlerts && (
             <div className="dashboard-card">
               <span>Unread Alerts</span>
+
               <strong>
-                {summary.unread_alerts}
+                {
+                  summary.unread_alerts
+                }
               </strong>
             </div>
           )}
@@ -291,45 +340,108 @@ function Dashboard() {
           {recent_alerts.length === 0 ? (
             <p>No recent alerts.</p>
           ) : (
-            <div className="dashboard-table-container">
-              <table className="dashboard-table">
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>Tool</th>
-                    <th>Severity</th>
-                    <th>Message</th>
-                    <th>Time</th>
-                  </tr>
-                </thead>
+            <>
+              <div className="dashboard-table-container">
+                <table className="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Type</th>
+                      <th>Tool</th>
+                      <th>Severity</th>
+                      <th>Message</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
 
-                <tbody>
-                  {recent_alerts.map((alert) => (
-                    <tr key={alert.alert_id}>
-                      <td>{alert.alert_type}</td>
+                  <tbody>
+                    {recent_alerts.map(
+                      (alert) => (
+                        <tr
+                          key={
+                            alert.alert_id
+                          }
+                        >
+                          <td>
+                            {
+                              alert.alert_type
+                            }
+                          </td>
 
-                      <td>
-                        {alert.tool_name ?? 'N/A'}
-                      </td>
+                          <td>
+                            {
+                              alert.tool_name ??
+                              'N/A'
+                            }
+                          </td>
 
-                      <td>
+                          <td>
+                            <StatusBadge
+                              value={
+                                alert.severity
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            {alert.message}
+                          </td>
+
+                          <td>
+                            {new Date(
+                              alert.created_at
+                            ).toLocaleString()}
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="dashboard-alert-cards">
+                {recent_alerts.map(
+                  (alert) => (
+                    <article
+                      className="dashboard-alert-card"
+                      key={
+                        alert.alert_id
+                      }
+                    >
+                      <div className="dashboard-alert-card-header">
+                        <div>
+                          <h3>
+                            {
+                              alert.alert_type
+                            }
+                          </h3>
+
+                          <span>
+                            {alert.tool_name ??
+                              'No Tool'}
+                          </span>
+                        </div>
+
                         <StatusBadge
-                          value={alert.severity}
+                          value={
+                            alert.severity
+                          }
                         />
-                      </td>
+                      </div>
 
-                      <td>{alert.message}</td>
+                      <p className="dashboard-alert-message">
+                        {alert.message}
+                      </p>
 
-                      <td>
+                      <div className="dashboard-alert-time">
                         {new Date(
                           alert.created_at
                         ).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </article>
+                  )
+                )}
+              </div>
+            </>
           )}
         </section>
       )}
