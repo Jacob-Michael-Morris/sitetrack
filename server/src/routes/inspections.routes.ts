@@ -13,16 +13,15 @@ const router = Router()
 
 router.use(requireAuth)
 
-router.use(
-  requireRole(
-    'Administrator',
-    'Maintenance Technician',
-    'Safety Personnel'
-  )
-)
-
 router.get(
   '/',
+  requireRole(
+    'Administrator',
+    'Equipment Manager',
+    'Maintenance Technician',
+    'Worker',
+    'Safety Personnel'
+  ),
   (req, res) =>
     inspectionsController.getAll(
       req,
@@ -32,6 +31,13 @@ router.get(
 
 router.get(
   '/:id',
+  requireRole(
+    'Administrator',
+    'Equipment Manager',
+    'Maintenance Technician',
+    'Worker',
+    'Safety Personnel'
+  ),
   (req, res) =>
     inspectionsController.getById(
       req,
@@ -41,6 +47,12 @@ router.get(
 
 router.post(
   '/',
+  requireRole(
+    'Administrator',
+    'Equipment Manager',
+    'Maintenance Technician',
+    'Worker'
+  ),
   (req, res) =>
     inspectionsController.create(
       req,

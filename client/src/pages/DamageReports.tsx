@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import StatusBadge from '../components/StatusBadge.js'
+import { useAuth } from '../context/useAuth.js'
 
 import {
   createDamageReport,
@@ -13,6 +14,11 @@ import type { DamageReport } from '../types/DamageReport.js'
 import type { Tool } from '../types/Tool.js'
 
 function DamageReports() {
+  const { user } = useAuth()
+
+  const canReportDamage =
+    user?.role !== 'Safety Personnel'
+
   const [reports, setReports] =
     useState<DamageReport[]>([])
 
@@ -38,6 +44,9 @@ function DamageReports() {
 
   const [message, setMessage] =
     useState('')
+
+  const [submitting, setSubmitting] =
+    useState(false)
 
   async function loadData() {
     const [
@@ -91,6 +100,12 @@ function DamageReports() {
   ) {
     event.preventDefault()
 
+    if (submitting) {
+      return
+    }
+
+    setSubmitting(true)
+
     try {
       await createDamageReport({
         tool_id: Number(toolId),
@@ -107,16 +122,20 @@ function DamageReports() {
       setError('')
 
       setMessage(
-        'Damage report created successfully.'
+        'Damage report created and repair work order opened.'
       )
 
       await loadData()
-    } catch {
+    } catch (reportError) {
       setError(
-        'Unable to create damage report.'
+        reportError instanceof Error
+          ? reportError.message
+          : 'Unable to create damage report.'
       )
 
       setMessage('')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -160,6 +179,7 @@ function DamageReports() {
               )
             }
             required
+            disabled={!canReportDamage}
           >
             <option value="">
               Select Tool
@@ -187,6 +207,7 @@ function DamageReports() {
                 event.target.value
               )
             }
+            disabled={!canReportDamage}
           >
             <option>Low</option>
             <option>Medium</option>
@@ -206,6 +227,7 @@ function DamageReports() {
               )
             }
             required
+            disabled={!canReportDamage}
           />
         </label>
 
@@ -219,12 +241,30 @@ function DamageReports() {
                 event.target.value
               )
             }
+            disabled={!canReportDamage}
           />
         </label>
 
-        <button type="submit">
-          Submit Damage Report
+        <button
+          type="submit"
+          disabled={
+            toolId === '' ||
+            description.trim() === '' ||
+            submitting ||
+            !canReportDamage
+          }
+        >
+          {submitting
+            ? 'Submitting...'
+            : 'Submit Damage Report'}
         </button>
+
+        {!canReportDamage && (
+          <p className="form-help">
+            Safety Personnel have review-only
+            access to damage reports.
+          </p>
+        )}
       </form>
 
       <h2>Damage Report History</h2>

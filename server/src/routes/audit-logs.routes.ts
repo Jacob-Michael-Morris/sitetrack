@@ -14,7 +14,10 @@ const router = Router()
 router.use(requireAuth)
 
 router.use(
-  requireRole('Administrator')
+  requireRole(
+    'Administrator',
+    'Safety Personnel'
+  )
 )
 
 router.get(

@@ -37,7 +37,7 @@ SiteTrack provides a React frontend and a Node.js/Express REST API backed by a h
 - **Language:** TypeScript
 - **Build Tool:** Vite
 - **Styling:** CSS
-- **Hosting:** To be deployed later
+- **Hosting:** Render
 
 ### Backend
 
@@ -47,7 +47,7 @@ SiteTrack provides a React frontend and a Node.js/Express REST API backed by a h
 - **API Style:** REST / JSON
 - **Authentication:** JWT with HTTP-only cookies
 - **Authorization:** Role-Based Access Control (RBAC)
-- **Hosting:** To be deployed later
+- **Hosting:** Render
 
 ### Database
 
@@ -440,9 +440,17 @@ Node.js / Express REST API
 Neon PostgreSQL
 ```
 
-The React frontend and Node.js/Express backend currently run locally during development.
+The React frontend and Node.js/Express backend are deployed together on Render. Render deploys the branch configured for the service after changes are pushed and merged.
 
-Both will possibly be deployed to cloud hosting later.
+Before deploying the return-to-service approval workflow for the first time, run the idempotent database migration from the `server` folder:
+
+```bash
+npm run migrate:return-service
+```
+
+The migration adds approval-request fields and the protected return-to-service decision history table. It must complete before the updated server starts handling requests.
+
+The hosted application follows this production architecture:
 
 The planned production architecture will be:
 

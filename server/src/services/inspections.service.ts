@@ -112,6 +112,19 @@ export class InspectionService {
         result.rows[0]
 
       if (inspection.isFailed()) {
+        await client.query(
+          `UPDATE tools
+           SET
+             status = 'Out of Service',
+             condition = $1,
+             updated_at = CURRENT_TIMESTAMP
+           WHERE tool_id = $2`,
+          [
+            inspection.condition,
+            inspection.toolId
+          ]
+        )
+
         await createAlert(
           {
             tool_id: inspection.toolId,
@@ -119,7 +132,7 @@ export class InspectionService {
             alert_type:
               'Failed Inspection',
             message:
-              'Tool failed inspection and requires review.',
+              'Tool failed inspection and was removed from service.',
             severity: 'High'
           },
           client

@@ -3,6 +3,7 @@ import type {
   InspectionInput
 } from '../types/Inspection.js'
 import API_BASE_URL from '../config/api.js'
+import { getResponseError } from '../utils/response-error.js'
 
 const API_URL = `${API_BASE_URL}/inspections`
 
@@ -31,7 +32,12 @@ export async function createInspection(
   })
 
   if (!response.ok) {
-    throw new Error('Unable to create inspection')
+    throw new Error(
+      await getResponseError(
+        response,
+        'Unable to create inspection'
+      )
+    )
   }
 
   return response.json()

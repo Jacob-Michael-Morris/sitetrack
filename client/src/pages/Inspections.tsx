@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import StatusBadge from '../components/StatusBadge.js'
+import { useAuth } from '../context/useAuth.js'
 
 import {
   createInspection,
@@ -13,6 +14,11 @@ import type { Inspection } from '../types/Inspection.js'
 import type { Tool } from '../types/Tool.js'
 
 function Inspections() {
+  const { user } = useAuth()
+
+  const canRecordInspection =
+    user?.role !== 'Safety Personnel'
+
   const [inspections, setInspections] =
     useState<Inspection[]>([])
 
@@ -41,6 +47,12 @@ function Inspections() {
 
   const [message, setMessage] =
     useState('')
+
+  const [submitting, setSubmitting] =
+    useState(false)
+
+  const today =
+    new Date().toISOString().slice(0, 10)
 
   async function loadData() {
     const [
@@ -97,6 +109,12 @@ function Inspections() {
   ) {
     event.preventDefault()
 
+    if (submitting) {
+      return
+    }
+
+    setSubmitting(true)
+
     try {
       await createInspection({
         tool_id: Number(toolId),
@@ -119,12 +137,16 @@ function Inspections() {
       )
 
       await loadData()
-    } catch {
+    } catch (inspectionError) {
       setError(
-        'Unable to record inspection.'
+        inspectionError instanceof Error
+          ? inspectionError.message
+          : 'Unable to record inspection.'
       )
 
       setMessage('')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -168,6 +190,7 @@ function Inspections() {
               )
             }
             required
+            disabled={!canRecordInspection}
           >
             <option value="">
               Select Tool
@@ -195,6 +218,7 @@ function Inspections() {
                 event.target.value
               )
             }
+            disabled={!canRecordInspection}
           >
             <option>Passed</option>
             <option>Failed</option>
@@ -211,6 +235,7 @@ function Inspections() {
                 event.target.value
               )
             }
+            disabled={!canRecordInspection}
           >
             <option>Good</option>
             <option>Fair</option>
@@ -230,6 +255,8 @@ function Inspections() {
 
           <input
             type="date"
+            min={today}
+            disabled={!canRecordInspection}
             value={
               nextInspectionDate
             }
@@ -251,12 +278,28 @@ function Inspections() {
                 event.target.value
               )
             }
+            disabled={!canRecordInspection}
           />
         </label>
 
-        <button type="submit">
-          Record Inspection
+        <button
+          type="submit"
+          disabled={
+            toolId === '' || submitting
+            || !canRecordInspection
+          }
+        >
+          {submitting
+            ? 'Recording...'
+            : 'Record Inspection'}
         </button>
+
+        {!canRecordInspection && (
+          <p className="form-help">
+            Safety Personnel have review-only
+            access to inspection records.
+          </p>
+        )}
       </form>
 
       <h2>Inspection History</h2>

@@ -197,7 +197,11 @@ function Jobsites() {
       </div>
 
       {filteredJobsites.length === 0 && (
-        <p>No jobsites match your search.</p>
+        <p>
+          {jobsites.length === 0
+            ? 'No jobsites have been added yet. Add a jobsite before checking out or transferring tools.'
+            : 'No jobsites match your current search or status filter.'}
+        </p>
       )}
     </div>
   )

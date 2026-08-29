@@ -1,10 +1,37 @@
 import type {
   WorkOrder,
-  WorkOrderInput
+  WorkOrderInput,
+  ReturnServiceDecision
 } from '../types/WorkOrder.js'
 import API_BASE_URL from '../config/api.js'
+import { getResponseError } from '../utils/response-error.js'
 
 const API_URL = `${API_BASE_URL}/work-orders`
+
+export interface MaintenanceTechnician {
+  user_id: number
+  name: string
+}
+
+export async function getMaintenanceTechnicians(): Promise<MaintenanceTechnician[]> {
+  const response = await fetch(
+    `${API_URL}/technicians`,
+    {
+      credentials: 'include'
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      await getResponseError(
+        response,
+        'Unable to retrieve maintenance technicians'
+      )
+    )
+  }
+
+  return response.json()
+}
 
 export async function getWorkOrders(): Promise<WorkOrder[]> {
   const response = await fetch(API_URL, {
@@ -31,7 +58,12 @@ export async function createWorkOrder(
   })
 
   if (!response.ok) {
-    throw new Error('Unable to create work order')
+    throw new Error(
+      await getResponseError(
+        response,
+        'Unable to create work order'
+      )
+    )
   }
 
   return response.json()
@@ -44,15 +76,20 @@ export async function completeWorkOrder(id: number) {
   })
 
   if (!response.ok) {
-    throw new Error('Unable to complete work order')
+    throw new Error(
+      await getResponseError(
+        response,
+        'Unable to complete work order'
+      )
+    )
   }
 
   return response.json()
 }
 
-export async function returnToService(id: number) {
+export async function requestReturnToService(id: number) {
   const response = await fetch(
-    `${API_URL}/${id}/return-to-service`,
+    `${API_URL}/${id}/return-request`,
     {
       method: 'PUT',
       credentials: 'include'
@@ -60,7 +97,44 @@ export async function returnToService(id: number) {
   )
 
   if (!response.ok) {
-    throw new Error('Unable to return tool to service')
+    throw new Error(
+      await getResponseError(
+        response,
+        'Unable to request return-to-service review'
+      )
+    )
+  }
+
+  return response.json()
+}
+
+export async function decideReturnToService(
+  id: number,
+  decision: ReturnServiceDecision,
+  reason: string
+) {
+  const response = await fetch(
+    `${API_URL}/${id}/return-decision`,
+    {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        decision,
+        reason
+      })
+    }
+  )
+
+  if (!response.ok) {
+    throw new Error(
+      await getResponseError(
+        response,
+        'Unable to record return-to-service decision'
+      )
+    )
   }
 
   return response.json()

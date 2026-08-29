@@ -147,7 +147,9 @@ function App() {
               <RequireRole
                 allowedRoles={[
                   ADMIN,
+                  EQUIPMENT_MANAGER,
                   MAINTENANCE_TECHNICIAN,
+                  WORKER,
                   SAFETY_PERSONNEL
                 ]}
               />
@@ -182,7 +184,9 @@ function App() {
               <RequireRole
                 allowedRoles={[
                   ADMIN,
-                  MAINTENANCE_TECHNICIAN
+                  EQUIPMENT_MANAGER,
+                  MAINTENANCE_TECHNICIAN,
+                  SAFETY_PERSONNEL
                 ]}
               />
             }
@@ -243,6 +247,18 @@ function App() {
               element={<EditUser />}
             />
 
+          </Route>
+
+          <Route
+            element={
+              <RequireRole
+                allowedRoles={[
+                  ADMIN,
+                  SAFETY_PERSONNEL
+                ]}
+              />
+            }
+          >
             <Route
               path="/audit-log"
               element={<AuditLog />}

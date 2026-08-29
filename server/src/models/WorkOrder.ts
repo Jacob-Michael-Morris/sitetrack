@@ -24,6 +24,8 @@ export class WorkOrder {
 
   static readonly OPEN_STATUS = 'Open'
   static readonly COMPLETED_STATUS = 'Completed'
+  static readonly AWAITING_APPROVAL_STATUS =
+    'Awaiting Approval'
   static readonly CLOSED_STATUS = 'Closed'
 
   static readonly MAINTENANCE_STATUS =
@@ -83,7 +85,7 @@ export class WorkOrder {
     }
   }
 
-  static assertCanReturnToService(
+  static assertCanRequestReturnToService(
     currentStatus: string
   ) {
     if (
@@ -91,7 +93,20 @@ export class WorkOrder {
       WorkOrder.COMPLETED_STATUS
     ) {
       throw new WorkOrderDomainError(
-        'Work order must be completed before the tool can return to service'
+        'Work order must be completed before return-to-service review can be requested'
+      )
+    }
+  }
+
+  static assertCanDecideReturnToService(
+    currentStatus: string
+  ) {
+    if (
+      currentStatus !==
+      WorkOrder.AWAITING_APPROVAL_STATUS
+    ) {
+      throw new WorkOrderDomainError(
+        'A return-to-service request must be pending before a decision is recorded'
       )
     }
   }

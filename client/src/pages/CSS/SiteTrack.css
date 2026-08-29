@@ -277,6 +277,60 @@ textarea {
   min-width: 130px;
 }
 
+.form-help {
+  margin: -6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.decision-summary {
+  margin-top: 6px;
+  min-width: 180px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.decision-controls,
+.mobile-decision-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.decision-controls label,
+.mobile-decision-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.decision-controls textarea,
+.mobile-decision-panel textarea {
+  min-height: 72px;
+}
+
+.decision-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.secondary-button {
+  border-color: #6b7280;
+  background-color: #ffffff;
+  color: #374151;
+}
+
+.secondary-button:hover {
+  background-color: #f3f4f6;
+}
+
+.mobile-decision-panel {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
 .details-card {
   width: 100%;
   max-width: 800px;

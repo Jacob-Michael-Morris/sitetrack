@@ -1,25 +1,35 @@
 import { useEffect, useState } from 'react'
 
 import StatusBadge from '../components/StatusBadge.js'
+import { useAuth } from '../context/useAuth.js'
 
 import {
   completeWorkOrder,
   createWorkOrder,
+  decideReturnToService,
+  getMaintenanceTechnicians,
   getWorkOrders,
-  returnToService
+  requestReturnToService
 } from '../services/work-orders.service.js'
 
 import { getTools } from '../services/tools.service.js'
 
 import type { Tool } from '../types/Tool.js'
 import type { WorkOrder } from '../types/WorkOrder.js'
+import type { ReturnServiceDecision } from '../types/WorkOrder.js'
+import type { MaintenanceTechnician } from '../services/work-orders.service.js'
 
 function Maintenance() {
+  const { user } = useAuth()
+
   const [workOrders, setWorkOrders] =
     useState<WorkOrder[]>([])
 
   const [tools, setTools] =
     useState<Tool[]>([])
+
+  const [technicians, setTechnicians] =
+    useState<MaintenanceTechnician[]>([])
 
   const [toolId, setToolId] =
     useState('')
@@ -46,17 +56,38 @@ function Maintenance() {
   const [message, setMessage] =
     useState('')
 
+  const [pendingAction, setPendingAction] =
+    useState<string | null>(null)
+
+  const [decisionReasons, setDecisionReasons] =
+    useState<Record<number, string>>({})
+
+  const canCreateWorkOrder =
+    user?.role === 'Administrator' ||
+    user?.role === 'Equipment Manager'
+
+  const canCompleteRepair =
+    user?.role === 'Administrator' ||
+    user?.role === 'Maintenance Technician'
+
+  const canApproveReturn =
+    user?.role === 'Administrator' ||
+    user?.role === 'Equipment Manager'
+
   async function loadData() {
     const [
       workOrderData,
-      toolData
+      toolData,
+      technicianData
     ] = await Promise.all([
       getWorkOrders(),
-      getTools()
+      getTools(),
+      getMaintenanceTechnicians()
     ])
 
     setWorkOrders(workOrderData)
     setTools(toolData)
+    setTechnicians(technicianData)
   }
 
   useEffect(() => {
@@ -64,12 +95,14 @@ function Maintenance() {
 
     Promise.all([
       getWorkOrders(),
-      getTools()
+      getTools(),
+      getMaintenanceTechnicians()
     ])
       .then(
         ([
           workOrderData,
-          toolData
+          toolData,
+          technicianData
         ]) => {
           if (cancelled) {
             return
@@ -80,6 +113,9 @@ function Maintenance() {
           )
 
           setTools(toolData)
+          setTechnicians(
+            technicianData
+          )
         }
       )
       .catch(() => {
@@ -100,6 +136,12 @@ function Maintenance() {
       React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
+
+    if (pendingAction !== null) {
+      return
+    }
+
+    setPendingAction('create')
 
     try {
       await createWorkOrder({
@@ -123,18 +165,28 @@ function Maintenance() {
       )
 
       await loadData()
-    } catch {
+    } catch (createError) {
       setError(
-        'Unable to create work order.'
+        createError instanceof Error
+          ? createError.message
+          : 'Unable to create work order.'
       )
 
       setMessage('')
+    } finally {
+      setPendingAction(null)
     }
   }
 
   async function handleComplete(
     id: number
   ) {
+    if (pendingAction !== null) {
+      return
+    }
+
+    setPendingAction(`complete-${id}`)
+
     try {
       await completeWorkOrder(id)
 
@@ -145,44 +197,126 @@ function Maintenance() {
       setError('')
 
       await loadData()
-    } catch {
+    } catch (completeError) {
       setError(
-        'Unable to complete work order.'
+        completeError instanceof Error
+          ? completeError.message
+          : 'Unable to complete work order.'
       )
 
       setMessage('')
+    } finally {
+      setPendingAction(null)
     }
   }
 
-  async function handleReturnToService(
+  async function handleReturnRequest(
     id: number
   ) {
+    if (pendingAction !== null) {
+      return
+    }
+
+    setPendingAction(`request-${id}`)
+
     try {
-      await returnToService(id)
+      await requestReturnToService(id)
 
       setMessage(
-        'Tool returned to service.'
+        'Return-to-service review requested.'
       )
 
       setError('')
 
       await loadData()
-    } catch {
+    } catch (returnError) {
       setError(
-        'Unable to return tool to service.'
+        returnError instanceof Error
+          ? returnError.message
+          : 'Unable to request return-to-service review.'
       )
 
       setMessage('')
+    } finally {
+      setPendingAction(null)
+    }
+  }
+
+  async function handleDecision(
+    id: number,
+    decision: ReturnServiceDecision
+  ) {
+    if (pendingAction !== null) {
+      return
+    }
+
+    const reason =
+      decisionReasons[id]?.trim() ?? ''
+
+    if (!reason) {
+      setError(
+        'Enter a reason before recording the decision.'
+      )
+      setMessage('')
+      return
+    }
+
+    setPendingAction(
+      `${decision.toLowerCase()}-${id}`
+    )
+
+    try {
+      await decideReturnToService(
+        id,
+        decision,
+        reason
+      )
+
+      setDecisionReasons((current) => {
+        const next = { ...current }
+        delete next[id]
+        return next
+      })
+
+      setMessage(
+        `Return to service ${decision.toLowerCase()}.`
+      )
+      setError('')
+
+      await loadData()
+    } catch (decisionError) {
+      setError(
+        decisionError instanceof Error
+          ? decisionError.message
+          : 'Unable to record return-to-service decision.'
+      )
+      setMessage('')
+    } finally {
+      setPendingAction(null)
     }
   }
 
   const maintenanceTools =
     tools.filter(
       (tool) =>
-        tool.status ===
-          'Out of Service' ||
-        tool.status ===
-          'Maintenance'
+        (
+          tool.status ===
+            'Out of Service' ||
+          tool.status ===
+            'Maintenance'
+        ) &&
+        !workOrders.some(
+          (workOrder) =>
+            workOrder.tool_id ===
+              tool.tool_id &&
+            [
+              'Open',
+              'Completed',
+              'Awaiting Approval'
+            ].includes(
+              workOrder.status
+            )
+        )
     )
 
   return (
@@ -209,12 +343,14 @@ function Maintenance() {
         <p>{message}</p>
       )}
 
-      <h2>Create Work Order</h2>
+      {canCreateWorkOrder && (
+        <>
+          <h2>Create Work Order</h2>
 
-      <form
-        className="tool-form"
-        onSubmit={handleSubmit}
-      >
+          <form
+            className="tool-form"
+            onSubmit={handleSubmit}
+          >
         <label>
           Tool
 
@@ -228,7 +364,9 @@ function Maintenance() {
             required
           >
             <option value="">
-              Select Tool
+              {maintenanceTools.length > 0
+                ? 'Select Tool'
+                : 'No tools require maintenance'}
             </option>
 
             {maintenanceTools.map(
@@ -266,14 +404,28 @@ function Maintenance() {
         <label>
           Assigned To
 
-          <input
+          <select
             value={assignedTo}
             onChange={(event) =>
               setAssignedTo(
                 event.target.value
               )
             }
-          />
+          >
+            <option value="">
+              Unassigned
+            </option>
+            {technicians.map(
+              (technician) => (
+                <option
+                  key={technician.user_id}
+                  value={technician.name}
+                >
+                  {technician.name}
+                </option>
+              )
+            )}
+          </select>
         </label>
 
         <label>
@@ -303,10 +455,29 @@ function Maintenance() {
           />
         </label>
 
-        <button type="submit">
-          Create Work Order
+        {maintenanceTools.length === 0 && (
+          <p className="form-help">
+            Work orders can be created for
+            tools marked Maintenance or Out
+            of Service.
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={
+            toolId === '' ||
+            description.trim() === '' ||
+            pendingAction !== null
+          }
+        >
+          {pendingAction === 'create'
+            ? 'Creating...'
+            : 'Create Work Order'}
         </button>
-      </form>
+          </form>
+        </>
+      )}
 
       <h2>Work Orders</h2>
 
@@ -319,6 +490,7 @@ function Maintenance() {
               <th>Status</th>
               <th>Assigned To</th>
               <th>Description</th>
+              <th>Latest Decision</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -365,32 +537,129 @@ function Maintenance() {
                   </td>
 
                   <td>
-                    {workOrder.status ===
+                    {workOrder.decision ? (
+                      <>
+                        <StatusBadge
+                          value={workOrder.decision}
+                        />
+                        <div className="decision-summary">
+                          {workOrder.approver_name}
+                          {': '}
+                          {workOrder.decision_reason}
+                        </div>
+                      </>
+                    ) : (
+                      'No decision recorded'
+                    )}
+                  </td>
+
+                  <td>
+                    {canCompleteRepair &&
+                    workOrder.status ===
                       'Open' && (
                       <button
                         type="button"
+                        disabled={
+                          pendingAction !== null
+                        }
                         onClick={() =>
                           handleComplete(
                             workOrder.work_order_id
                           )
                         }
                       >
-                        Complete
+                        {pendingAction ===
+                        `complete-${workOrder.work_order_id}`
+                          ? 'Completing...'
+                          : 'Complete'}
                       </button>
                     )}
 
-                    {workOrder.status ===
+                    {canCompleteRepair &&
+                    workOrder.status ===
                       'Completed' && (
                       <button
                         type="button"
+                        disabled={
+                          pendingAction !== null
+                        }
                         onClick={() =>
-                          handleReturnToService(
+                          handleReturnRequest(
                             workOrder.work_order_id
                           )
                         }
                       >
-                        Return to Service
+                        {pendingAction ===
+                        `request-${workOrder.work_order_id}`
+                          ? 'Requesting...'
+                          : 'Request Review'}
                       </button>
+                    )}
+
+                    {canApproveReturn &&
+                    workOrder.status ===
+                      'Awaiting Approval' &&
+                    user?.user_id !==
+                      workOrder.completed_by && (
+                      <div className="decision-controls">
+                        <label>
+                          Decision Reason
+                          <textarea
+                            value={
+                              decisionReasons[
+                                workOrder.work_order_id
+                              ] ?? ''
+                            }
+                            onChange={(event) =>
+                              setDecisionReasons(
+                                (current) => ({
+                                  ...current,
+                                  [workOrder.work_order_id]:
+                                    event.target.value
+                                })
+                              )
+                            }
+                          />
+                        </label>
+
+                        <div className="decision-buttons">
+                          <button
+                            type="button"
+                            disabled={pendingAction !== null}
+                            onClick={() =>
+                              handleDecision(
+                                workOrder.work_order_id,
+                                'Approved'
+                              )
+                            }
+                          >
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            disabled={pendingAction !== null}
+                            onClick={() =>
+                              handleDecision(
+                                workOrder.work_order_id,
+                                'Denied'
+                              )
+                            }
+                          >
+                            Deny
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {canApproveReturn &&
+                    workOrder.status ===
+                      'Awaiting Approval' &&
+                    user?.user_id ===
+                      workOrder.completed_by && (
+                      <span>
+                        Another authorized approver must decide.
+                      </span>
                     )}
 
                     {workOrder.status ===
@@ -492,36 +761,116 @@ function Maintenance() {
                     }
                   </span>
                 </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Latest Decision
+                  </span>
+                  <span>
+                    {workOrder.decision
+                      ? `${workOrder.decision}: ${workOrder.decision_reason}`
+                      : 'None'}
+                  </span>
+                </div>
               </div>
 
-              {workOrder.status ===
+              {canCompleteRepair &&
+              workOrder.status ===
                 'Open' && (
                 <button
                   type="button"
                   className="mobile-card-action"
+                  disabled={
+                    pendingAction !== null
+                  }
                   onClick={() =>
                     handleComplete(
                       workOrder.work_order_id
                     )
                   }
                 >
-                  Complete Work Order
+                  {pendingAction ===
+                  `complete-${workOrder.work_order_id}`
+                    ? 'Completing...'
+                    : 'Complete Work Order'}
                 </button>
               )}
 
-              {workOrder.status ===
+              {canCompleteRepair &&
+              workOrder.status ===
                 'Completed' && (
                 <button
                   type="button"
                   className="mobile-card-action"
+                  disabled={
+                    pendingAction !== null
+                  }
                   onClick={() =>
-                    handleReturnToService(
+                    handleReturnRequest(
                       workOrder.work_order_id
                     )
                   }
                 >
-                  Return to Service
+                  {pendingAction ===
+                  `request-${workOrder.work_order_id}`
+                    ? 'Requesting...'
+                    : 'Request Return Review'}
                 </button>
+              )}
+
+              {canApproveReturn &&
+              workOrder.status ===
+                'Awaiting Approval' &&
+              user?.user_id !==
+                workOrder.completed_by && (
+                <div className="mobile-decision-panel">
+                  <label>
+                    Decision Reason
+                    <textarea
+                      value={
+                        decisionReasons[
+                          workOrder.work_order_id
+                        ] ?? ''
+                      }
+                      onChange={(event) =>
+                        setDecisionReasons(
+                          (current) => ({
+                            ...current,
+                            [workOrder.work_order_id]:
+                              event.target.value
+                          })
+                        )
+                      }
+                    />
+                  </label>
+                  <div className="decision-buttons">
+                    <button
+                      type="button"
+                      disabled={pendingAction !== null}
+                      onClick={() =>
+                        handleDecision(
+                          workOrder.work_order_id,
+                          'Approved'
+                        )
+                      }
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      disabled={pendingAction !== null}
+                      onClick={() =>
+                        handleDecision(
+                          workOrder.work_order_id,
+                          'Denied'
+                        )
+                      }
+                    >
+                      Deny
+                    </button>
+                  </div>
+                </div>
               )}
             </article>
           )

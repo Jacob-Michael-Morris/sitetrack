@@ -3,6 +3,7 @@ import type {
   DamageReportInput
 } from '../types/DamageReport.js'
 import API_BASE_URL from '../config/api.js'
+import { getResponseError } from '../utils/response-error.js'
 
 const API_URL = `${API_BASE_URL}/damage-reports`
 
@@ -31,7 +32,12 @@ export async function createDamageReport(
   })
 
   if (!response.ok) {
-    throw new Error('Unable to create damage report')
+    throw new Error(
+      await getResponseError(
+        response,
+        'Unable to create damage report'
+      )
+    )
   }
 
   return response.json()

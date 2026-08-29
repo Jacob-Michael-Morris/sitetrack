@@ -119,7 +119,9 @@ function Sidebar({
         )}
 
         {(isAdministrator ||
+          isEquipmentManager ||
           isMaintenanceTechnician ||
+          isWorker ||
           isSafetyPersonnel) && (
           <NavLink
             to="/inspections"
@@ -142,7 +144,9 @@ function Sidebar({
         )}
 
         {(isAdministrator ||
-          isMaintenanceTechnician) && (
+          isEquipmentManager ||
+          isMaintenanceTechnician ||
+          isSafetyPersonnel) && (
           <NavLink
             to="/maintenance"
             onClick={onClose}
@@ -181,13 +185,17 @@ function Sidebar({
               Users
             </NavLink>
 
-            <NavLink
-              to="/audit-log"
-              onClick={onClose}
-            >
-              Audit Log
-            </NavLink>
           </>
+        )}
+
+        {(isAdministrator ||
+          isSafetyPersonnel) && (
+          <NavLink
+            to="/audit-log"
+            onClick={onClose}
+          >
+            Audit Log
+          </NavLink>
         )}
       </nav>
 

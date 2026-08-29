@@ -12,6 +12,26 @@ import {
 } from '../services/work-orders.service.js'
 
 export class WorkOrdersController {
+  async getMaintenanceTechnicians(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const technicians =
+        await workOrderService
+          .getMaintenanceTechnicians()
+
+      res.json(technicians)
+    } catch (error) {
+      console.error(error)
+
+      res.status(500).json({
+        message:
+          'Unable to retrieve maintenance technicians'
+      })
+    }
+  }
+
   async getAll(
     req: Request,
     res: Response
@@ -170,7 +190,7 @@ export class WorkOrdersController {
     }
   }
 
-  async returnToService(
+  async requestReturnToService(
     req: Request,
     res: Response
   ) {
@@ -195,7 +215,7 @@ export class WorkOrdersController {
 
       const workOrder =
         await workOrderService
-          .returnToService(
+          .requestReturnToService(
             id,
             userId
           )
@@ -210,7 +230,7 @@ export class WorkOrdersController {
 
       res.json({
         message:
-          'Tool returned to service successfully'
+          'Return-to-service review requested successfully'
       })
     } catch (error) {
       console.error(error)
@@ -226,8 +246,66 @@ export class WorkOrdersController {
       }
 
       res.status(500).json({
+          message:
+            'Unable to request return-to-service review'
+      })
+    }
+  }
+
+  async decideReturnToService(
+    req: Request,
+    res: Response
+  ) {
+    try {
+      const id = Number(req.params.id)
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+        res.status(400).json({
+          message: 'Invalid work order ID'
+        })
+        return
+      }
+
+      const userId = Number(
+        res.locals.auth.userId
+      )
+
+      const result =
+        await workOrderService
+          .decideReturnToService(
+            id,
+            userId,
+            req.body.decision,
+            req.body.reason
+          )
+
+      if (!result) {
+        res.status(404).json({
+          message: 'Work order not found'
+        })
+        return
+      }
+
+      res.json(result)
+    } catch (error) {
+      console.error(error)
+
+      if (
+        error instanceof
+        WorkOrderDomainError
+      ) {
+        res.status(400).json({
+          message: error.message
+        })
+        return
+      }
+
+      res.status(500).json({
         message:
-          'Unable to return tool to service'
+          'Unable to record return-to-service decision'
       })
     }
   }
