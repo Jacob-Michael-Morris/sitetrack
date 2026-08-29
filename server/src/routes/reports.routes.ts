@@ -48,7 +48,8 @@ router.get(
   requireRole(
     'Administrator',
     'Equipment Manager',
-    'Maintenance Technician'
+    'Maintenance Technician',
+    'Safety Personnel'
   ),
   (req, res) =>
     reportsController

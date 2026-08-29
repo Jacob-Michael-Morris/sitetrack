@@ -113,6 +113,16 @@ export class Inspection {
         'Next inspection date is invalid'
       )
     }
+
+    if (
+      this.nextInspectionDate &&
+      this.nextInspectionDate <
+        new Date().toISOString().slice(0, 10)
+    ) {
+      throw new InspectionDomainError(
+        'Next inspection date cannot be in the past'
+      )
+    }
   }
 
   private isValidDate(value: string) {

@@ -26,7 +26,9 @@ export const ASSIGNMENT_ROLES: string[] = [
 
 export const INSPECTION_ROLES: string[] = [
   ADMIN,
+  EQUIPMENT_MANAGER,
   MAINTENANCE_TECHNICIAN,
+  WORKER,
   SAFETY_PERSONNEL
 ]
 
@@ -39,7 +41,9 @@ export const DAMAGE_REPORT_ROLES: string[] = [
 
 export const MAINTENANCE_ROLES: string[] = [
   ADMIN,
-  MAINTENANCE_TECHNICIAN
+  EQUIPMENT_MANAGER,
+  MAINTENANCE_TECHNICIAN,
+  SAFETY_PERSONNEL
 ]
 
 export const ALERT_ROLES: string[] = [

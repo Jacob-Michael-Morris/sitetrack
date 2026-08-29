@@ -74,6 +74,14 @@ export class AssignmentService {
         )
       }
 
+      if (
+        tool.status !== 'Available'
+      ) {
+        throw new AssignmentDomainError(
+          'Only available tools can be checked out'
+        )
+      }
+
       const activeAssignmentResult =
         await client.query(
           `SELECT assignment_id
@@ -96,7 +104,8 @@ export class AssignmentService {
         await client.query(
           `SELECT
              jobsite_id,
-             name
+             name,
+             status
            FROM jobsites
            WHERE jobsite_id = $1`,
           [assignment.jobsiteId]
@@ -108,6 +117,14 @@ export class AssignmentService {
       if (!jobsite) {
         throw new AssignmentDomainError(
           'Jobsite not found'
+        )
+      }
+
+      if (
+        jobsite.status !== 'Active'
+      ) {
+        throw new AssignmentDomainError(
+          'Tools can only be checked out to active jobsites'
         )
       }
 
@@ -354,7 +371,8 @@ export class AssignmentService {
         await client.query(
           `SELECT
              jobsite_id,
-             name
+             name,
+             status
            FROM jobsites
            WHERE jobsite_id = $1`,
           [assignment.jobsiteId]
@@ -369,6 +387,14 @@ export class AssignmentService {
       if (!newJobsite) {
         throw new AssignmentDomainError(
           'New jobsite not found'
+        )
+      }
+
+      if (
+        newJobsite.status !== 'Active'
+      ) {
+        throw new AssignmentDomainError(
+          'Tools can only be transferred to active jobsites'
         )
       }
 

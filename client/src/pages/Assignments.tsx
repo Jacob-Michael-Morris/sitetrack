@@ -60,6 +60,11 @@ function Assignments() {
   const [message, setMessage] =
     useState('')
 
+  const [pendingAction, setPendingAction] =
+    useState<
+      'checkout' | 'return' | 'transfer' | null
+    >(null)
+
   async function loadData() {
     const [
       assignmentData,
@@ -121,17 +126,54 @@ function Assignments() {
         tool.status === 'Available'
     )
 
+  const activeJobsites =
+    jobsites.filter(
+      (jobsite) =>
+        jobsite.status === 'Active'
+    )
+
   const activeAssignments =
     assignments.filter(
       (assignment) =>
         assignment.released_at === null
     )
 
+  const transferAssignment =
+    activeAssignments.find(
+      (assignment) =>
+        String(assignment.tool_id) ===
+        transferToolId
+    )
+
+  const transferJobsites =
+    activeJobsites.filter(
+      (jobsite) =>
+        jobsite.jobsite_id !==
+        transferAssignment?.jobsite_id
+    )
+
+  const canCheckout =
+    checkoutToolId !== '' &&
+    checkoutJobsiteId !== ''
+
+  const canReturn =
+    returnToolId !== ''
+
+  const canTransfer =
+    transferToolId !== '' &&
+    transferJobsiteId !== ''
+
   async function handleCheckout(
     event:
       React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
+
+    if (pendingAction !== null) {
+      return
+    }
+
+    setPendingAction('checkout')
 
     try {
       await checkoutTool(
@@ -150,12 +192,16 @@ function Assignments() {
       )
 
       await loadData()
-    } catch {
+    } catch (checkoutError) {
       setError(
-        'Unable to check out tool.'
+        checkoutError instanceof Error
+          ? checkoutError.message
+          : 'Unable to check out tool.'
       )
 
       setMessage('')
+    } finally {
+      setPendingAction(null)
     }
   }
 
@@ -164,6 +210,12 @@ function Assignments() {
       React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
+
+    if (pendingAction !== null) {
+      return
+    }
+
+    setPendingAction('return')
 
     try {
       await returnTool(
@@ -180,12 +232,16 @@ function Assignments() {
       )
 
       await loadData()
-    } catch {
+    } catch (returnError) {
       setError(
-        'Unable to return tool.'
+        returnError instanceof Error
+          ? returnError.message
+          : 'Unable to return tool.'
       )
 
       setMessage('')
+    } finally {
+      setPendingAction(null)
     }
   }
 
@@ -194,6 +250,12 @@ function Assignments() {
       React.FormEvent<HTMLFormElement>
   ) {
     event.preventDefault()
+
+    if (pendingAction !== null) {
+      return
+    }
+
+    setPendingAction('transfer')
 
     try {
       await transferTool(
@@ -212,12 +274,16 @@ function Assignments() {
       )
 
       await loadData()
-    } catch {
+    } catch (transferError) {
       setError(
-        'Unable to transfer tool.'
+        transferError instanceof Error
+          ? transferError.message
+          : 'Unable to transfer tool.'
       )
 
       setMessage('')
+    } finally {
+      setPendingAction(null)
     }
   }
 
@@ -263,7 +329,9 @@ function Assignments() {
             required
           >
             <option value="">
-              Select Tool
+              {availableTools.length > 0
+                ? 'Select Tool'
+                : 'No available tools'}
             </option>
 
             {availableTools.map(
@@ -293,10 +361,12 @@ function Assignments() {
             required
           >
             <option value="">
-              Select Jobsite
+              {activeJobsites.length > 0
+                ? 'Select Jobsite'
+                : 'No active jobsites'}
             </option>
 
-            {jobsites.map(
+            {activeJobsites.map(
               (jobsite) => (
                 <option
                   key={
@@ -313,8 +383,23 @@ function Assignments() {
           </select>
         </label>
 
-        <button type="submit">
-          Check Out
+        {activeJobsites.length === 0 && (
+          <p className="form-help">
+            Add or activate a jobsite before
+            checking out a tool.
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={
+            !canCheckout ||
+            pendingAction !== null
+          }
+        >
+          {pendingAction === 'checkout'
+            ? 'Checking Out...'
+            : 'Check Out'}
         </button>
       </form>
 
@@ -337,7 +422,9 @@ function Assignments() {
             required
           >
             <option value="">
-              Select Tool
+              {activeAssignments.length > 0
+                ? 'Select Tool'
+                : 'No assigned tools'}
             </option>
 
             {activeAssignments.map(
@@ -363,8 +450,16 @@ function Assignments() {
           </select>
         </label>
 
-        <button type="submit">
-          Return Tool
+        <button
+          type="submit"
+          disabled={
+            !canReturn ||
+            pendingAction !== null
+          }
+        >
+          {pendingAction === 'return'
+            ? 'Returning...'
+            : 'Return Tool'}
         </button>
       </form>
 
@@ -387,7 +482,9 @@ function Assignments() {
             required
           >
             <option value="">
-              Select Tool
+              {activeAssignments.length > 0
+                ? 'Select Tool'
+                : 'No assigned tools'}
             </option>
 
             {activeAssignments.map(
@@ -428,10 +525,12 @@ function Assignments() {
             required
           >
             <option value="">
-              Select Jobsite
+              {transferJobsites.length > 0
+                ? 'Select Jobsite'
+                : 'No other active jobsites'}
             </option>
 
-            {jobsites.map(
+            {transferJobsites.map(
               (jobsite) => (
                 <option
                   key={
@@ -448,8 +547,23 @@ function Assignments() {
           </select>
         </label>
 
-        <button type="submit">
-          Transfer Tool
+        {activeAssignments.length === 0 && (
+          <p className="form-help">
+            Check out a tool before trying
+            to transfer it.
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={
+            !canTransfer ||
+            pendingAction !== null
+          }
+        >
+          {pendingAction === 'transfer'
+            ? 'Transferring...'
+            : 'Transfer Tool'}
         </button>
       </form>
 

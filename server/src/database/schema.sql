@@ -83,9 +83,22 @@ CREATE TABLE IF NOT EXISTS work_orders (
   priority VARCHAR(50) NOT NULL DEFAULT 'Medium',
   status VARCHAR(50) NOT NULL DEFAULT 'Open',
   assigned_to VARCHAR(150),
+  completed_by INTEGER REFERENCES users(user_id),
+  return_requested_by INTEGER REFERENCES users(user_id),
+  return_requested_at TIMESTAMP,
   opened_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   completed_at TIMESTAMP,
   notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS return_service_decisions (
+  decision_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  work_order_id INTEGER NOT NULL REFERENCES work_orders(work_order_id),
+  approver_user_id INTEGER NOT NULL REFERENCES users(user_id),
+  decision VARCHAR(20) NOT NULL CHECK (decision IN ('Approved', 'Denied')),
+  reason TEXT NOT NULL,
+  block_disposition VARCHAR(50) NOT NULL,
+  decided_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS alerts (

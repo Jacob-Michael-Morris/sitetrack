@@ -15,7 +15,8 @@ import {
   DAMAGE_REPORT_ROLES,
   INSPECTION_ROLES,
   JOBSITE_ROLES,
-  MAINTENANCE_ROLES
+  MAINTENANCE_ROLES,
+  SAFETY_PERSONNEL
 } from './constants/roles.js'
 
 import Login from './pages/Login.js'
@@ -233,7 +234,18 @@ function App() {
               path="/users/:id/edit"
               element={<EditUser />}
             />
+          </Route>
 
+          <Route
+            element={
+              <RequireRole
+                allowedRoles={[
+                  ADMIN,
+                  SAFETY_PERSONNEL
+                ]}
+              />
+            }
+          >
             <Route
               path="/audit-log"
               element={<AuditLog />}

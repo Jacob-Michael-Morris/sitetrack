@@ -144,6 +144,44 @@ export class DamageReportService {
       const createdReport =
         result.rows[0]
 
+      const existingWorkOrderResult =
+        await client.query(
+          `SELECT work_order_id
+           FROM work_orders
+           WHERE tool_id = $1
+             AND status IN (
+               'Open',
+               'Completed',
+               'Awaiting Approval'
+             )
+           LIMIT 1`,
+          [report.toolId]
+        )
+
+      if (
+        (existingWorkOrderResult.rowCount ?? 0) ===
+        0
+      ) {
+        await client.query(
+          `INSERT INTO work_orders
+            (
+              tool_id,
+              damage_report_id,
+              description,
+              priority,
+              notes
+            )
+           VALUES ($1, $2, $3, $4, $5)`,
+          [
+            report.toolId,
+            createdReport.damage_report_id,
+            `Repair required for reported damage: ${report.description}`,
+            report.severity,
+            report.notes || null
+          ]
+        )
+      }
+
       await client.query(
         `UPDATE tools
          SET

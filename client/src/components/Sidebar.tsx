@@ -14,6 +14,7 @@ import {
   JOBSITE_ROLES,
   MAINTENANCE_ROLES,
   REPORT_ROLES,
+  SAFETY_PERSONNEL,
   hasAllowedRole
 } from '../constants/roles.js'
 
@@ -33,6 +34,9 @@ function Sidebar({
 
   const isAdministrator =
     role === ADMIN
+
+  const isSafetyPersonnel =
+    role === SAFETY_PERSONNEL
 
   const canViewJobsites =
     hasAllowedRole(
@@ -197,21 +201,22 @@ function Sidebar({
         )}
 
         {isAdministrator && (
-          <>
-            <NavLink
-              to="/users"
-              onClick={onClose}
-            >
-              Users
-            </NavLink>
+          <NavLink
+            to="/users"
+            onClick={onClose}
+          >
+            Users
+          </NavLink>
+        )}
 
-            <NavLink
-              to="/audit-log"
-              onClick={onClose}
-            >
-              Audit Log
-            </NavLink>
-          </>
+        {(isAdministrator ||
+          isSafetyPersonnel) && (
+          <NavLink
+            to="/audit-log"
+            onClick={onClose}
+          >
+            Audit Log
+          </NavLink>
         )}
       </nav>
 
