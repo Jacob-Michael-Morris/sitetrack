@@ -1,3 +1,7 @@
+import {
+  ValidationError
+} from '../errors/ValidationError.js'
+
 export interface ToolInput {
   name: string
   serial_number: string
@@ -30,39 +34,61 @@ export class Tool {
   purchaseDate: string | null
 
   constructor(input: ToolInput) {
-    this.name = input.name.trim()
-    this.serialNumber = input.serial_number.trim()
-    this.category = input.category.trim()
+    this.name = String(
+      input.name ?? ''
+    ).trim()
 
-    this.status =
+    this.serialNumber = String(
+      input.serial_number ?? ''
+    ).trim()
+
+    this.category = String(
+      input.category ?? ''
+    ).trim()
+
+    this.status = String(
       input.status ?? 'Available'
+    ).trim()
 
-    this.condition =
+    this.condition = String(
       input.condition ?? 'Good'
+    ).trim()
 
     this.purchaseDate =
-      input.purchase_date || null
+      input.purchase_date
+        ? String(input.purchase_date)
+        : null
 
     this.validate()
   }
 
   private validate() {
     if (!this.name) {
-      throw new Error('Tool name is required')
+      throw new ValidationError(
+        'Tool name is required'
+      )
     }
 
     if (!this.serialNumber) {
-      throw new Error('Serial number is required')
+      throw new ValidationError(
+        'Serial number is required'
+      )
     }
 
     if (!this.category) {
-      throw new Error('Category is required')
+      throw new ValidationError(
+        'Category is required'
+      )
     }
 
     if (
-      !Tool.VALID_STATUSES.includes(this.status)
+      !Tool.VALID_STATUSES.includes(
+        this.status
+      )
     ) {
-      throw new Error('Invalid tool status')
+      throw new ValidationError(
+        'Invalid tool status'
+      )
     }
 
     if (
@@ -70,26 +96,80 @@ export class Tool {
         this.condition
       )
     ) {
-      throw new Error('Invalid tool condition')
+      throw new ValidationError(
+        'Invalid tool condition'
+      )
     }
 
     if (
       this.purchaseDate &&
-      this.isFutureDate(this.purchaseDate)
+      !this.isValidDate(
+        this.purchaseDate
+      )
     ) {
-      throw new Error(
+      throw new ValidationError(
+        'Purchase date is invalid'
+      )
+    }
+
+    if (
+      this.purchaseDate &&
+      this.isFutureDate(
+        this.purchaseDate
+      )
+    ) {
+      throw new ValidationError(
         'Purchase date cannot be in the future'
       )
     }
   }
 
-  private isFutureDate(value: string) {
-    const selectedDate = new Date(
-      `${value}T00:00:00`
+  private isValidDate(
+    value: string
+  ) {
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(
+        value
+      )
+    ) {
+      return false
+    }
+
+    const date = new Date(
+      `${value}T00:00:00Z`
     )
 
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return false
+    }
+
+    return (
+      date
+        .toISOString()
+        .slice(0, 10) === value
+    )
+  }
+
+  private isFutureDate(
+    value: string
+  ) {
+    const selectedDate =
+      new Date(
+        `${value}T00:00:00`
+      )
+
     const today = new Date()
-    today.setHours(0, 0, 0, 0)
+
+    today.setHours(
+      0,
+      0,
+      0,
+      0
+    )
 
     return selectedDate > today
   }

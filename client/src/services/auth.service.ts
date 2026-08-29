@@ -1,50 +1,44 @@
-import type { User } from '../types/User.js'
 import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
 
-const API_URL = `${API_BASE_URL}/auth`
+import type { User } from '../types/User.js'
+
+const API_URL =
+  `${API_BASE_URL}/auth`
 
 export async function login(
   email: string,
   password: string
 ): Promise<User> {
-  const response = await fetch(`${API_URL}/login`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
+  return apiRequest<User>(
+    `${API_URL}/login`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        email,
+        password
+      })
     },
-    body: JSON.stringify({
-      email,
-      password
-    })
-  })
-
-  if (!response.ok) {
-    throw new Error('Invalid email or password')
-  }
-
-  return response.json()
+    'Invalid email or password'
+  )
 }
 
-export async function logout() {
-  const response = await fetch(`${API_URL}/logout`, {
-    method: 'POST',
-    credentials: 'include'
-  })
-
-  if (!response.ok) {
-    throw new Error('Unable to log out')
-  }
+export async function logout():
+Promise<void> {
+  await apiRequest(
+    `${API_URL}/logout`,
+    {
+      method: 'POST'
+    },
+    'Unable to log out'
+  )
 }
 
-export async function getCurrentUser(): Promise<User> {
-  const response = await fetch(`${API_URL}/me`, {
-    credentials: 'include'
-  })
-
-  if (!response.ok) {
-    throw new Error('Not authenticated')
-  }
-
-  return response.json()
+export async function getCurrentUser():
+Promise<User> {
+  return apiRequest<User>(
+    `${API_URL}/me`,
+    {},
+    'Not authenticated'
+  )
 }

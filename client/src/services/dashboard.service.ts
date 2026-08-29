@@ -1,16 +1,16 @@
-import type { DashboardData } from '../types/Dashboard.js'
 import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
 
-const API_URL = `${API_BASE_URL}/dashboard`
+import type { DashboardData } from '../types/Dashboard.js'
 
-export async function getDashboard(): Promise<DashboardData> {
-  const response = await fetch(API_URL, {
-    credentials: 'include'
-  })
+const API_URL =
+  `${API_BASE_URL}/dashboard`
 
-  if (!response.ok) {
-    throw new Error('Unable to retrieve dashboard data')
-  }
-
-  return response.json()
+export async function getDashboard():
+Promise<DashboardData> {
+  return apiRequest<DashboardData>(
+    API_URL,
+    {},
+    'Unable to retrieve dashboard data'
+  )
 }

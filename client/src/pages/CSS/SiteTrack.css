@@ -208,11 +208,6 @@ h2 {
   color: #6b7280;
 }
 
-.form-page,
-.detail-page {
-  width: 100%;
-}
-
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -253,15 +248,11 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 18px;
-
   width: 100%;
   max-width: 650px;
-
   padding: 24px;
-
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-
   background-color: #ffffff;
 }
 
@@ -280,18 +271,11 @@ textarea {
 .details-card {
   width: 100%;
   max-width: 800px;
-
   margin-bottom: 20px;
   padding: 24px;
-
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-
   background-color: #ffffff;
-}
-
-.details-card p {
-  margin: 10px 0;
 }
 
 .details-list {
@@ -301,17 +285,11 @@ textarea {
 
 .details-row {
   display: grid;
-
-  grid-template-columns:
-    160px minmax(0, 1fr);
-
+  grid-template-columns: 160px minmax(0, 1fr);
   align-items: center;
   gap: 18px;
-
   padding: 13px 0;
-
-  border-bottom:
-    1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .details-row:first-child {
@@ -331,9 +309,7 @@ textarea {
 
 .details-value {
   min-width: 0;
-
   color: #1f2937;
-
   word-break: break-word;
 }
 
@@ -344,13 +320,10 @@ textarea {
 
 table {
   width: 100%;
-
   border-collapse: collapse;
   overflow: hidden;
-
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-
   background-color: #ffffff;
 }
 
@@ -361,10 +334,7 @@ thead {
 th,
 td {
   padding: 12px 14px;
-
-  border-bottom:
-    1px solid #e5e7eb;
-
+  border-bottom: 1px solid #e5e7eb;
   text-align: left;
   vertical-align: top;
 }
@@ -393,10 +363,8 @@ tbody tr:last-child td {
 
 .mobile-data-card {
   overflow: hidden;
-
   border: 1px solid #d1d5db;
   border-radius: 9px;
-
   background-color: #ffffff;
 }
 
@@ -404,13 +372,9 @@ tbody tr:last-child td {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-
   gap: 12px;
-
   padding: 16px;
-
-  border-bottom:
-    1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .mobile-data-card-header h2 {
@@ -421,7 +385,6 @@ tbody tr:last-child td {
 .mobile-data-card-body {
   display: flex;
   flex-direction: column;
-
   padding: 6px 16px;
 }
 
@@ -429,13 +392,9 @@ tbody tr:last-child td {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   gap: 16px;
-
   padding: 10px 0;
-
-  border-bottom:
-    1px solid #f3f4f6;
+  border-bottom: 1px solid #f3f4f6;
 }
 
 .mobile-data-row:last-child {
@@ -444,38 +403,30 @@ tbody tr:last-child td {
 
 .mobile-data-label {
   flex-shrink: 0;
-
   color: #6b7280;
-
   font-size: 13px;
   font-weight: 600;
 }
 
 .mobile-data-row > span:last-child {
   min-width: 0;
-
   text-align: right;
   word-break: break-word;
 }
 
 .mobile-card-action {
   display: block;
-
   width: 100%;
-
   padding: 11px 16px;
-
-  border-top:
-    1px solid #e5e7eb;
-
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+  border-radius: 0;
   background-color: #f9fafb;
-
   color: #1f2937;
-
   text-align: center;
   text-decoration: none;
-
   font-weight: 700;
+  cursor: pointer;
 }
 
 .mobile-card-action:hover {
@@ -485,14 +436,10 @@ tbody tr:last-child td {
 
 [role="alert"] {
   max-width: 650px;
-
   padding: 12px 14px;
-
   border: 1px solid #fca5a5;
   border-radius: 6px;
-
   background-color: #fef2f2;
-
   color: #991b1b;
   font-weight: 500;
 }
@@ -513,45 +460,30 @@ tbody tr:last-child td {
     top: 0;
     left: 0;
     z-index: 1100;
-
     width: min(300px, 85vw);
-
     height: 100dvh;
     min-height: 0;
-
     overflow-y: auto;
-
-    transform:
-      translateX(-100%);
-
-    transition:
-      transform 180ms ease;
-
+    transform: translateX(-100%);
+    transition: transform 180ms ease;
     box-shadow:
       8px 0 24px
       rgba(0, 0, 0, 0.22);
   }
 
   .sidebar--open {
-    transform:
-      translateX(0);
+    transform: translateX(0);
   }
 
   .sidebar-close-button {
     display: flex;
     justify-content: center;
     align-items: center;
-
     width: 36px;
     height: 36px;
-
     padding: 7px;
-
     border: 0;
-
-    background-color:
-      transparent;
-
+    background-color: transparent;
     color: #ffffff;
   }
 
@@ -562,70 +494,42 @@ tbody tr:last-child td {
   .sidebar-close-button svg {
     width: 22px;
     height: 22px;
-
     fill: none;
-
     stroke: currentColor;
     stroke-width: 2;
     stroke-linecap: round;
   }
 
-  .sidebar-nav {
-    flex-direction: column;
-    flex-wrap: nowrap;
-  }
-
-  .sidebar-user {
-    margin-top: 24px;
-  }
-
   .mobile-sidebar-backdrop {
     display: block;
-
     position: fixed;
     inset: 0;
     z-index: 1050;
-
     width: 100%;
     height: 100%;
-
     margin: 0;
     padding: 0;
-
     border: 0;
     border-radius: 0;
-
-    background-color:
-      rgba(17, 24, 39, 0.5);
-
+    background-color: rgba(17, 24, 39, 0.5);
     cursor: default;
   }
 
   .mobile-sidebar-backdrop:hover {
-    background-color:
-      rgba(17, 24, 39, 0.5);
+    background-color: rgba(17, 24, 39, 0.5);
   }
 
   .mobile-header {
     position: sticky;
     top: 0;
     z-index: 900;
-
     display: flex;
     align-items: center;
-
     gap: 12px;
-
     height: 56px;
-
     padding: 0 14px;
-
-    border-bottom:
-      1px solid #374151;
-
-    background-color:
-      #1f2937;
-
+    border-bottom: 1px solid #374151;
+    background-color: #1f2937;
     color: #ffffff;
   }
 
@@ -633,17 +537,11 @@ tbody tr:last-child td {
     display: flex;
     justify-content: center;
     align-items: center;
-
     width: 38px;
     height: 38px;
-
     padding: 8px;
-
     border: 0;
-
-    background-color:
-      transparent;
-
+    background-color: transparent;
     color: #ffffff;
   }
 
@@ -654,9 +552,7 @@ tbody tr:last-child td {
   .mobile-menu-button svg {
     width: 23px;
     height: 23px;
-
     fill: none;
-
     stroke: currentColor;
     stroke-width: 2;
     stroke-linecap: round;
@@ -680,23 +576,12 @@ tbody tr:last-child td {
     bottom: 0;
     left: 0;
     z-index: 950;
-
     display: flex;
     align-items: stretch;
-
     min-height: 64px;
-
-    padding-bottom:
-      env(
-        safe-area-inset-bottom
-      );
-
-    border-top:
-      1px solid #1f2937;
-
-    background-color:
-      #1f2937;
-
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid #1f2937;
+    background-color: #1f2937;
     box-shadow:
       0 -4px 14px
       rgba(0, 0, 0, 0.08);
@@ -706,38 +591,21 @@ tbody tr:last-child td {
     display: flex;
     flex: 1;
     flex-direction: column;
-
     justify-content: center;
     align-items: center;
-
     gap: 3px;
-
     min-width: 0;
-
     padding: 7px 4px;
-
     border-right:
       1px solid
-      rgba(
-        255,
-        255,
-        255,
-        0.25
-      );
-
-    background-color:
-      #1f2937;
-
+      rgba(255, 255, 255, 0.25);
+    background-color: #1f2937;
     color: #ffffff;
-
     text-decoration: none;
-
     font-size: 11px;
     font-weight: 600;
-
     transition:
-      background-color
-        150ms ease,
+      background-color 150ms ease,
       color 150ms ease;
   }
 
@@ -746,29 +614,22 @@ tbody tr:last-child td {
   }
 
   .mobile-bottom-nav a.active {
-    background-color:
-      #1f2937;
-
+    background-color: #1f2937;
     color: #ffffff;
   }
 
   .mobile-bottom-nav a:hover,
   .mobile-bottom-nav a.active:hover {
-    background-color:
-      #ffffff;
-
+    background-color: #ffffff;
     color: #1f2937;
   }
 
   .mobile-bottom-nav svg {
     width: 22px;
     height: 22px;
-
     fill: none;
-
     stroke: currentColor;
     stroke-width: 1.8;
-
     stroke-linecap: round;
     stroke-linejoin: round;
   }
@@ -817,7 +678,6 @@ tbody tr:last-child td {
   .details-row {
     grid-template-columns: 1fr;
     gap: 6px;
-
     padding: 12px 0;
   }
 
@@ -827,9 +687,7 @@ tbody tr:last-child td {
 
   .back-link {
     display: block;
-
     width: fit-content;
-
     margin-top: 4px;
   }
 
@@ -839,9 +697,7 @@ tbody tr:last-child td {
 
   .mobile-card-list {
     display: grid;
-
     grid-template-columns: 1fr;
-
     gap: 14px;
   }
 

@@ -7,6 +7,8 @@ import {
 
 import { useAuth } from '../context/useAuth.js'
 
+import './CSS/Login.css'
+
 function Login() {
   const { user, login } = useAuth()
   const navigate = useNavigate()

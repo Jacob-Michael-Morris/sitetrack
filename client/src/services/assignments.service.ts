@@ -1,18 +1,18 @@
-import type { ToolAssignment } from '../types/ToolAssignment.js'
 import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
 
-const API_URL = `${API_BASE_URL}/assignments`
+import type { ToolAssignment } from '../types/ToolAssignment.js'
 
-export async function getAssignments(): Promise<ToolAssignment[]> {
-  const response = await fetch(API_URL, {
-    credentials: 'include'
-  })
+const API_URL =
+  `${API_BASE_URL}/assignments`
 
-  if (!response.ok) {
-    throw new Error('Unable to retrieve assignments')
-  }
-
-  return response.json()
+export async function getAssignments():
+Promise<ToolAssignment[]> {
+  return apiRequest<ToolAssignment[]>(
+    API_URL,
+    {},
+    'Unable to retrieve assignments'
+  )
 }
 
 export async function checkoutTool(
@@ -20,47 +20,35 @@ export async function checkoutTool(
   jobsiteId: number,
   notes: string
 ) {
-  const response = await fetch(`${API_URL}/checkout`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
+  return apiRequest(
+    `${API_URL}/checkout`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        tool_id: toolId,
+        jobsite_id: jobsiteId,
+        notes
+      })
     },
-    body: JSON.stringify({
-      tool_id: toolId,
-      jobsite_id: jobsiteId,
-      notes
-    })
-  })
-
-  if (!response.ok) {
-    throw new Error('Unable to check out tool')
-  }
-
-  return response.json()
+    'Unable to check out tool'
+  )
 }
 
 export async function returnTool(
   toolId: number,
   notes: string
 ) {
-  const response = await fetch(`${API_URL}/return`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
+  return apiRequest(
+    `${API_URL}/return`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        tool_id: toolId,
+        notes
+      })
     },
-    body: JSON.stringify({
-      tool_id: toolId,
-      notes
-    })
-  })
-
-  if (!response.ok) {
-    throw new Error('Unable to return tool')
-  }
-
-  return response.json()
+    'Unable to return tool'
+  )
 }
 
 export async function transferTool(
@@ -68,22 +56,16 @@ export async function transferTool(
   jobsiteId: number,
   notes: string
 ) {
-  const response = await fetch(`${API_URL}/transfer`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
+  return apiRequest(
+    `${API_URL}/transfer`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        tool_id: toolId,
+        jobsite_id: jobsiteId,
+        notes
+      })
     },
-    body: JSON.stringify({
-      tool_id: toolId,
-      jobsite_id: jobsiteId,
-      notes
-    })
-  })
-
-  if (!response.ok) {
-    throw new Error('Unable to transfer tool')
-  }
-
-  return response.json()
+    'Unable to transfer tool'
+  )
 }

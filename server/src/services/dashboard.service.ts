@@ -85,7 +85,3 @@ export class DashboardService {
 
 export const dashboardService =
   new DashboardService()
-
-export async function getDashboardSummary() {
-  return dashboardService.getSummary()
-}

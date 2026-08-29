@@ -4,6 +4,10 @@ import type {
 } from 'express'
 
 import {
+  ValidationError
+} from '../errors/ValidationError.js'
+
+import {
   toolService
 } from '../services/tools.service.js'
 
@@ -46,24 +50,29 @@ export class ToolsController {
     res: Response
   ) {
     try {
-      const id = Number(req.params.id)
+      const id =
+        Number(req.params.id)
 
       if (
         !Number.isInteger(id) ||
         id <= 0
       ) {
         res.status(400).json({
-          message: 'Invalid tool ID'
+          message:
+            'Invalid tool ID'
         })
         return
       }
 
       const tool =
-        await toolService.getById(id)
+        await toolService.getById(
+          id
+        )
 
       if (!tool) {
         res.status(404).json({
-          message: 'Tool not found'
+          message:
+            'Tool not found'
         })
         return
       }
@@ -94,13 +103,16 @@ export class ToolsController {
           userId
         )
 
-      res.status(201).json(tool)
+      res.status(201).json(
+        tool
+      )
     } catch (error) {
       console.error(error)
 
       if (
-        getDatabaseErrorCode(error) ===
-        '23505'
+        getDatabaseErrorCode(
+          error
+        ) === '23505'
       ) {
         res.status(409).json({
           message:
@@ -109,9 +121,13 @@ export class ToolsController {
         return
       }
 
-      if (error instanceof Error) {
+      if (
+        error instanceof
+        ValidationError
+      ) {
         res.status(400).json({
-          message: error.message
+          message:
+            error.message
         })
         return
       }
@@ -128,14 +144,16 @@ export class ToolsController {
     res: Response
   ) {
     try {
-      const id = Number(req.params.id)
+      const id =
+        Number(req.params.id)
 
       if (
         !Number.isInteger(id) ||
         id <= 0
       ) {
         res.status(400).json({
-          message: 'Invalid tool ID'
+          message:
+            'Invalid tool ID'
         })
         return
       }
@@ -153,7 +171,8 @@ export class ToolsController {
 
       if (!tool) {
         res.status(404).json({
-          message: 'Tool not found'
+          message:
+            'Tool not found'
         })
         return
       }
@@ -163,8 +182,9 @@ export class ToolsController {
       console.error(error)
 
       if (
-        getDatabaseErrorCode(error) ===
-        '23505'
+        getDatabaseErrorCode(
+          error
+        ) === '23505'
       ) {
         res.status(409).json({
           message:
@@ -173,9 +193,13 @@ export class ToolsController {
         return
       }
 
-      if (error instanceof Error) {
+      if (
+        error instanceof
+        ValidationError
+      ) {
         res.status(400).json({
-          message: error.message
+          message:
+            error.message
         })
         return
       }

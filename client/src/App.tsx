@@ -8,6 +8,16 @@ import Layout from './components/Layout.js'
 import RequireAuth from './components/RequireAuth.js'
 import RequireRole from './components/RequireRole.js'
 
+import {
+  ADMIN,
+  ALERT_ROLES,
+  ASSIGNMENT_ROLES,
+  DAMAGE_REPORT_ROLES,
+  INSPECTION_ROLES,
+  JOBSITE_ROLES,
+  MAINTENANCE_ROLES
+} from './constants/roles.js'
+
 import Login from './pages/Login.js'
 import Dashboard from './pages/Dashboard.js'
 
@@ -36,13 +46,6 @@ import EditUser from './pages/EditUser.js'
 
 import Forbidden from './pages/Forbidden.js'
 import NotFound from './pages/NotFound.js'
-
-const ADMIN = 'Administrator'
-const EQUIPMENT_MANAGER = 'Equipment Manager'
-const MAINTENANCE_TECHNICIAN =
-  'Maintenance Technician'
-const WORKER = 'Worker'
-const SAFETY_PERSONNEL = 'Safety Personnel'
 
 function App() {
   return (
@@ -87,10 +90,9 @@ function App() {
           <Route
             element={
               <RequireRole
-                allowedRoles={[
-                  ADMIN,
-                  EQUIPMENT_MANAGER
-                ]}
+                allowedRoles={
+                  JOBSITE_ROLES
+                }
               />
             }
           >
@@ -128,11 +130,9 @@ function App() {
           <Route
             element={
               <RequireRole
-                allowedRoles={[
-                  ADMIN,
-                  EQUIPMENT_MANAGER,
-                  WORKER
-                ]}
+                allowedRoles={
+                  ASSIGNMENT_ROLES
+                }
               />
             }
           >
@@ -145,11 +145,9 @@ function App() {
           <Route
             element={
               <RequireRole
-                allowedRoles={[
-                  ADMIN,
-                  MAINTENANCE_TECHNICIAN,
-                  SAFETY_PERSONNEL
-                ]}
+                allowedRoles={
+                  INSPECTION_ROLES
+                }
               />
             }
           >
@@ -162,12 +160,9 @@ function App() {
           <Route
             element={
               <RequireRole
-                allowedRoles={[
-                  ADMIN,
-                  MAINTENANCE_TECHNICIAN,
-                  WORKER,
-                  SAFETY_PERSONNEL
-                ]}
+                allowedRoles={
+                  DAMAGE_REPORT_ROLES
+                }
               />
             }
           >
@@ -180,10 +175,9 @@ function App() {
           <Route
             element={
               <RequireRole
-                allowedRoles={[
-                  ADMIN,
-                  MAINTENANCE_TECHNICIAN
-                ]}
+                allowedRoles={
+                  MAINTENANCE_ROLES
+                }
               />
             }
           >
@@ -196,12 +190,9 @@ function App() {
           <Route
             element={
               <RequireRole
-                allowedRoles={[
-                  ADMIN,
-                  EQUIPMENT_MANAGER,
-                  MAINTENANCE_TECHNICIAN,
-                  SAFETY_PERSONNEL
-                ]}
+                allowedRoles={
+                  ALERT_ROLES
+                }
               />
             }
           >

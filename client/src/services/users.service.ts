@@ -1,116 +1,57 @@
+import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
+
 import type {
   AdminUser,
   CreateUserInput,
   UpdateUserInput
 } from '../types/AdminUser.js'
-import API_BASE_URL from '../config/api.js'
 
-const API_URL = `${API_BASE_URL}/users`
+const API_URL =
+  `${API_BASE_URL}/users`
 
-async function getErrorMessage(
-  response: Response,
-  fallback: string
-) {
-  try {
-    const data = await response.json()
-
-    if (
-      typeof data.message === 'string' &&
-      data.message.length > 0
-    ) {
-      return data.message
-    }
-  } catch {
-    return fallback
-  }
-
-  return fallback
-}
-
-export async function getUsers(): Promise<AdminUser[]> {
-  const response = await fetch(API_URL, {
-    credentials: 'include'
-  })
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        'Unable to retrieve users'
-      )
-    )
-  }
-
-  return response.json()
+export async function getUsers():
+Promise<AdminUser[]> {
+  return apiRequest<AdminUser[]>(
+    API_URL,
+    {},
+    'Unable to retrieve users'
+  )
 }
 
 export async function getUser(
   id: string
 ): Promise<AdminUser> {
-  const response = await fetch(`${API_URL}/${id}`, {
-    credentials: 'include'
-  })
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        'Unable to retrieve user'
-      )
-    )
-  }
-
-  return response.json()
+  return apiRequest<AdminUser>(
+    `${API_URL}/${id}`,
+    {},
+    'Unable to retrieve user'
+  )
 }
 
 export async function createUser(
   user: CreateUserInput
 ): Promise<AdminUser> {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
+  return apiRequest<AdminUser>(
+    API_URL,
+    {
+      method: 'POST',
+      body: JSON.stringify(user)
     },
-    body: JSON.stringify(user)
-  })
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        'Unable to create user'
-      )
-    )
-  }
-
-  return response.json()
+    'Unable to create user'
+  )
 }
 
 export async function updateUser(
   id: string,
   user: UpdateUserInput
 ): Promise<AdminUser> {
-  const response = await fetch(
+  return apiRequest<AdminUser>(
     `${API_URL}/${id}`,
     {
       method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(user)
-    }
+    },
+    'Unable to update user'
   )
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        'Unable to update user'
-      )
-    )
-  }
-
-  return response.json()
 }

@@ -1,16 +1,16 @@
-import type { AuditLog } from '../types/AuditLog.js'
 import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
 
-const API_URL = `${API_BASE_URL}/audit-logs`
+import type { AuditLog } from '../types/AuditLog.js'
 
-export async function getAuditLogs(): Promise<AuditLog[]> {
-  const response = await fetch(API_URL, {
-    credentials: 'include'
-  })
+const API_URL =
+  `${API_BASE_URL}/audit-logs`
 
-  if (!response.ok) {
-    throw new Error('Unable to retrieve audit logs')
-  }
-
-  return response.json()
+export async function getAuditLogs():
+Promise<AuditLog[]> {
+  return apiRequest<AuditLog[]>(
+    API_URL,
+    {},
+    'Unable to retrieve audit logs'
+  )
 }

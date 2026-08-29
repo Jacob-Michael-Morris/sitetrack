@@ -1,11 +1,19 @@
 import { useState } from 'react'
+
 import {
   NavLink,
   Outlet
 } from 'react-router'
 
 import Sidebar from './Sidebar'
+
 import { useAuth } from '../context/useAuth.js'
+
+import {
+  ASSIGNMENT_ROLES,
+  JOBSITE_ROLES,
+  hasAllowedRole
+} from '../constants/roles.js'
 
 function Layout() {
   const [menuOpen, setMenuOpen] =
@@ -15,23 +23,17 @@ function Layout() {
 
   const role = user?.role
 
-  const isAdministrator =
-    role === 'Administrator'
-
-  const isEquipmentManager =
-    role === 'Equipment Manager'
-
-  const isWorker =
-    role === 'Worker'
-
   const canViewJobsites =
-    isAdministrator ||
-    isEquipmentManager
+    hasAllowedRole(
+      role,
+      JOBSITE_ROLES
+    )
 
   const canViewAssignments =
-    isAdministrator ||
-    isEquipmentManager ||
-    isWorker
+    hasAllowedRole(
+      role,
+      ASSIGNMENT_ROLES
+    )
 
   function closeMenu() {
     setMenuOpen(false)
@@ -111,6 +113,7 @@ function Layout() {
                 aria-hidden="true"
               >
                 <path d="M12 21s7-5.1 7-12a7 7 0 1 0-14 0c0 6.9 7 12 7 12Z" />
+
                 <circle
                   cx="12"
                   cy="9"
@@ -137,7 +140,9 @@ function Layout() {
                 <path d="m9 14-3 3 3 3" />
               </svg>
 
-              <span>Assignments</span>
+              <span>
+                Assignments
+              </span>
             </NavLink>
           )}
         </nav>

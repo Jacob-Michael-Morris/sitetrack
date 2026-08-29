@@ -1,118 +1,56 @@
+import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
+
 import type {
   Tool,
   ToolInput
 } from '../types/Tool.js'
-import API_BASE_URL from '../config/api.js'
 
-const API_URL = `${API_BASE_URL}/tools`
+const API_URL =
+  `${API_BASE_URL}/tools`
 
-async function getErrorMessage(
-  response: Response,
-  fallback: string
-) {
-  try {
-    const data = await response.json()
-
-    if (
-      typeof data.message === 'string' &&
-      data.message.length > 0
-    ) {
-      return data.message
-    }
-  } catch {
-    return fallback
-  }
-
-  return fallback
-}
-
-export async function getTools(): Promise<Tool[]> {
-  const response = await fetch(API_URL, {
-    credentials: 'include'
-  })
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        'Unable to retrieve tools'
-      )
-    )
-  }
-
-  return response.json()
+export async function getTools():
+Promise<Tool[]> {
+  return apiRequest<Tool[]>(
+    API_URL,
+    {},
+    'Unable to retrieve tools'
+  )
 }
 
 export async function getTool(
   id: string
 ): Promise<Tool> {
-  const response = await fetch(
+  return apiRequest<Tool>(
     `${API_URL}/${id}`,
-    {
-      credentials: 'include'
-    }
+    {},
+    'Unable to retrieve tool'
   )
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        'Unable to retrieve tool'
-      )
-    )
-  }
-
-  return response.json()
 }
 
 export async function createTool(
   tool: ToolInput
 ): Promise<Tool> {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json'
+  return apiRequest<Tool>(
+    API_URL,
+    {
+      method: 'POST',
+      body: JSON.stringify(tool)
     },
-    body: JSON.stringify(tool)
-  })
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        'Unable to create tool'
-      )
-    )
-  }
-
-  return response.json()
+    'Unable to create tool'
+  )
 }
 
 export async function updateTool(
   id: string,
   tool: ToolInput
 ): Promise<Tool> {
-  const response = await fetch(
+  return apiRequest<Tool>(
     `${API_URL}/${id}`,
     {
       method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(tool)
-    }
+    },
+    'Unable to update tool'
   )
-
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(
-        response,
-        'Unable to update tool'
-      )
-    )
-  }
-
-  return response.json()
 }

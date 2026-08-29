@@ -1,16 +1,16 @@
-import type { Role } from '../types/Role.js'
 import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
 
-const API_URL = `${API_BASE_URL}/roles`
+import type { Role } from '../types/Role.js'
 
-export async function getRoles(): Promise<Role[]> {
-  const response = await fetch(API_URL, {
-    credentials: 'include'
-  })
+const API_URL =
+  `${API_BASE_URL}/roles`
 
-  if (!response.ok) {
-    throw new Error('Unable to retrieve roles')
-  }
-
-  return response.json()
+export async function getRoles():
+Promise<Role[]> {
+  return apiRequest<Role[]>(
+    API_URL,
+    {},
+    'Unable to retrieve roles'
+  )
 }

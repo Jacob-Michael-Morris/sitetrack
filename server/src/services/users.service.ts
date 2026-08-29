@@ -70,43 +70,63 @@ export class UserService {
         12
       )
 
-    const result = await pool.query(
-      `INSERT INTO users
-        (
-          role_id,
-          name,
-          email,
-          password_hash
+    const client =
+      await pool.connect()
+
+    try {
+      await client.query('BEGIN')
+
+      const result =
+        await client.query(
+          `INSERT INTO users
+            (
+              role_id,
+              name,
+              email,
+              password_hash
+            )
+           VALUES ($1, $2, $3, $4)
+           RETURNING
+             user_id,
+             role_id,
+             name,
+             email,
+             is_active,
+             created_at,
+             updated_at`,
+          [
+            user.roleId,
+            user.name,
+            user.email,
+            passwordHash
+          ]
         )
-       VALUES ($1, $2, $3, $4)
-       RETURNING
-         user_id,
-         role_id,
-         name,
-         email,
-         is_active,
-         created_at,
-         updated_at`,
-      [
-        user.roleId,
-        user.name,
-        user.email,
-        passwordHash
-      ]
-    )
 
-    const createdUser = result.rows[0]
+      const createdUser =
+        result.rows[0]
 
-    await createAuditLog({
-      user_id: actorUserId,
-      action: 'USER_CREATED',
-      entity_type: 'User',
-      entity_id: createdUser.user_id,
-      description:
-        `User "${createdUser.name}" was created.`
-    })
+      await createAuditLog(
+        {
+          user_id: actorUserId,
+          action: 'USER_CREATED',
+          entity_type: 'User',
+          entity_id:
+            createdUser.user_id,
+          description:
+            `User "${createdUser.name}" was created.`
+        },
+        client
+      )
 
-    return createdUser
+      await client.query('COMMIT')
+
+      return createdUser
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
+    }
   }
 
   async update(
@@ -122,49 +142,70 @@ export class UserService {
       actorUserId
     )
 
-    const result = await pool.query(
-      `UPDATE users
-       SET
-         name = $1,
-         email = $2,
-         role_id = $3,
-         is_active = $4,
-         updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = $5
-       RETURNING
-         user_id,
-         role_id,
-         name,
-         email,
-         is_active,
-         created_at,
-         updated_at`,
-      [
-        user.name,
-        user.email,
-        user.roleId,
-        user.isActive,
-        id
-      ]
-    )
+    const client =
+      await pool.connect()
 
-    const updatedUser =
-      result.rows[0]
+    try {
+      await client.query('BEGIN')
 
-    if (!updatedUser) {
-      return undefined
+      const result =
+        await client.query(
+          `UPDATE users
+           SET
+             name = $1,
+             email = $2,
+             role_id = $3,
+             is_active = $4,
+             updated_at =
+               CURRENT_TIMESTAMP
+           WHERE user_id = $5
+           RETURNING
+             user_id,
+             role_id,
+             name,
+             email,
+             is_active,
+             created_at,
+             updated_at`,
+          [
+            user.name,
+            user.email,
+            user.roleId,
+            user.isActive,
+            id
+          ]
+        )
+
+      const updatedUser =
+        result.rows[0]
+
+      if (!updatedUser) {
+        await client.query('ROLLBACK')
+        return undefined
+      }
+
+      await createAuditLog(
+        {
+          user_id: actorUserId,
+          action: 'USER_UPDATED',
+          entity_type: 'User',
+          entity_id:
+            updatedUser.user_id,
+          description:
+            `User "${updatedUser.name}" was updated.`
+        },
+        client
+      )
+
+      await client.query('COMMIT')
+
+      return updatedUser
+    } catch (error) {
+      await client.query('ROLLBACK')
+      throw error
+    } finally {
+      client.release()
     }
-
-    await createAuditLog({
-      user_id: actorUserId,
-      action: 'USER_UPDATED',
-      entity_type: 'User',
-      entity_id: updatedUser.user_id,
-      description:
-        `User "${updatedUser.name}" was updated.`
-    })
-
-    return updatedUser
   }
 }
 

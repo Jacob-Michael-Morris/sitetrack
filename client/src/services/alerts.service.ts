@@ -1,42 +1,38 @@
-import type { Alert } from '../types/Alert.js'
 import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
 
-const API_URL = `${API_BASE_URL}/alerts`
+import type { Alert } from '../types/Alert.js'
 
-export async function getAlerts(): Promise<Alert[]> {
-  const response = await fetch(API_URL, {
-    credentials: 'include'
-  })
+const API_URL =
+  `${API_BASE_URL}/alerts`
 
-  if (!response.ok) {
-    throw new Error('Unable to retrieve alerts')
-  }
-
-  return response.json()
+export async function getAlerts():
+Promise<Alert[]> {
+  return apiRequest<Alert[]>(
+    API_URL,
+    {},
+    'Unable to retrieve alerts'
+  )
 }
 
-export async function markAlertRead(id: number): Promise<Alert> {
-  const response = await fetch(`${API_URL}/${id}/read`, {
-    method: 'PUT',
-    credentials: 'include'
-  })
-
-  if (!response.ok) {
-    throw new Error('Unable to mark alert as read')
-  }
-
-  return response.json()
+export async function markAlertRead(
+  id: number
+): Promise<Alert> {
+  return apiRequest<Alert>(
+    `${API_URL}/${id}/read`,
+    {
+      method: 'PUT'
+    },
+    'Unable to mark alert as read'
+  )
 }
 
 export async function markAllAlertsRead() {
-  const response = await fetch(`${API_URL}/read-all`, {
-    method: 'PUT',
-    credentials: 'include'
-  })
-
-  if (!response.ok) {
-    throw new Error('Unable to mark alerts as read')
-  }
-
-  return response.json()
+  return apiRequest(
+    `${API_URL}/read-all`,
+    {
+      method: 'PUT'
+    },
+    'Unable to mark alerts as read'
+  )
 }

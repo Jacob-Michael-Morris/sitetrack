@@ -4,6 +4,10 @@ import type {
 } from 'express'
 
 import {
+  ValidationError
+} from '../errors/ValidationError.js'
+
+import {
   jobsiteService
 } from '../services/jobsites.service.js'
 
@@ -32,24 +36,29 @@ export class JobsitesController {
     res: Response
   ) {
     try {
-      const id = Number(req.params.id)
+      const id =
+        Number(req.params.id)
 
       if (
         !Number.isInteger(id) ||
         id <= 0
       ) {
         res.status(400).json({
-          message: 'Invalid jobsite ID'
+          message:
+            'Invalid jobsite ID'
         })
         return
       }
 
       const jobsite =
-        await jobsiteService.getById(id)
+        await jobsiteService.getById(
+          id
+        )
 
       if (!jobsite) {
         res.status(404).json({
-          message: 'Jobsite not found'
+          message:
+            'Jobsite not found'
         })
         return
       }
@@ -70,18 +79,29 @@ export class JobsitesController {
     res: Response
   ) {
     try {
+      const userId = Number(
+        res.locals.auth.userId
+      )
+
       const jobsite =
         await jobsiteService.create(
-          req.body
+          req.body,
+          userId
         )
 
-      res.status(201).json(jobsite)
+      res.status(201).json(
+        jobsite
+      )
     } catch (error) {
       console.error(error)
 
-      if (error instanceof Error) {
+      if (
+        error instanceof
+        ValidationError
+      ) {
         res.status(400).json({
-          message: error.message
+          message:
+            error.message
         })
         return
       }
@@ -98,41 +118,50 @@ export class JobsitesController {
     res: Response
   ) {
     try {
-      const id = Number(req.params.id)
+      const id =
+        Number(req.params.id)
 
       if (
         !Number.isInteger(id) ||
         id <= 0
       ) {
         res.status(400).json({
-          message: 'Invalid jobsite ID'
+          message:
+            'Invalid jobsite ID'
         })
         return
       }
 
-      const existingJobsite =
-        await jobsiteService.getById(id)
-
-      if (!existingJobsite) {
-        res.status(404).json({
-          message: 'Jobsite not found'
-        })
-        return
-      }
+      const userId = Number(
+        res.locals.auth.userId
+      )
 
       const jobsite =
         await jobsiteService.update(
           id,
-          req.body
+          req.body,
+          userId
         )
+
+      if (!jobsite) {
+        res.status(404).json({
+          message:
+            'Jobsite not found'
+        })
+        return
+      }
 
       res.json(jobsite)
     } catch (error) {
       console.error(error)
 
-      if (error instanceof Error) {
+      if (
+        error instanceof
+        ValidationError
+      ) {
         res.status(400).json({
-          message: error.message
+          message:
+            error.message
         })
         return
       }
