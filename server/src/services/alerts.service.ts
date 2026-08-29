@@ -194,26 +194,6 @@ export class AlertService {
 export const alertService =
   new AlertService()
 
-export async function getAllAlerts() {
-  return alertService.getAll()
-}
-
-export async function getAlertById(
-  id: number
-) {
-  return alertService.getById(id)
-}
-
-export async function markAlertRead(
-  id: number
-) {
-  return alertService.markRead(id)
-}
-
-export async function markAllAlertsRead() {
-  return alertService.markAllRead()
-}
-
 export async function createAlert(
   alert: AlertInput,
   client?: PoolClient
@@ -222,8 +202,4 @@ export async function createAlert(
     alert,
     client
   )
-}
-
-export async function generateInspectionAlerts() {
-  return alertService.generateInspectionAlerts()
 }

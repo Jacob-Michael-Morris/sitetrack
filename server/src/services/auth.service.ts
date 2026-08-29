@@ -211,17 +211,3 @@ export class AuthService {
 
 export const authService =
   new AuthService()
-
-export async function getUserByEmail(
-  email: string
-) {
-  return authService.getUserByEmail(
-    email
-  )
-}
-
-export async function getUserById(
-  id: number
-) {
-  return authService.getUserById(id)
-}

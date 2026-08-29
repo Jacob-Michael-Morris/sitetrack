@@ -1,3 +1,6 @@
+import API_BASE_URL from '../config/api.js'
+import { apiRequest } from '../utils/api-request.js'
+
 import type {
   AssignmentReport,
   DamageReport,
@@ -5,25 +8,18 @@ import type {
   MaintenanceReport,
   ToolInventoryReport
 } from '../types/Report.js'
-import API_BASE_URL from '../config/api.js'
 
-const API_URL = `${API_BASE_URL}/reports`
+const API_URL =
+  `${API_BASE_URL}/reports`
 
-async function getReport<T>(
+function getReport<T>(
   endpoint: string
 ): Promise<T[]> {
-  const response = await fetch(
+  return apiRequest<T[]>(
     `${API_URL}/${endpoint}`,
-    {
-      credentials: 'include'
-    }
+    {},
+    'Unable to retrieve report'
   )
-
-  if (!response.ok) {
-    throw new Error('Unable to retrieve report')
-  }
-
-  return response.json()
 }
 
 export function getToolInventoryReport() {

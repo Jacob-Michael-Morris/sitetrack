@@ -141,23 +141,3 @@ export class ReportService {
 
 export const reportService =
   new ReportService()
-
-export async function getToolInventoryReport() {
-  return reportService.getToolInventory()
-}
-
-export async function getCurrentAssignmentsReport() {
-  return reportService.getCurrentAssignments()
-}
-
-export async function getMaintenanceHistoryReport() {
-  return reportService.getMaintenanceHistory()
-}
-
-export async function getInspectionStatusReport() {
-  return reportService.getInspectionStatus()
-}
-
-export async function getDamageHistoryReport() {
-  return reportService.getDamageHistory()
-}

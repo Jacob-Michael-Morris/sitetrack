@@ -17,7 +17,3 @@ export class RoleService {
 
 export const roleService =
   new RoleService()
-
-export async function getAllRoles() {
-  return roleService.getAll()
-}

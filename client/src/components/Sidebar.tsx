@@ -5,6 +5,18 @@ import {
 
 import { useAuth } from '../context/useAuth.js'
 
+import {
+  ADMIN,
+  ALERT_ROLES,
+  ASSIGNMENT_ROLES,
+  DAMAGE_REPORT_ROLES,
+  INSPECTION_ROLES,
+  JOBSITE_ROLES,
+  MAINTENANCE_ROLES,
+  REPORT_ROLES,
+  hasAllowedRole
+} from '../constants/roles.js'
+
 interface SidebarProps {
   mobileOpen: boolean
   onClose: () => void
@@ -20,25 +32,49 @@ function Sidebar({
   const role = user?.role
 
   const isAdministrator =
-    role === 'Administrator'
+    role === ADMIN
 
-  const isEquipmentManager =
-    role === 'Equipment Manager'
+  const canViewJobsites =
+    hasAllowedRole(
+      role,
+      JOBSITE_ROLES
+    )
 
-  const isMaintenanceTechnician =
-    role === 'Maintenance Technician'
+  const canViewAssignments =
+    hasAllowedRole(
+      role,
+      ASSIGNMENT_ROLES
+    )
 
-  const isWorker =
-    role === 'Worker'
+  const canViewInspections =
+    hasAllowedRole(
+      role,
+      INSPECTION_ROLES
+    )
 
-  const isSafetyPersonnel =
-    role === 'Safety Personnel'
+  const canViewDamageReports =
+    hasAllowedRole(
+      role,
+      DAMAGE_REPORT_ROLES
+    )
+
+  const canViewMaintenance =
+    hasAllowedRole(
+      role,
+      MAINTENANCE_ROLES
+    )
+
+  const canViewAlerts =
+    hasAllowedRole(
+      role,
+      ALERT_ROLES
+    )
 
   const canViewReports =
-    isAdministrator ||
-    isEquipmentManager ||
-    isMaintenanceTechnician ||
-    isSafetyPersonnel
+    hasAllowedRole(
+      role,
+      REPORT_ROLES
+    )
 
   async function handleLogout() {
     try {
@@ -97,8 +133,7 @@ function Sidebar({
           Tools
         </NavLink>
 
-        {(isAdministrator ||
-          isEquipmentManager) && (
+        {canViewJobsites && (
           <NavLink
             to="/jobsites"
             onClick={onClose}
@@ -107,9 +142,7 @@ function Sidebar({
           </NavLink>
         )}
 
-        {(isAdministrator ||
-          isEquipmentManager ||
-          isWorker) && (
+        {canViewAssignments && (
           <NavLink
             to="/assignments"
             onClick={onClose}
@@ -118,9 +151,7 @@ function Sidebar({
           </NavLink>
         )}
 
-        {(isAdministrator ||
-          isMaintenanceTechnician ||
-          isSafetyPersonnel) && (
+        {canViewInspections && (
           <NavLink
             to="/inspections"
             onClick={onClose}
@@ -129,10 +160,7 @@ function Sidebar({
           </NavLink>
         )}
 
-        {(isAdministrator ||
-          isMaintenanceTechnician ||
-          isWorker ||
-          isSafetyPersonnel) && (
+        {canViewDamageReports && (
           <NavLink
             to="/damage-reports"
             onClick={onClose}
@@ -141,8 +169,7 @@ function Sidebar({
           </NavLink>
         )}
 
-        {(isAdministrator ||
-          isMaintenanceTechnician) && (
+        {canViewMaintenance && (
           <NavLink
             to="/maintenance"
             onClick={onClose}
@@ -151,10 +178,7 @@ function Sidebar({
           </NavLink>
         )}
 
-        {(isAdministrator ||
-          isEquipmentManager ||
-          isMaintenanceTechnician ||
-          isSafetyPersonnel) && (
+        {canViewAlerts && (
           <NavLink
             to="/alerts"
             onClick={onClose}
@@ -193,12 +217,17 @@ function Sidebar({
 
       <div className="sidebar-user">
         <p>
-          <strong>{user?.name}</strong>
+          <strong>
+            {user?.name}
+          </strong>
         </p>
 
         <p>{user?.role}</p>
 
-        <button onClick={handleLogout}>
+        <button
+          type="button"
+          onClick={handleLogout}
+        >
           Log Out
         </button>
       </div>

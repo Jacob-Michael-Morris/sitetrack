@@ -1,3 +1,7 @@
+import {
+  ValidationError
+} from '../errors/ValidationError.js'
+
 export interface JobsiteInput {
   name: string
   location: string
@@ -22,7 +26,9 @@ export class Jobsite {
   description: string
 
   constructor(input: JobsiteInput) {
-    this.name = String(input.name ?? '').trim()
+    this.name = String(
+      input.name ?? ''
+    ).trim()
 
     this.location = String(
       input.location ?? ''
@@ -51,13 +57,13 @@ export class Jobsite {
 
   private validate() {
     if (!this.name) {
-      throw new Error(
+      throw new ValidationError(
         'Jobsite name is required'
       )
     }
 
     if (!this.location) {
-      throw new Error(
+      throw new ValidationError(
         'Jobsite location is required'
       )
     }
@@ -67,25 +73,29 @@ export class Jobsite {
         this.status
       )
     ) {
-      throw new Error(
+      throw new ValidationError(
         'Invalid jobsite status'
       )
     }
 
     if (
       this.startDate &&
-      !this.isValidDate(this.startDate)
+      !this.isValidDate(
+        this.startDate
+      )
     ) {
-      throw new Error(
+      throw new ValidationError(
         'Start date is invalid'
       )
     }
 
     if (
       this.endDate &&
-      !this.isValidDate(this.endDate)
+      !this.isValidDate(
+        this.endDate
+      )
     ) {
-      throw new Error(
+      throw new ValidationError(
         'End date is invalid'
       )
     }
@@ -93,17 +103,22 @@ export class Jobsite {
     if (
       this.startDate &&
       this.endDate &&
-      this.endDate < this.startDate
+      this.endDate <
+        this.startDate
     ) {
-      throw new Error(
+      throw new ValidationError(
         'End date cannot be before start date'
       )
     }
   }
 
-  private isValidDate(value: string) {
+  private isValidDate(
+    value: string
+  ) {
     if (
-      !/^\d{4}-\d{2}-\d{2}$/.test(value)
+      !/^\d{4}-\d{2}-\d{2}$/.test(
+        value
+      )
     ) {
       return false
     }
@@ -112,13 +127,18 @@ export class Jobsite {
       `${value}T00:00:00Z`
     )
 
-    if (Number.isNaN(date.getTime())) {
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
       return false
     }
 
     return (
-      date.toISOString().slice(0, 10) ===
-      value
+      date
+        .toISOString()
+        .slice(0, 10) === value
     )
   }
 }
