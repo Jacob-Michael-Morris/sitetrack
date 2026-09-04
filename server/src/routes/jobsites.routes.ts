@@ -13,13 +13,6 @@ const router = Router()
 
 router.use(requireAuth)
 
-router.use(
-  requireRole(
-    'Administrator',
-    'Equipment Manager'
-  )
-)
-
 router.get(
   '/',
   (req, res) =>
@@ -34,12 +27,20 @@ router.get(
 
 router.post(
   '/',
+  requireRole(
+    'Administrator',
+    'Equipment Manager'
+  ),
   (req, res) =>
     jobsitesController.create(req, res)
 )
 
 router.put(
   '/:id',
+  requireRole(
+    'Administrator',
+    'Equipment Manager'
+  ),
   (req, res) =>
     jobsitesController.update(req, res)
 )
