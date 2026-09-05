@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 
 import StatusBadge from '../components/StatusBadge.js'
-import { useAuth } from '../context/useAuth.js'
 
 import {
   getCurrentAssignmentsReport,
@@ -32,10 +31,10 @@ type ReportData =
   | DamageReport[]
 
 function Reports() {
-  const { user } = useAuth()
-
   const [reportType, setReportType] =
-    useState<ReportType>('tool-inventory')
+    useState<ReportType>(
+      'tool-inventory'
+    )
 
   const [data, setData] =
     useState<ReportData>([])
@@ -46,24 +45,11 @@ function Reports() {
   const [error, setError] =
     useState('')
 
-  const role = user?.role
-
-  const isAdministrator =
-    role === 'Administrator'
-
-  const isEquipmentManager =
-    role === 'Equipment Manager'
-
-  const isMaintenanceTechnician =
-    role === 'Maintenance Technician'
-
-  const isSafetyPersonnel =
-    role === 'Safety Personnel'
-
   useEffect(() => {
     let cancelled = false
 
-    let request: Promise<ReportData>
+    let request:
+      Promise<ReportData>
 
     switch (reportType) {
       case 'current-assignments':
@@ -152,7 +138,8 @@ function Reports() {
       return
     }
 
-    const date = getExportDate()
+    const date =
+      getExportDate()
 
     if (
       reportType ===
@@ -364,7 +351,9 @@ function Reports() {
           <thead>
             <tr>
               <th>Tool</th>
-              <th>Serial Number</th>
+              <th>
+                Serial Number
+              </th>
               <th>Category</th>
               <th>Status</th>
               <th>Condition</th>
@@ -377,10 +366,14 @@ function Reports() {
           <tbody>
             {rows.map((row) => (
               <tr key={row.tool_id}>
-                <td>{row.name}</td>
+                <td>
+                  {row.name}
+                </td>
 
                 <td>
-                  {row.serial_number}
+                  {
+                    row.serial_number
+                  }
                 </td>
 
                 <td>
@@ -389,7 +382,9 @@ function Reports() {
 
                 <td>
                   <StatusBadge
-                    value={row.status}
+                    value={
+                      row.status
+                    }
                   />
                 </td>
 
@@ -402,8 +397,10 @@ function Reports() {
                 </td>
 
                 <td>
-                  {row.current_jobsite ??
-                    'N/A'}
+                  {
+                    row.current_jobsite ??
+                    'N/A'
+                  }
                 </td>
               </tr>
             ))}
@@ -424,7 +421,9 @@ function Reports() {
           <thead>
             <tr>
               <th>Tool</th>
-              <th>Serial Number</th>
+              <th>
+                Serial Number
+              </th>
               <th>Jobsite</th>
               <th>Assigned</th>
               <th>Status</th>
@@ -444,7 +443,9 @@ function Reports() {
                 </td>
 
                 <td>
-                  {row.serial_number}
+                  {
+                    row.serial_number
+                  }
                 </td>
 
                 <td>
@@ -459,7 +460,9 @@ function Reports() {
 
                 <td>
                   <StatusBadge
-                    value={row.status}
+                    value={
+                      row.status
+                    }
                   />
                 </td>
 
@@ -485,11 +488,15 @@ function Reports() {
         <table className="reports-table">
           <thead>
             <tr>
-              <th>Work Order</th>
+              <th>
+                Work Order
+              </th>
               <th>Tool</th>
               <th>Priority</th>
               <th>Status</th>
-              <th>Assigned To</th>
+              <th>
+                Assigned To
+              </th>
               <th>Opened</th>
               <th>Completed</th>
             </tr>
@@ -503,7 +510,10 @@ function Reports() {
                 }
               >
                 <td>
-                  #{row.work_order_id}
+                  #
+                  {
+                    row.work_order_id
+                  }
                 </td>
 
                 <td>
@@ -520,13 +530,17 @@ function Reports() {
 
                 <td>
                   <StatusBadge
-                    value={row.status}
+                    value={
+                      row.status
+                    }
                   />
                 </td>
 
                 <td>
-                  {row.assigned_to ||
-                    'Unassigned'}
+                  {
+                    row.assigned_to ||
+                    'Unassigned'
+                  }
                 </td>
 
                 <td>
@@ -559,7 +573,9 @@ function Reports() {
           <thead>
             <tr>
               <th>Tool</th>
-              <th>Serial Number</th>
+              <th>
+                Serial Number
+              </th>
               <th>
                 Last Inspection
               </th>
@@ -574,13 +590,19 @@ function Reports() {
 
           <tbody>
             {rows.map((row) => (
-              <tr key={row.tool_id}>
+              <tr
+                key={
+                  row.tool_id
+                }
+              >
                 <td>
                   {row.tool_name}
                 </td>
 
                 <td>
-                  {row.serial_number}
+                  {
+                    row.serial_number
+                  }
                 </td>
 
                 <td>
@@ -658,7 +680,10 @@ function Reports() {
               }
             >
               <td>
-                #{row.damage_report_id}
+                #
+                {
+                  row.damage_report_id
+                }
               </td>
 
               <td>
@@ -675,7 +700,9 @@ function Reports() {
 
               <td>
                 <StatusBadge
-                  value={row.status}
+                  value={
+                    row.status
+                  }
                 />
               </td>
 
@@ -716,36 +743,51 @@ function Reports() {
         >
           <div className="report-mobile-card-header">
             <div>
-              <h2>{row.name}</h2>
+              <h2>
+                {row.name}
+              </h2>
 
               <span>
-                {row.serial_number}
+                {
+                  row.serial_number
+                }
               </span>
             </div>
 
             <StatusBadge
-              value={row.status}
+              value={
+                row.status
+              }
             />
           </div>
 
           <div className="report-mobile-card-body">
             <div className="report-mobile-row">
-              <span>Category</span>
+              <span>
+                Category
+              </span>
+
               <strong>
                 {row.category}
               </strong>
             </div>
 
             <div className="report-mobile-row">
-              <span>Status</span>
+              <span>
+                Status
+              </span>
 
               <StatusBadge
-                value={row.status}
+                value={
+                  row.status
+                }
               />
             </div>
 
             <div className="report-mobile-row">
-              <span>Condition</span>
+              <span>
+                Condition
+              </span>
 
               <StatusBadge
                 value={
@@ -760,8 +802,10 @@ function Reports() {
               </span>
 
               <strong>
-                {row.current_jobsite ??
-                  'N/A'}
+                {
+                  row.current_jobsite ??
+                  'N/A'
+                }
               </strong>
             </div>
           </div>
@@ -779,7 +823,9 @@ function Reports() {
       return rows.map((row) => (
         <article
           className="report-mobile-card"
-          key={row.assignment_id}
+          key={
+            row.assignment_id
+          }
         >
           <div className="report-mobile-card-header">
             <div>
@@ -788,26 +834,36 @@ function Reports() {
               </h2>
 
               <span>
-                {row.serial_number}
+                {
+                  row.serial_number
+                }
               </span>
             </div>
 
             <StatusBadge
-              value={row.status}
+              value={
+                row.status
+              }
             />
           </div>
 
           <div className="report-mobile-card-body">
             <div className="report-mobile-row">
-              <span>Jobsite</span>
+              <span>
+                Jobsite
+              </span>
 
               <strong>
-                {row.jobsite_name}
+                {
+                  row.jobsite_name
+                }
               </strong>
             </div>
 
             <div className="report-mobile-row">
-              <span>Assigned</span>
+              <span>
+                Assigned
+              </span>
 
               <strong>
                 {formatDate(
@@ -817,15 +873,21 @@ function Reports() {
             </div>
 
             <div className="report-mobile-row">
-              <span>Status</span>
+              <span>
+                Status
+              </span>
 
               <StatusBadge
-                value={row.status}
+                value={
+                  row.status
+                }
               />
             </div>
 
             <div className="report-mobile-row report-mobile-row-stacked">
-              <span>Notes</span>
+              <span>
+                Notes
+              </span>
 
               <strong>
                 {row.notes ||
@@ -847,7 +909,9 @@ function Reports() {
       return rows.map((row) => (
         <article
           className="report-mobile-card"
-          key={row.work_order_id}
+          key={
+            row.work_order_id
+          }
         >
           <div className="report-mobile-card-header">
             <div>
@@ -857,21 +921,29 @@ function Reports() {
 
               <span>
                 Work Order #
-                {row.work_order_id}
+                {
+                  row.work_order_id
+                }
               </span>
             </div>
 
             <StatusBadge
-              value={row.priority}
+              value={
+                row.priority
+              }
             />
           </div>
 
           <div className="report-mobile-card-body">
             <div className="report-mobile-row">
-              <span>Status</span>
+              <span>
+                Status
+              </span>
 
               <StatusBadge
-                value={row.status}
+                value={
+                  row.status
+                }
               />
             </div>
 
@@ -881,13 +953,17 @@ function Reports() {
               </span>
 
               <strong>
-                {row.assigned_to ||
-                  'Unassigned'}
+                {
+                  row.assigned_to ||
+                  'Unassigned'
+                }
               </strong>
             </div>
 
             <div className="report-mobile-row">
-              <span>Opened</span>
+              <span>
+                Opened
+              </span>
 
               <strong>
                 {formatDate(
@@ -897,7 +973,9 @@ function Reports() {
             </div>
 
             <div className="report-mobile-row">
-              <span>Completed</span>
+              <span>
+                Completed
+              </span>
 
               <strong>
                 {formatDate(
@@ -929,7 +1007,9 @@ function Reports() {
               </h2>
 
               <span>
-                {row.serial_number}
+                {
+                  row.serial_number
+                }
               </span>
             </div>
 
@@ -954,19 +1034,27 @@ function Reports() {
             </div>
 
             <div className="report-mobile-row">
-              <span>Result</span>
+              <span>
+                Result
+              </span>
 
               {row.result ? (
                 <StatusBadge
-                  value={row.result}
+                  value={
+                    row.result
+                  }
                 />
               ) : (
-                <strong>N/A</strong>
+                <strong>
+                  N/A
+                </strong>
               )}
             </div>
 
             <div className="report-mobile-row">
-              <span>Condition</span>
+              <span>
+                Condition
+              </span>
 
               {row.condition ? (
                 <StatusBadge
@@ -975,7 +1063,9 @@ function Reports() {
                   }
                 />
               ) : (
-                <strong>N/A</strong>
+                <strong>
+                  N/A
+                </strong>
               )}
             </div>
 
@@ -1001,7 +1091,9 @@ function Reports() {
     return rows.map((row) => (
       <article
         className="report-mobile-card"
-        key={row.damage_report_id}
+        key={
+          row.damage_report_id
+        }
       >
         <div className="report-mobile-card-header">
           <div>
@@ -1011,26 +1103,36 @@ function Reports() {
 
             <span>
               Damage Report #
-              {row.damage_report_id}
+              {
+                row.damage_report_id
+              }
             </span>
           </div>
 
           <StatusBadge
-            value={row.severity}
+            value={
+              row.severity
+            }
           />
         </div>
 
         <div className="report-mobile-card-body">
           <div className="report-mobile-row">
-            <span>Status</span>
+            <span>
+              Status
+            </span>
 
             <StatusBadge
-              value={row.status}
+              value={
+                row.status
+              }
             />
           </div>
 
           <div className="report-mobile-row">
-            <span>Reported</span>
+            <span>
+              Reported
+            </span>
 
             <strong>
               {formatDate(
@@ -1040,7 +1142,9 @@ function Reports() {
           </div>
 
           <div className="report-mobile-row">
-            <span>Resolved</span>
+            <span>
+              Resolved
+            </span>
 
             <strong>
               {formatDate(
@@ -1050,7 +1154,9 @@ function Reports() {
           </div>
 
           <div className="report-mobile-row report-mobile-row-stacked">
-            <span>Description</span>
+            <span>
+              Description
+            </span>
 
             <strong>
               {row.description}
@@ -1087,38 +1193,21 @@ function Reports() {
               Tool Inventory
             </option>
 
-            {(isAdministrator ||
-              isEquipmentManager) && (
-              <option value="current-assignments">
-                Current Assignments
-              </option>
-            )}
+            <option value="current-assignments">
+              Current Assignments
+            </option>
 
-            {(isAdministrator ||
-              isEquipmentManager ||
-              isMaintenanceTechnician) && (
-              <option value="maintenance-history">
-                Maintenance History
-              </option>
-            )}
+            <option value="maintenance-history">
+              Maintenance History
+            </option>
 
-            {(isAdministrator ||
-              isEquipmentManager ||
-              isMaintenanceTechnician ||
-              isSafetyPersonnel) && (
-              <option value="inspection-status">
-                Inspection Status
-              </option>
-            )}
+            <option value="inspection-status">
+              Inspection Status
+            </option>
 
-            {(isAdministrator ||
-              isEquipmentManager ||
-              isMaintenanceTechnician ||
-              isSafetyPersonnel) && (
-              <option value="damage-history">
-                Damage History
-              </option>
-            )}
+            <option value="damage-history">
+              Damage History
+            </option>
           </select>
         </label>
 
@@ -1137,14 +1226,17 @@ function Reports() {
       </div>
 
       {loading && (
-        <p>Loading report...</p>
-      )}
-
-      {!loading && error && (
-        <p role="alert">
-          {error}
+        <p>
+          Loading report...
         </p>
       )}
+
+      {!loading &&
+        error && (
+          <p role="alert">
+            {error}
+          </p>
+        )}
 
       {!loading &&
         !error &&
@@ -1160,11 +1252,15 @@ function Reports() {
         data.length > 0 && (
           <>
             <div className="reports-table-container">
-              {renderDesktopReport()}
+              {
+                renderDesktopReport()
+              }
             </div>
 
             <div className="reports-mobile-cards">
-              {renderMobileReport()}
+              {
+                renderMobileReport()
+              }
             </div>
           </>
         )}

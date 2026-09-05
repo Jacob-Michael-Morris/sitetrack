@@ -2,11 +2,24 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
 import StatusBadge from '../components/StatusBadge.js'
+import { useAuth } from '../context/useAuth.js'
 import { getUsers } from '../services/users.service.js'
 
 import type { AdminUser } from '../types/AdminUser.js'
 
 function Users() {
+  const { hasPermission } = useAuth()
+
+  const canCreateUser =
+    hasPermission(
+      'users.create'
+    )
+
+  const canManageRoles =
+    hasPermission(
+      'roles.manage'
+    )
+
   const [users, setUsers] =
     useState<AdminUser[]>([])
 
@@ -82,12 +95,31 @@ function Users() {
           </p>
         </div>
 
-        <Link
-          className="button"
-          to="/users/new"
-        >
-          Create User
-        </Link>
+        {(canManageRoles ||
+          canCreateUser) && (
+          <div>
+            {canManageRoles && (
+              <Link
+                className="button"
+                to="/roles/manage"
+              >
+                Manage Roles
+              </Link>
+            )}
+
+            {canManageRoles &&
+              canCreateUser && ' '}
+
+            {canCreateUser && (
+              <Link
+                className="button"
+                to="/users/new"
+              >
+                Create User
+              </Link>
+            )}
+          </div>
+        )}
       </div>
 
       {error && (
@@ -254,7 +286,9 @@ function Users() {
 
       {filteredUsers.length === 0 &&
         !error && (
-          <p>No users found.</p>
+          <p>
+            No users found.
+          </p>
         )}
     </div>
   )

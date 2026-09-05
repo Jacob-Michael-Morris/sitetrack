@@ -14,10 +14,12 @@ import type { Inspection } from '../types/Inspection.js'
 import type { Tool } from '../types/Tool.js'
 
 function Inspections() {
-  const { user } = useAuth()
+  const { hasPermission } = useAuth()
 
   const canRecordInspection =
-    user?.role !== 'Safety Personnel'
+    hasPermission(
+      'inspections.create'
+    )
 
   const [inspections, setInspections] =
     useState<Inspection[]>([])
@@ -52,7 +54,9 @@ function Inspections() {
     useState(false)
 
   const today =
-    new Date().toISOString().slice(0, 10)
+    new Date()
+      .toISOString()
+      .slice(0, 10)
 
   async function loadData() {
     const [
@@ -63,7 +67,10 @@ function Inspections() {
       getTools()
     ])
 
-    setInspections(inspectionData)
+    setInspections(
+      inspectionData
+    )
+
     setTools(toolData)
   }
 
@@ -109,7 +116,10 @@ function Inspections() {
   ) {
     event.preventDefault()
 
-    if (submitting) {
+    if (
+      !canRecordInspection ||
+      submitting
+    ) {
       return
     }
 
@@ -170,139 +180,154 @@ function Inspections() {
       )}
 
       {message && (
-        <p>{message}</p>
+        <p>
+          {message}
+        </p>
       )}
 
-      <h2>Perform Inspection</h2>
+      {canRecordInspection ? (
+        <>
+          <h2>
+            Perform Inspection
+          </h2>
 
-      <form
-        className="tool-form"
-        onSubmit={handleSubmit}
-      >
-        <label>
-          Tool
-
-          <select
-            value={toolId}
-            onChange={(event) =>
-              setToolId(
-                event.target.value
-              )
-            }
-            required
-            disabled={!canRecordInspection}
+          <form
+            className="tool-form"
+            onSubmit={handleSubmit}
           >
-            <option value="">
-              Select Tool
-            </option>
+            <label>
+              Tool
 
-            {tools.map((tool) => (
-              <option
-                key={tool.tool_id}
-                value={tool.tool_id}
+              <select
+                value={toolId}
+                onChange={(event) =>
+                  setToolId(
+                    event.target.value
+                  )
+                }
+                required
               >
-                {tool.name} -{' '}
-                {tool.serial_number}
-              </option>
-            ))}
-          </select>
-        </label>
+                <option value="">
+                  Select Tool
+                </option>
 
-        <label>
-          Result
+                {tools.map((tool) => (
+                  <option
+                    key={tool.tool_id}
+                    value={tool.tool_id}
+                  >
+                    {tool.name} -{' '}
+                    {tool.serial_number}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <select
-            value={result}
-            onChange={(event) =>
-              setResult(
-                event.target.value
-              )
-            }
-            disabled={!canRecordInspection}
-          >
-            <option>Passed</option>
-            <option>Failed</option>
-          </select>
-        </label>
+            <label>
+              Result
 
-        <label>
-          Condition
+              <select
+                value={result}
+                onChange={(event) =>
+                  setResult(
+                    event.target.value
+                  )
+                }
+              >
+                <option>
+                  Passed
+                </option>
 
-          <select
-            value={condition}
-            onChange={(event) =>
-              setCondition(
-                event.target.value
-              )
-            }
-            disabled={!canRecordInspection}
-          >
-            <option>Good</option>
-            <option>Fair</option>
+                <option>
+                  Failed
+                </option>
+              </select>
+            </label>
 
-            <option>
-              Needs Repair
-            </option>
+            <label>
+              Condition
 
-            <option>
-              Damaged
-            </option>
-          </select>
-        </label>
+              <select
+                value={condition}
+                onChange={(event) =>
+                  setCondition(
+                    event.target.value
+                  )
+                }
+              >
+                <option>
+                  Good
+                </option>
 
-        <label>
-          Next Inspection Date
+                <option>
+                  Fair
+                </option>
 
-          <input
-            type="date"
-            min={today}
-            disabled={!canRecordInspection}
-            value={
-              nextInspectionDate
-            }
-            onChange={(event) =>
-              setNextInspectionDate(
-                event.target.value
-              )
-            }
-          />
-        </label>
+                <option>
+                  Needs Repair
+                </option>
 
-        <label>
-          Notes
+                <option>
+                  Damaged
+                </option>
+              </select>
+            </label>
 
-          <textarea
-            value={notes}
-            onChange={(event) =>
-              setNotes(
-                event.target.value
-              )
-            }
-            disabled={!canRecordInspection}
-          />
-        </label>
+            <label>
+              Next Inspection Date
 
-        <button
-          type="submit"
-          disabled={
-            toolId === '' || submitting
-            || !canRecordInspection
-          }
-        >
-          {submitting
-            ? 'Recording...'
-            : 'Record Inspection'}
-        </button>
+              <input
+                type="date"
+                min={today}
+                value={
+                  nextInspectionDate
+                }
+                onChange={(event) =>
+                  setNextInspectionDate(
+                    event.target.value
+                  )
+                }
+              />
+            </label>
 
-        {!canRecordInspection && (
-          <p className="form-help">
-            Safety Personnel have review-only
-            access to inspection records.
-          </p>
-        )}
-      </form>
+            <label>
+              Notes
 
-      <h2>Inspection History</h2>
+              <textarea
+                value={notes}
+                onChange={(event) =>
+                  setNotes(
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            <button
+              type="submit"
+              disabled={
+                toolId === '' ||
+                submitting
+              }
+            >
+              {submitting
+                ? 'Recording...'
+                : 'Record Inspection'}
+            </button>
+          </form>
+        </>
+      ) : (
+        <p className="form-help">
+          You can review inspection
+          records, but you do not have
+          permission to record an
+          inspection.
+        </p>
+      )}
+
+      <h2>
+        Inspection History
+      </h2>
 
       <div className="responsive-table-view">
         <table>
@@ -313,6 +338,7 @@ function Inspections() {
               <th>Date</th>
               <th>Result</th>
               <th>Condition</th>
+
               <th>
                 Next Inspection
               </th>
@@ -324,31 +350,36 @@ function Inspections() {
               (inspection) => (
                 <tr
                   key={
-                    inspection.inspection_id
+                    inspection
+                      .inspection_id
                   }
                 >
                   <td>
                     {
-                      inspection.tool_name
+                      inspection
+                        .tool_name
                     }
                   </td>
 
                   <td>
                     {
-                      inspection.serial_number
+                      inspection
+                        .serial_number
                     }
                   </td>
 
                   <td>
                     {new Date(
-                      inspection.inspection_date
+                      inspection
+                        .inspection_date
                     ).toLocaleDateString()}
                   </td>
 
                   <td>
                     <StatusBadge
                       value={
-                        inspection.result
+                        inspection
+                          .result
                       }
                     />
                   </td>
@@ -356,7 +387,8 @@ function Inspections() {
                   <td>
                     <StatusBadge
                       value={
-                        inspection.condition
+                        inspection
+                          .condition
                       }
                     />
                   </td>
@@ -383,13 +415,15 @@ function Inspections() {
             <article
               className="mobile-data-card"
               key={
-                inspection.inspection_id
+                inspection
+                  .inspection_id
               }
             >
               <div className="mobile-data-card-header">
                 <h2>
                   {
-                    inspection.tool_name
+                    inspection
+                      .tool_name
                   }
                 </h2>
 
@@ -408,7 +442,8 @@ function Inspections() {
 
                   <span>
                     {
-                      inspection.serial_number
+                      inspection
+                        .serial_number
                     }
                   </span>
                 </div>
@@ -420,7 +455,8 @@ function Inspections() {
 
                   <span>
                     {new Date(
-                      inspection.inspection_date
+                      inspection
+                        .inspection_date
                     ).toLocaleDateString()}
                   </span>
                 </div>
@@ -444,7 +480,8 @@ function Inspections() {
 
                   <StatusBadge
                     value={
-                      inspection.condition
+                      inspection
+                        .condition
                     }
                   />
                 </div>

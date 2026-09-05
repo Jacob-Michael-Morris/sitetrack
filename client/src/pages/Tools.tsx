@@ -8,7 +8,7 @@ import { getTools } from '../services/tools.service.js'
 import type { Tool } from '../types/Tool.js'
 
 function Tools() {
-  const { user } = useAuth()
+  const { hasPermission } = useAuth()
 
   const [tools, setTools] = useState<Tool[]>([])
   const [search, setSearch] = useState('')
@@ -17,8 +17,7 @@ function Tools() {
   const [error, setError] = useState('')
 
   const canRegisterTool =
-    user?.role === 'Administrator' ||
-    user?.role === 'Equipment Manager'
+    hasPermission('tools.create')
 
   useEffect(() => {
     async function loadTools() {
@@ -66,7 +65,10 @@ function Tools() {
         </div>
 
         {canRegisterTool && (
-          <Link className="button" to="/tools/new">
+          <Link
+            className="button"
+            to="/tools/new"
+          >
             Register Tool
           </Link>
         )}
@@ -88,10 +90,22 @@ function Tools() {
             setStatusFilter(event.target.value)
           }
         >
-          <option value="All">All Statuses</option>
-          <option value="Available">Available</option>
-          <option value="Checked Out">Checked Out</option>
-          <option value="Maintenance">Maintenance</option>
+          <option value="All">
+            All Statuses
+          </option>
+
+          <option value="Available">
+            Available
+          </option>
+
+          <option value="Checked Out">
+            Checked Out
+          </option>
+
+          <option value="Maintenance">
+            Maintenance
+          </option>
+
           <option value="Out of Service">
             Out of Service
           </option>
@@ -119,15 +133,21 @@ function Tools() {
                 <td>{tool.category}</td>
 
                 <td>
-                  <StatusBadge value={tool.status} />
+                  <StatusBadge
+                    value={tool.status}
+                  />
                 </td>
 
                 <td>
-                  <StatusBadge value={tool.condition} />
+                  <StatusBadge
+                    value={tool.condition}
+                  />
                 </td>
 
                 <td>
-                  <Link to={`/tools/${tool.tool_id}`}>
+                  <Link
+                    to={`/tools/${tool.tool_id}`}
+                  >
                     View
                   </Link>
                 </td>
@@ -146,7 +166,9 @@ function Tools() {
             <div className="mobile-data-card-header">
               <h2>{tool.name}</h2>
 
-              <StatusBadge value={tool.status} />
+              <StatusBadge
+                value={tool.status}
+              />
             </div>
 
             <div className="mobile-data-card-body">
@@ -165,7 +187,9 @@ function Tools() {
                   Category
                 </span>
 
-                <span>{tool.category}</span>
+                <span>
+                  {tool.category}
+                </span>
               </div>
 
               <div className="mobile-data-row">
@@ -173,7 +197,9 @@ function Tools() {
                   Status
                 </span>
 
-                <StatusBadge value={tool.status} />
+                <StatusBadge
+                  value={tool.status}
+                />
               </div>
 
               <div className="mobile-data-row">
@@ -181,7 +207,9 @@ function Tools() {
                   Condition
                 </span>
 
-                <StatusBadge value={tool.condition} />
+                <StatusBadge
+                  value={tool.condition}
+                />
               </div>
             </div>
 
@@ -196,7 +224,9 @@ function Tools() {
       </div>
 
       {filteredTools.length === 0 && (
-        <p>No tools match your search.</p>
+        <p>
+          No tools match your search.
+        </p>
       )}
     </div>
   )

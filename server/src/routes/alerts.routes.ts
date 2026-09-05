@@ -6,24 +6,18 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
 
 router.use(requireAuth)
 
-router.use(
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Maintenance Technician',
-    'Safety Personnel'
-  )
-)
-
 router.get(
   '/',
+  requirePermission(
+    'alerts.view'
+  ),
   (req, res) =>
     alertsController.getAll(
       req,
@@ -33,6 +27,9 @@ router.get(
 
 router.get(
   '/:id',
+  requirePermission(
+    'alerts.view'
+  ),
   (req, res) =>
     alertsController.getById(
       req,
@@ -42,6 +39,9 @@ router.get(
 
 router.put(
   '/read-all',
+  requirePermission(
+    'alerts.view'
+  ),
   (req, res) =>
     alertsController.markAllRead(
       req,
@@ -51,6 +51,9 @@ router.put(
 
 router.put(
   '/:id/read',
+  requirePermission(
+    'alerts.view'
+  ),
   (req, res) =>
     alertsController.markRead(
       req,

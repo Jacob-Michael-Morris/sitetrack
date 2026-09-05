@@ -6,7 +6,7 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
@@ -14,9 +14,8 @@ const router = Router()
 router.use(requireAuth)
 
 router.use(
-  requireRole(
-    'Administrator',
-    'Safety Personnel'
+  requirePermission(
+    'audit.view'
   )
 )
 

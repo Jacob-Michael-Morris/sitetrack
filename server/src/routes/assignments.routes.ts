@@ -6,23 +6,18 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
 
 router.use(requireAuth)
 
-router.use(
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Worker'
-  )
-)
-
 router.get(
   '/',
+  requirePermission(
+    'assignments.view'
+  ),
   (req, res) =>
     assignmentsController.getAll(
       req,
@@ -32,6 +27,9 @@ router.get(
 
 router.post(
   '/checkout',
+  requirePermission(
+    'assignments.checkout'
+  ),
   (req, res) =>
     assignmentsController.checkout(
       req,
@@ -41,6 +39,9 @@ router.post(
 
 router.post(
   '/return',
+  requirePermission(
+    'assignments.return'
+  ),
   (req, res) =>
     assignmentsController
       .returnAssignment(
@@ -51,6 +52,9 @@ router.post(
 
 router.post(
   '/transfer',
+  requirePermission(
+    'assignments.transfer'
+  ),
   (req, res) =>
     assignmentsController.transfer(
       req,

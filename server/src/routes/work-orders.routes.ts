@@ -6,7 +6,7 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
@@ -15,11 +15,8 @@ router.use(requireAuth)
 
 router.get(
   '/',
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Maintenance Technician',
-    'Safety Personnel'
+  requirePermission(
+    'maintenance.view'
   ),
   (req, res) =>
     workOrdersController.getAll(
@@ -30,11 +27,8 @@ router.get(
 
 router.get(
   '/technicians',
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Maintenance Technician',
-    'Safety Personnel'
+  requirePermission(
+    'maintenance.view'
   ),
   (req, res) =>
     workOrdersController
@@ -46,11 +40,8 @@ router.get(
 
 router.get(
   '/:id',
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Maintenance Technician',
-    'Safety Personnel'
+  requirePermission(
+    'maintenance.view'
   ),
   (req, res) =>
     workOrdersController.getById(
@@ -61,9 +52,8 @@ router.get(
 
 router.post(
   '/',
-  requireRole(
-    'Administrator',
-    'Equipment Manager'
+  requirePermission(
+    'maintenance.create'
   ),
   (req, res) =>
     workOrdersController.create(
@@ -74,9 +64,8 @@ router.post(
 
 router.put(
   '/:id/complete',
-  requireRole(
-    'Administrator',
-    'Maintenance Technician'
+  requirePermission(
+    'maintenance.complete'
   ),
   (req, res) =>
     workOrdersController.complete(
@@ -87,9 +76,8 @@ router.put(
 
 router.put(
   '/:id/return-request',
-  requireRole(
-    'Administrator',
-    'Maintenance Technician'
+  requirePermission(
+    'maintenance.return_request'
   ),
   (req, res) =>
     workOrdersController
@@ -101,9 +89,8 @@ router.put(
 
 router.put(
   '/:id/return-decision',
-  requireRole(
-    'Administrator',
-    'Equipment Manager'
+  requirePermission(
+    'maintenance.return_approve'
   ),
   (req, res) =>
     workOrdersController

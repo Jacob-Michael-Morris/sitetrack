@@ -5,19 +5,6 @@ import {
 
 import { useAuth } from '../context/useAuth.js'
 
-import {
-  ADMIN,
-  ALERT_ROLES,
-  ASSIGNMENT_ROLES,
-  DAMAGE_REPORT_ROLES,
-  INSPECTION_ROLES,
-  JOBSITE_ROLES,
-  MAINTENANCE_ROLES,
-  REPORT_ROLES,
-  SAFETY_PERSONNEL,
-  hasAllowedRole
-} from '../constants/roles.js'
-
 interface SidebarProps {
   mobileOpen: boolean
   onClose: () => void
@@ -27,63 +14,13 @@ function Sidebar({
   mobileOpen,
   onClose
 }: SidebarProps) {
-  const { user, logout } = useAuth()
+  const {
+    user,
+    logout,
+    hasPermission
+  } = useAuth()
+
   const navigate = useNavigate()
-
-  const role = user?.role
-
-  const isAdministrator =
-    role === ADMIN
-
-  const isSafetyPersonnel =
-    role === SAFETY_PERSONNEL
-
-  const canViewJobsites =
-    !isSafetyPersonnel &&
-    hasAllowedRole(
-      role,
-      JOBSITE_ROLES
-    )
-
-  const canViewAssignments =
-    !isSafetyPersonnel &&
-    hasAllowedRole(
-      role,
-      ASSIGNMENT_ROLES
-    )
-
-  const canViewInspections =
-    !isSafetyPersonnel &&
-    hasAllowedRole(
-      role,
-      INSPECTION_ROLES
-    )
-
-  const canViewDamageReports =
-    !isSafetyPersonnel &&
-    hasAllowedRole(
-      role,
-      DAMAGE_REPORT_ROLES
-    )
-
-  const canViewMaintenance =
-    !isSafetyPersonnel &&
-    hasAllowedRole(
-      role,
-      MAINTENANCE_ROLES
-    )
-
-  const canViewAlerts =
-    hasAllowedRole(
-      role,
-      ALERT_ROLES
-    )
-
-  const canViewReports =
-    hasAllowedRole(
-      role,
-      REPORT_ROLES
-    )
 
   async function handleLogout() {
     try {
@@ -128,21 +65,31 @@ function Sidebar({
       </div>
 
       <nav className="sidebar-nav">
-        <NavLink
-          to="/dashboard"
-          onClick={onClose}
-        >
-          Dashboard
-        </NavLink>
+        {hasPermission(
+          'dashboard.view'
+        ) && (
+          <NavLink
+            to="/dashboard"
+            onClick={onClose}
+          >
+            Dashboard
+          </NavLink>
+        )}
 
-        <NavLink
-          to="/tools"
-          onClick={onClose}
-        >
-          Tools
-        </NavLink>
+        {hasPermission(
+          'tools.view'
+        ) && (
+          <NavLink
+            to="/tools"
+            onClick={onClose}
+          >
+            Tools
+          </NavLink>
+        )}
 
-        {canViewJobsites && (
+        {hasPermission(
+          'jobsites.view'
+        ) && (
           <NavLink
             to="/jobsites"
             onClick={onClose}
@@ -151,7 +98,9 @@ function Sidebar({
           </NavLink>
         )}
 
-        {canViewAssignments && (
+        {hasPermission(
+          'assignments.view'
+        ) && (
           <NavLink
             to="/assignments"
             onClick={onClose}
@@ -160,7 +109,9 @@ function Sidebar({
           </NavLink>
         )}
 
-        {canViewInspections && (
+        {hasPermission(
+          'inspections.view'
+        ) && (
           <NavLink
             to="/inspections"
             onClick={onClose}
@@ -169,7 +120,9 @@ function Sidebar({
           </NavLink>
         )}
 
-        {canViewDamageReports && (
+        {hasPermission(
+          'damage_reports.view'
+        ) && (
           <NavLink
             to="/damage-reports"
             onClick={onClose}
@@ -178,7 +131,9 @@ function Sidebar({
           </NavLink>
         )}
 
-        {canViewMaintenance && (
+        {hasPermission(
+          'maintenance.view'
+        ) && (
           <NavLink
             to="/maintenance"
             onClick={onClose}
@@ -187,7 +142,9 @@ function Sidebar({
           </NavLink>
         )}
 
-        {canViewAlerts && (
+        {hasPermission(
+          'alerts.view'
+        ) && (
           <NavLink
             to="/alerts"
             onClick={onClose}
@@ -196,7 +153,9 @@ function Sidebar({
           </NavLink>
         )}
 
-        {canViewReports && (
+        {hasPermission(
+          'reports.view'
+        ) && (
           <NavLink
             to="/reports"
             onClick={onClose}
@@ -205,7 +164,9 @@ function Sidebar({
           </NavLink>
         )}
 
-        {isAdministrator && (
+        {hasPermission(
+          'users.view'
+        ) && (
           <NavLink
             to="/users"
             onClick={onClose}
@@ -214,8 +175,20 @@ function Sidebar({
           </NavLink>
         )}
 
-        {(isAdministrator ||
-          isSafetyPersonnel) && (
+        {hasPermission(
+          'roles.manage'
+        ) && (
+          <NavLink
+            to="/roles/manage"
+            onClick={onClose}
+          >
+            Manage Roles
+          </NavLink>
+        )}
+
+        {hasPermission(
+          'audit.view'
+        ) && (
           <NavLink
             to="/audit-log"
             onClick={onClose}

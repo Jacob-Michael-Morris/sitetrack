@@ -11,6 +11,10 @@ import {
   authService
 } from '../services/auth.service.js'
 
+import {
+  roleService
+} from '../services/roles.service.js'
+
 interface AuthPayload {
   userId: number
   role: string
@@ -118,10 +122,10 @@ export async function requireAuth(
   }
 }
 
-export function requireRole(
-  ...allowedRoles: string[]
+export function requirePermission(
+  permissionKey: string
 ) {
-  return (
+  return async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -139,18 +143,29 @@ export function requireRole(
       return
     }
 
-    if (
-      !allowedRoles.includes(
-        auth.role
-      )
-    ) {
-      res.status(403).json({
-        message:
-          'You do not have permission to perform this action'
-      })
-      return
-    }
+    try {
+      const allowed =
+        await roleService.hasPermission(
+          auth.role,
+          permissionKey
+        )
 
-    next()
+      if (!allowed) {
+        res.status(403).json({
+          message:
+            'You do not have permission to perform this action'
+        })
+        return
+      }
+
+      next()
+    } catch (error) {
+      console.error(error)
+
+      res.status(500).json({
+        message:
+          'Unable to verify permissions'
+      })
+    }
   }
 }

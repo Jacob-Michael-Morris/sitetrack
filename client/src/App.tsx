@@ -6,18 +6,9 @@ import {
 
 import Layout from './components/Layout.js'
 import RequireAuth from './components/RequireAuth.js'
-import RequireRole from './components/RequireRole.js'
+import RequirePermission from './components/RequirePermission.js'
 
-import {
-  ADMIN,
-  ALERT_ROLES,
-  ASSIGNMENT_ROLES,
-  DAMAGE_REPORT_ROLES,
-  INSPECTION_ROLES,
-  JOBSITE_ROLES,
-  MAINTENANCE_ROLES,
-  SAFETY_PERSONNEL
-} from './constants/roles.js'
+import { useAuth } from './context/useAuth.js'
 
 import Login from './pages/Login.js'
 import Dashboard from './pages/Dashboard.js'
@@ -44,24 +35,83 @@ import Users from './pages/Users.js'
 import RegisterUser from './pages/RegisterUser.js'
 import UserDetails from './pages/UserDetails.js'
 import EditUser from './pages/EditUser.js'
+import ManageRoles from './pages/ManageRoles.js'
 
 import Forbidden from './pages/Forbidden.js'
 import NotFound from './pages/NotFound.js'
 
-const INSPECTION_PAGE_ROLES =
-  INSPECTION_ROLES.filter(
-    (role) => role !== SAFETY_PERSONNEL
-  )
+function DefaultRoute() {
+  const { hasPermission } = useAuth()
 
-const DAMAGE_REPORT_PAGE_ROLES =
-  DAMAGE_REPORT_ROLES.filter(
-    (role) => role !== SAFETY_PERSONNEL
-  )
+  const destinations = [
+    {
+      permission: 'dashboard.view',
+      path: '/dashboard'
+    },
+    {
+      permission: 'tools.view',
+      path: '/tools'
+    },
+    {
+      permission: 'jobsites.view',
+      path: '/jobsites'
+    },
+    {
+      permission: 'assignments.view',
+      path: '/assignments'
+    },
+    {
+      permission: 'inspections.view',
+      path: '/inspections'
+    },
+    {
+      permission: 'damage_reports.view',
+      path: '/damage-reports'
+    },
+    {
+      permission: 'maintenance.view',
+      path: '/maintenance'
+    },
+    {
+      permission: 'alerts.view',
+      path: '/alerts'
+    },
+    {
+      permission: 'reports.view',
+      path: '/reports'
+    },
+    {
+      permission: 'users.view',
+      path: '/users'
+    },
+    {
+      permission: 'roles.manage',
+      path: '/roles/manage'
+    },
+    {
+      permission: 'audit.view',
+      path: '/audit-log'
+    }
+  ]
 
-const MAINTENANCE_PAGE_ROLES =
-  MAINTENANCE_ROLES.filter(
-    (role) => role !== SAFETY_PERSONNEL
+  const destination =
+    destinations.find(
+      (item) =>
+        hasPermission(
+          item.permission
+        )
+    )
+
+  return (
+    <Navigate
+      to={
+        destination?.path ??
+        '/forbidden'
+      }
+      replace
+    />
   )
+}
 
 function App() {
   return (
@@ -75,17 +125,7 @@ function App() {
         <Route element={<Layout />}>
           <Route
             path="/"
-            element={
-              <Navigate
-                to="/dashboard"
-                replace
-              />
-            }
-          />
-
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
+            element={<DefaultRoute />}
           />
 
           <Route
@@ -94,21 +134,40 @@ function App() {
           />
 
           <Route
-            path="/tools"
-            element={<Tools />}
-          />
-
-          <Route
-            path="/tools/:id"
-            element={<ToolDetails />}
-          />
+            element={
+              <RequirePermission
+                permission="dashboard.view"
+              />
+            }
+          >
+            <Route
+              path="/dashboard"
+              element={<Dashboard />}
+            />
+          </Route>
 
           <Route
             element={
-              <RequireRole
-                allowedRoles={
-                  JOBSITE_ROLES
-                }
+              <RequirePermission
+                permission="tools.view"
+              />
+            }
+          >
+            <Route
+              path="/tools"
+              element={<Tools />}
+            />
+
+            <Route
+              path="/tools/:id"
+              element={<ToolDetails />}
+            />
+          </Route>
+
+          <Route
+            element={
+              <RequirePermission
+                permission="tools.create"
               />
             }
           >
@@ -116,27 +175,59 @@ function App() {
               path="/tools/new"
               element={<RegisterTool />}
             />
+          </Route>
 
+          <Route
+            element={
+              <RequirePermission
+                permission="tools.edit"
+              />
+            }
+          >
             <Route
               path="/tools/:id/edit"
               element={<EditTool />}
             />
+          </Route>
 
+          <Route
+            element={
+              <RequirePermission
+                permission="jobsites.view"
+              />
+            }
+          >
             <Route
               path="/jobsites"
               element={<Jobsites />}
             />
 
             <Route
-              path="/jobsites/new"
-              element={<RegisterJobsite />}
-            />
-
-            <Route
               path="/jobsites/:id"
               element={<JobsiteDetails />}
             />
+          </Route>
 
+          <Route
+            element={
+              <RequirePermission
+                permission="jobsites.create"
+              />
+            }
+          >
+            <Route
+              path="/jobsites/new"
+              element={<RegisterJobsite />}
+            />
+          </Route>
+
+          <Route
+            element={
+              <RequirePermission
+                permission="jobsites.edit"
+              />
+            }
+          >
             <Route
               path="/jobsites/:id/edit"
               element={<EditJobsite />}
@@ -145,10 +236,8 @@ function App() {
 
           <Route
             element={
-              <RequireRole
-                allowedRoles={
-                  ASSIGNMENT_ROLES
-                }
+              <RequirePermission
+                permission="assignments.view"
               />
             }
           >
@@ -160,10 +249,8 @@ function App() {
 
           <Route
             element={
-              <RequireRole
-                allowedRoles={
-                  INSPECTION_PAGE_ROLES
-                }
+              <RequirePermission
+                permission="inspections.view"
               />
             }
           >
@@ -175,10 +262,8 @@ function App() {
 
           <Route
             element={
-              <RequireRole
-                allowedRoles={
-                  DAMAGE_REPORT_PAGE_ROLES
-                }
+              <RequirePermission
+                permission="damage_reports.view"
               />
             }
           >
@@ -190,10 +275,8 @@ function App() {
 
           <Route
             element={
-              <RequireRole
-                allowedRoles={
-                  MAINTENANCE_PAGE_ROLES
-                }
+              <RequirePermission
+                permission="maintenance.view"
               />
             }
           >
@@ -205,10 +288,8 @@ function App() {
 
           <Route
             element={
-              <RequireRole
-                allowedRoles={
-                  ALERT_ROLES
-                }
+              <RequirePermission
+                permission="alerts.view"
               />
             }
           >
@@ -216,7 +297,15 @@ function App() {
               path="/alerts"
               element={<Alerts />}
             />
+          </Route>
 
+          <Route
+            element={
+              <RequirePermission
+                permission="reports.view"
+              />
+            }
+          >
             <Route
               path="/reports"
               element={<Reports />}
@@ -225,8 +314,8 @@ function App() {
 
           <Route
             element={
-              <RequireRole
-                allowedRoles={[ADMIN]}
+              <RequirePermission
+                permission="users.view"
               />
             }
           >
@@ -236,15 +325,31 @@ function App() {
             />
 
             <Route
-              path="/users/new"
-              element={<RegisterUser />}
-            />
-
-            <Route
               path="/users/:id"
               element={<UserDetails />}
             />
+          </Route>
 
+          <Route
+            element={
+              <RequirePermission
+                permission="users.create"
+              />
+            }
+          >
+            <Route
+              path="/users/new"
+              element={<RegisterUser />}
+            />
+          </Route>
+
+          <Route
+            element={
+              <RequirePermission
+                permission="users.edit"
+              />
+            }
+          >
             <Route
               path="/users/:id/edit"
               element={<EditUser />}
@@ -253,11 +358,21 @@ function App() {
 
           <Route
             element={
-              <RequireRole
-                allowedRoles={[
-                  ADMIN,
-                  SAFETY_PERSONNEL
-                ]}
+              <RequirePermission
+                permission="roles.manage"
+              />
+            }
+          >
+            <Route
+              path="/roles/manage"
+              element={<ManageRoles />}
+            />
+          </Route>
+
+          <Route
+            element={
+              <RequirePermission
+                permission="audit.view"
               />
             }
           >

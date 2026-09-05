@@ -15,12 +15,40 @@ import {
 import { getTools } from '../services/tools.service.js'
 
 import type { Tool } from '../types/Tool.js'
-import type { WorkOrder } from '../types/WorkOrder.js'
-import type { ReturnServiceDecision } from '../types/WorkOrder.js'
-import type { MaintenanceTechnician } from '../services/work-orders.service.js'
+import type {
+  ReturnServiceDecision,
+  WorkOrder
+} from '../types/WorkOrder.js'
+
+import type {
+  MaintenanceTechnician
+} from '../services/work-orders.service.js'
 
 function Maintenance() {
-  const { user } = useAuth()
+  const {
+    user,
+    hasPermission
+  } = useAuth()
+
+  const canCreateWorkOrder =
+    hasPermission(
+      'maintenance.create'
+    )
+
+  const canCompleteRepair =
+    hasPermission(
+      'maintenance.complete'
+    )
+
+  const canRequestReturn =
+    hasPermission(
+      'maintenance.return_request'
+    )
+
+  const canApproveReturn =
+    hasPermission(
+      'maintenance.return_approve'
+    )
 
   const [workOrders, setWorkOrders] =
     useState<WorkOrder[]>([])
@@ -56,23 +84,19 @@ function Maintenance() {
   const [message, setMessage] =
     useState('')
 
-  const [pendingAction, setPendingAction] =
-    useState<string | null>(null)
+  const [
+    pendingAction,
+    setPendingAction
+  ] = useState<string | null>(
+    null
+  )
 
-  const [decisionReasons, setDecisionReasons] =
-    useState<Record<number, string>>({})
-
-  const canCreateWorkOrder =
-    user?.role === 'Administrator' ||
-    user?.role === 'Equipment Manager'
-
-  const canCompleteRepair =
-    user?.role === 'Administrator' ||
-    user?.role === 'Maintenance Technician'
-
-  const canApproveReturn =
-    user?.role === 'Administrator' ||
-    user?.role === 'Equipment Manager'
+  const [
+    decisionReasons,
+    setDecisionReasons
+  ] = useState<
+    Record<number, string>
+  >({})
 
   async function loadData() {
     const [
@@ -85,9 +109,15 @@ function Maintenance() {
       getMaintenanceTechnicians()
     ])
 
-    setWorkOrders(workOrderData)
+    setWorkOrders(
+      workOrderData
+    )
+
     setTools(toolData)
-    setTechnicians(technicianData)
+
+    setTechnicians(
+      technicianData
+    )
   }
 
   useEffect(() => {
@@ -113,6 +143,7 @@ function Maintenance() {
           )
 
           setTools(toolData)
+
           setTechnicians(
             technicianData
           )
@@ -137,11 +168,16 @@ function Maintenance() {
   ) {
     event.preventDefault()
 
-    if (pendingAction !== null) {
+    if (
+      !canCreateWorkOrder ||
+      pendingAction !== null
+    ) {
       return
     }
 
-    setPendingAction('create')
+    setPendingAction(
+      'create'
+    )
 
     try {
       await createWorkOrder({
@@ -181,11 +217,16 @@ function Maintenance() {
   async function handleComplete(
     id: number
   ) {
-    if (pendingAction !== null) {
+    if (
+      !canCompleteRepair ||
+      pendingAction !== null
+    ) {
       return
     }
 
-    setPendingAction(`complete-${id}`)
+    setPendingAction(
+      `complete-${id}`
+    )
 
     try {
       await completeWorkOrder(id)
@@ -213,14 +254,21 @@ function Maintenance() {
   async function handleReturnRequest(
     id: number
   ) {
-    if (pendingAction !== null) {
+    if (
+      !canRequestReturn ||
+      pendingAction !== null
+    ) {
       return
     }
 
-    setPendingAction(`request-${id}`)
+    setPendingAction(
+      `request-${id}`
+    )
 
     try {
-      await requestReturnToService(id)
+      await requestReturnToService(
+        id
+      )
 
       setMessage(
         'Return-to-service review requested.'
@@ -244,19 +292,26 @@ function Maintenance() {
 
   async function handleDecision(
     id: number,
-    decision: ReturnServiceDecision
+    decision:
+      ReturnServiceDecision
   ) {
-    if (pendingAction !== null) {
+    if (
+      !canApproveReturn ||
+      pendingAction !== null
+    ) {
       return
     }
 
     const reason =
-      decisionReasons[id]?.trim() ?? ''
+      decisionReasons[
+        id
+      ]?.trim() ?? ''
 
     if (!reason) {
       setError(
         'Enter a reason before recording the decision.'
       )
+
       setMessage('')
       return
     }
@@ -272,15 +327,22 @@ function Maintenance() {
         reason
       )
 
-      setDecisionReasons((current) => {
-        const next = { ...current }
-        delete next[id]
-        return next
-      })
+      setDecisionReasons(
+        (current) => {
+          const next = {
+            ...current
+          }
+
+          delete next[id]
+
+          return next
+        }
+      )
 
       setMessage(
         `Return to service ${decision.toLowerCase()}.`
       )
+
       setError('')
 
       await loadData()
@@ -290,6 +352,7 @@ function Maintenance() {
           ? decisionError.message
           : 'Unable to record return-to-service decision.'
       )
+
       setMessage('')
     } finally {
       setPendingAction(null)
@@ -323,7 +386,9 @@ function Maintenance() {
     <div>
       <div className="page-header">
         <div>
-          <h1>Maintenance</h1>
+          <h1>
+            Maintenance
+          </h1>
 
           <p>
             Create work orders and
@@ -340,146 +405,184 @@ function Maintenance() {
       )}
 
       {message && (
-        <p>{message}</p>
+        <p>
+          {message}
+        </p>
       )}
 
       {canCreateWorkOrder && (
         <>
-          <h2>Create Work Order</h2>
+          <h2>
+            Create Work Order
+          </h2>
 
           <form
             className="tool-form"
-            onSubmit={handleSubmit}
-          >
-        <label>
-          Tool
-
-          <select
-            value={toolId}
-            onChange={(event) =>
-              setToolId(
-                event.target.value
-              )
+            onSubmit={
+              handleSubmit
             }
-            required
           >
-            <option value="">
-              {maintenanceTools.length > 0
-                ? 'Select Tool'
-                : 'No tools require maintenance'}
-            </option>
+            <label>
+              Tool
 
-            {maintenanceTools.map(
-              (tool) => (
-                <option
-                  key={tool.tool_id}
-                  value={tool.tool_id}
-                >
-                  {tool.name} -{' '}
-                  {tool.serial_number}
+              <select
+                value={toolId}
+                onChange={(event) =>
+                  setToolId(
+                    event.target.value
+                  )
+                }
+                required
+              >
+                <option value="">
+                  {maintenanceTools
+                    .length > 0
+                    ? 'Select Tool'
+                    : 'No tools require maintenance'}
                 </option>
-              )
-            )}
-          </select>
-        </label>
 
-        <label>
-          Priority
+                {maintenanceTools.map(
+                  (tool) => (
+                    <option
+                      key={
+                        tool.tool_id
+                      }
+                      value={
+                        tool.tool_id
+                      }
+                    >
+                      {tool.name} -{' '}
+                      {
+                        tool.serial_number
+                      }
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
 
-          <select
-            value={priority}
-            onChange={(event) =>
-              setPriority(
-                event.target.value
-              )
-            }
-          >
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-            <option>Critical</option>
-          </select>
-        </label>
+            <label>
+              Priority
 
-        <label>
-          Assigned To
-
-          <select
-            value={assignedTo}
-            onChange={(event) =>
-              setAssignedTo(
-                event.target.value
-              )
-            }
-          >
-            <option value="">
-              Unassigned
-            </option>
-            {technicians.map(
-              (technician) => (
-                <option
-                  key={technician.user_id}
-                  value={technician.name}
-                >
-                  {technician.name}
+              <select
+                value={priority}
+                onChange={(event) =>
+                  setPriority(
+                    event.target.value
+                  )
+                }
+              >
+                <option>
+                  Low
                 </option>
-              )
+
+                <option>
+                  Medium
+                </option>
+
+                <option>
+                  High
+                </option>
+
+                <option>
+                  Critical
+                </option>
+              </select>
+            </label>
+
+            <label>
+              Assigned To
+
+              <select
+                value={assignedTo}
+                onChange={(event) =>
+                  setAssignedTo(
+                    event.target.value
+                  )
+                }
+              >
+                <option value="">
+                  Unassigned
+                </option>
+
+                {technicians.map(
+                  (technician) => (
+                    <option
+                      key={
+                        technician.user_id
+                      }
+                      value={
+                        technician.name
+                      }
+                    >
+                      {
+                        technician.name
+                      }
+                    </option>
+                  )
+                )}
+              </select>
+            </label>
+
+            <label>
+              Description
+
+              <textarea
+                value={description}
+                onChange={(event) =>
+                  setDescription(
+                    event.target.value
+                  )
+                }
+                required
+              />
+            </label>
+
+            <label>
+              Notes
+
+              <textarea
+                value={notes}
+                onChange={(event) =>
+                  setNotes(
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            {maintenanceTools.length ===
+              0 && (
+              <p className="form-help">
+                Work orders can be
+                created for tools
+                marked Maintenance or
+                Out of Service.
+              </p>
             )}
-          </select>
-        </label>
 
-        <label>
-          Description
-
-          <textarea
-            value={description}
-            onChange={(event) =>
-              setDescription(
-                event.target.value
-              )
-            }
-            required
-          />
-        </label>
-
-        <label>
-          Notes
-
-          <textarea
-            value={notes}
-            onChange={(event) =>
-              setNotes(
-                event.target.value
-              )
-            }
-          />
-        </label>
-
-        {maintenanceTools.length === 0 && (
-          <p className="form-help">
-            Work orders can be created for
-            tools marked Maintenance or Out
-            of Service.
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={
-            toolId === '' ||
-            description.trim() === '' ||
-            pendingAction !== null
-          }
-        >
-          {pendingAction === 'create'
-            ? 'Creating...'
-            : 'Create Work Order'}
-        </button>
+            <button
+              type="submit"
+              disabled={
+                toolId === '' ||
+                description.trim() ===
+                  '' ||
+                pendingAction !==
+                  null
+              }
+            >
+              {pendingAction ===
+              'create'
+                ? 'Creating...'
+                : 'Create Work Order'}
+            </button>
           </form>
         </>
       )}
 
-      <h2>Work Orders</h2>
+      <h2>
+        Work Orders
+      </h2>
 
       <div className="responsive-table-view">
         <table>
@@ -488,9 +591,15 @@ function Maintenance() {
               <th>Tool</th>
               <th>Priority</th>
               <th>Status</th>
-              <th>Assigned To</th>
+              <th>
+                Assigned To
+              </th>
               <th>Description</th>
-              <th>Latest Decision</th>
+
+              <th>
+                Latest Decision
+              </th>
+
               <th>Action</th>
             </tr>
           </thead>
@@ -500,19 +609,22 @@ function Maintenance() {
               (workOrder) => (
                 <tr
                   key={
-                    workOrder.work_order_id
+                    workOrder
+                      .work_order_id
                   }
                 >
                   <td>
                     {
-                      workOrder.tool_name
+                      workOrder
+                        .tool_name
                     }
                   </td>
 
                   <td>
                     <StatusBadge
                       value={
-                        workOrder.priority
+                        workOrder
+                          .priority
                       }
                     />
                   </td>
@@ -520,32 +632,46 @@ function Maintenance() {
                   <td>
                     <StatusBadge
                       value={
-                        workOrder.status
+                        workOrder
+                          .status
                       }
                     />
                   </td>
 
                   <td>
-                    {workOrder.assigned_to ||
+                    {workOrder
+                      .assigned_to ||
                       'Unassigned'}
                   </td>
 
                   <td>
                     {
-                      workOrder.description
+                      workOrder
+                        .description
                     }
                   </td>
 
                   <td>
-                    {workOrder.decision ? (
+                    {workOrder
+                      .decision ? (
                       <>
                         <StatusBadge
-                          value={workOrder.decision}
+                          value={
+                            workOrder
+                              .decision
+                          }
                         />
+
                         <div className="decision-summary">
-                          {workOrder.approver_name}
+                          {
+                            workOrder
+                              .approver_name
+                          }
                           {': '}
-                          {workOrder.decision_reason}
+                          {
+                            workOrder
+                              .decision_reason
+                          }
                         </div>
                       </>
                     ) : (
@@ -560,11 +686,13 @@ function Maintenance() {
                       <button
                         type="button"
                         disabled={
-                          pendingAction !== null
+                          pendingAction !==
+                          null
                         }
                         onClick={() =>
                           handleComplete(
-                            workOrder.work_order_id
+                            workOrder
+                              .work_order_id
                           )
                         }
                       >
@@ -575,17 +703,19 @@ function Maintenance() {
                       </button>
                     )}
 
-                    {canCompleteRepair &&
+                    {canRequestReturn &&
                     workOrder.status ===
                       'Completed' && (
                       <button
                         type="button"
                         disabled={
-                          pendingAction !== null
+                          pendingAction !==
+                          null
                         }
                         onClick={() =>
                           handleReturnRequest(
-                            workOrder.work_order_id
+                            workOrder
+                              .work_order_id
                           )
                         }
                       >
@@ -600,22 +730,31 @@ function Maintenance() {
                     workOrder.status ===
                       'Awaiting Approval' &&
                     user?.user_id !==
-                      workOrder.completed_by && (
+                      workOrder
+                        .completed_by && (
                       <div className="decision-controls">
                         <label>
                           Decision Reason
+
                           <textarea
                             value={
                               decisionReasons[
-                                workOrder.work_order_id
+                                workOrder
+                                  .work_order_id
                               ] ?? ''
                             }
-                            onChange={(event) =>
+                            onChange={(
+                              event
+                            ) =>
                               setDecisionReasons(
-                                (current) => ({
+                                (
+                                  current
+                                ) => ({
                                   ...current,
                                   [workOrder.work_order_id]:
-                                    event.target.value
+                                    event
+                                      .target
+                                      .value
                                 })
                               )
                             }
@@ -625,23 +764,32 @@ function Maintenance() {
                         <div className="decision-buttons">
                           <button
                             type="button"
-                            disabled={pendingAction !== null}
+                            disabled={
+                              pendingAction !==
+                              null
+                            }
                             onClick={() =>
                               handleDecision(
-                                workOrder.work_order_id,
+                                workOrder
+                                  .work_order_id,
                                 'Approved'
                               )
                             }
                           >
                             Approve
                           </button>
+
                           <button
                             type="button"
                             className="secondary-button"
-                            disabled={pendingAction !== null}
+                            disabled={
+                              pendingAction !==
+                              null
+                            }
                             onClick={() =>
                               handleDecision(
-                                workOrder.work_order_id,
+                                workOrder
+                                  .work_order_id,
                                 'Denied'
                               )
                             }
@@ -656,9 +804,11 @@ function Maintenance() {
                     workOrder.status ===
                       'Awaiting Approval' &&
                     user?.user_id ===
-                      workOrder.completed_by && (
+                      workOrder
+                        .completed_by && (
                       <span>
-                        Another authorized approver must decide.
+                        Another authorized
+                        approver must decide.
                       </span>
                     )}
 
@@ -682,21 +832,24 @@ function Maintenance() {
             <article
               className="mobile-data-card"
               key={
-                workOrder.work_order_id
+                workOrder
+                  .work_order_id
               }
             >
               <div className="mobile-data-card-header">
                 <div>
                   <h2>
                     {
-                      workOrder.tool_name
+                      workOrder
+                        .tool_name
                     }
                   </h2>
                 </div>
 
                 <StatusBadge
                   value={
-                    workOrder.priority
+                    workOrder
+                      .priority
                   }
                 />
               </div>
@@ -710,7 +863,8 @@ function Maintenance() {
                   <span>
                     #
                     {
-                      workOrder.work_order_id
+                      workOrder
+                        .work_order_id
                     }
                   </span>
                 </div>
@@ -722,7 +876,8 @@ function Maintenance() {
 
                   <StatusBadge
                     value={
-                      workOrder.priority
+                      workOrder
+                        .priority
                     }
                   />
                 </div>
@@ -745,7 +900,8 @@ function Maintenance() {
                   </span>
 
                   <span>
-                    {workOrder.assigned_to ||
+                    {workOrder
+                      .assigned_to ||
                       'Unassigned'}
                   </span>
                 </div>
@@ -757,7 +913,8 @@ function Maintenance() {
 
                   <span>
                     {
-                      workOrder.description
+                      workOrder
+                        .description
                     }
                   </span>
                 </div>
@@ -766,6 +923,7 @@ function Maintenance() {
                   <span className="mobile-data-label">
                     Latest Decision
                   </span>
+
                   <span>
                     {workOrder.decision
                       ? `${workOrder.decision}: ${workOrder.decision_reason}`
@@ -781,11 +939,13 @@ function Maintenance() {
                   type="button"
                   className="mobile-card-action"
                   disabled={
-                    pendingAction !== null
+                    pendingAction !==
+                    null
                   }
                   onClick={() =>
                     handleComplete(
-                      workOrder.work_order_id
+                      workOrder
+                        .work_order_id
                     )
                   }
                 >
@@ -796,18 +956,20 @@ function Maintenance() {
                 </button>
               )}
 
-              {canCompleteRepair &&
+              {canRequestReturn &&
               workOrder.status ===
                 'Completed' && (
                 <button
                   type="button"
                   className="mobile-card-action"
                   disabled={
-                    pendingAction !== null
+                    pendingAction !==
+                    null
                   }
                   onClick={() =>
                     handleReturnRequest(
-                      workOrder.work_order_id
+                      workOrder
+                        .work_order_id
                     )
                   }
                 >
@@ -826,43 +988,61 @@ function Maintenance() {
                 <div className="mobile-decision-panel">
                   <label>
                     Decision Reason
+
                     <textarea
                       value={
                         decisionReasons[
-                          workOrder.work_order_id
+                          workOrder
+                            .work_order_id
                         ] ?? ''
                       }
-                      onChange={(event) =>
+                      onChange={(
+                        event
+                      ) =>
                         setDecisionReasons(
-                          (current) => ({
+                          (
+                            current
+                          ) => ({
                             ...current,
                             [workOrder.work_order_id]:
-                              event.target.value
+                              event
+                                .target
+                                .value
                           })
                         )
                       }
                     />
                   </label>
+
                   <div className="decision-buttons">
                     <button
                       type="button"
-                      disabled={pendingAction !== null}
+                      disabled={
+                        pendingAction !==
+                        null
+                      }
                       onClick={() =>
                         handleDecision(
-                          workOrder.work_order_id,
+                          workOrder
+                            .work_order_id,
                           'Approved'
                         )
                       }
                     >
                       Approve
                     </button>
+
                     <button
                       type="button"
                       className="secondary-button"
-                      disabled={pendingAction !== null}
+                      disabled={
+                        pendingAction !==
+                        null
+                      }
                       onClick={() =>
                         handleDecision(
-                          workOrder.work_order_id,
+                          workOrder
+                            .work_order_id,
                           'Denied'
                         )
                       }
@@ -871,6 +1051,17 @@ function Maintenance() {
                     </button>
                   </div>
                 </div>
+              )}
+
+              {canApproveReturn &&
+              workOrder.status ===
+                'Awaiting Approval' &&
+              user?.user_id ===
+                workOrder.completed_by && (
+                <p className="form-help">
+                  Another authorized
+                  approver must decide.
+                </p>
               )}
             </article>
           )

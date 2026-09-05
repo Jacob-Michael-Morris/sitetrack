@@ -21,8 +21,11 @@ interface AuthProviderProps {
 function AuthProvider({
   children
 }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] =
+    useState<User | null>(null)
+
+  const [loading, setLoading] =
+    useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -53,10 +56,11 @@ function AuthProvider({
     email: string,
     password: string
   ) {
-    const loggedInUser = await loginRequest(
-      email,
-      password
-    )
+    const loggedInUser =
+      await loginRequest(
+        email,
+        password
+      )
 
     setUser(loggedInUser)
   }
@@ -66,13 +70,24 @@ function AuthProvider({
     setUser(null)
   }
 
+  function hasPermission(
+    permissionKey: string
+  ) {
+    return (
+      user?.permissions.includes(
+        permissionKey
+      ) ?? false
+    )
+  }
+
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
         login,
-        logout
+        logout,
+        hasPermission
       }}
     >
       {children}
