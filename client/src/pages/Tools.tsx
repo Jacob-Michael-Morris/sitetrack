@@ -2,16 +2,23 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
 import StatusBadge from '../components/StatusBadge.js'
+import { useAuth } from '../context/useAuth.js'
 import { getTools } from '../services/tools.service.js'
 
 import type { Tool } from '../types/Tool.js'
 
 function Tools() {
+  const { user } = useAuth()
+
   const [tools, setTools] = useState<Tool[]>([])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const canRegisterTool =
+    user?.role === 'Administrator' ||
+    user?.role === 'Equipment Manager'
 
   useEffect(() => {
     async function loadTools() {
@@ -58,9 +65,11 @@ function Tools() {
           <p>Manage SiteTrack tools and equipment.</p>
         </div>
 
-        <Link className="button" to="/tools/new">
-          Register Tool
-        </Link>
+        {canRegisterTool && (
+          <Link className="button" to="/tools/new">
+            Register Tool
+          </Link>
+        )}
       </div>
 
       <div className="toolbar">
