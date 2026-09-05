@@ -39,30 +39,35 @@ function Sidebar({
     role === SAFETY_PERSONNEL
 
   const canViewJobsites =
+    !isSafetyPersonnel &&
     hasAllowedRole(
       role,
       JOBSITE_ROLES
     )
 
   const canViewAssignments =
+    !isSafetyPersonnel &&
     hasAllowedRole(
       role,
       ASSIGNMENT_ROLES
     )
 
   const canViewInspections =
+    !isSafetyPersonnel &&
     hasAllowedRole(
       role,
       INSPECTION_ROLES
     )
 
   const canViewDamageReports =
+    !isSafetyPersonnel &&
     hasAllowedRole(
       role,
       DAMAGE_REPORT_ROLES
     )
 
   const canViewMaintenance =
+    !isSafetyPersonnel &&
     hasAllowedRole(
       role,
       MAINTENANCE_ROLES

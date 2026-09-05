@@ -48,6 +48,21 @@ import EditUser from './pages/EditUser.js'
 import Forbidden from './pages/Forbidden.js'
 import NotFound from './pages/NotFound.js'
 
+const INSPECTION_PAGE_ROLES =
+  INSPECTION_ROLES.filter(
+    (role) => role !== SAFETY_PERSONNEL
+  )
+
+const DAMAGE_REPORT_PAGE_ROLES =
+  DAMAGE_REPORT_ROLES.filter(
+    (role) => role !== SAFETY_PERSONNEL
+  )
+
+const MAINTENANCE_PAGE_ROLES =
+  MAINTENANCE_ROLES.filter(
+    (role) => role !== SAFETY_PERSONNEL
+  )
+
 function App() {
   return (
     <Routes>
@@ -147,7 +162,7 @@ function App() {
             element={
               <RequireRole
                 allowedRoles={
-                  INSPECTION_ROLES
+                  INSPECTION_PAGE_ROLES
                 }
               />
             }
@@ -162,7 +177,7 @@ function App() {
             element={
               <RequireRole
                 allowedRoles={
-                  DAMAGE_REPORT_ROLES
+                  DAMAGE_REPORT_PAGE_ROLES
                 }
               />
             }
@@ -177,7 +192,7 @@ function App() {
             element={
               <RequireRole
                 allowedRoles={
-                  MAINTENANCE_ROLES
+                  MAINTENANCE_PAGE_ROLES
                 }
               />
             }
