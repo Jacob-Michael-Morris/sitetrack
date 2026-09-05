@@ -176,17 +176,6 @@ function Sidebar({
         )}
 
         {hasPermission(
-          'roles.manage'
-        ) && (
-          <NavLink
-            to="/roles/manage"
-            onClick={onClose}
-          >
-            Manage Roles
-          </NavLink>
-        )}
-
-        {hasPermission(
           'audit.view'
         ) && (
           <NavLink
