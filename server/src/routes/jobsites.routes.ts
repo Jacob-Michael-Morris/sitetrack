@@ -6,7 +6,7 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
@@ -16,33 +16,43 @@ router.use(requireAuth)
 router.get(
   '/',
   (req, res) =>
-    jobsitesController.getAll(req, res)
+    jobsitesController.getAll(
+      req,
+      res
+    )
 )
 
 router.get(
   '/:id',
   (req, res) =>
-    jobsitesController.getById(req, res)
+    jobsitesController.getById(
+      req,
+      res
+    )
 )
 
 router.post(
   '/',
-  requireRole(
-    'Administrator',
-    'Equipment Manager'
+  requirePermission(
+    'jobsites.create'
   ),
   (req, res) =>
-    jobsitesController.create(req, res)
+    jobsitesController.create(
+      req,
+      res
+    )
 )
 
 router.put(
   '/:id',
-  requireRole(
-    'Administrator',
-    'Equipment Manager'
+  requirePermission(
+    'jobsites.edit'
   ),
   (req, res) =>
-    jobsitesController.update(req, res)
+    jobsitesController.update(
+      req,
+      res
+    )
 )
 
 export default router

@@ -6,16 +6,12 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
 
 router.use(requireAuth)
-
-router.use(
-  requireRole('Administrator')
-)
 
 router.get(
   '/',
@@ -24,6 +20,45 @@ router.get(
       req,
       res
     )
+)
+
+router.get(
+  '/permissions',
+  requirePermission(
+    'roles.manage'
+  ),
+  (req, res) =>
+    rolesController
+      .getAllPermissions(
+        req,
+        res
+      )
+)
+
+router.get(
+  '/:id/permissions',
+  requirePermission(
+    'roles.manage'
+  ),
+  (req, res) =>
+    rolesController
+      .getRolePermissions(
+        req,
+        res
+      )
+)
+
+router.put(
+  '/:id/permissions',
+  requirePermission(
+    'roles.manage'
+  ),
+  (req, res) =>
+    rolesController
+      .updateRolePermissions(
+        req,
+        res
+      )
 )
 
 export default router

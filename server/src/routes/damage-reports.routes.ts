@@ -6,24 +6,18 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
 
 router.use(requireAuth)
 
-router.use(
-  requireRole(
-    'Administrator',
-    'Maintenance Technician',
-    'Worker',
-    'Safety Personnel'
-  )
-)
-
 router.get(
   '/',
+  requirePermission(
+    'damage_reports.view'
+  ),
   (req, res) =>
     damageReportsController.getAll(
       req,
@@ -33,6 +27,9 @@ router.get(
 
 router.get(
   '/:id',
+  requirePermission(
+    'damage_reports.view'
+  ),
   (req, res) =>
     damageReportsController.getById(
       req,
@@ -42,6 +39,9 @@ router.get(
 
 router.post(
   '/',
+  requirePermission(
+    'damage_reports.create'
+  ),
   (req, res) =>
     damageReportsController.create(
       req,

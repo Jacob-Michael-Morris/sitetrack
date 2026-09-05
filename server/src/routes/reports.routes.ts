@@ -6,7 +6,7 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
@@ -15,11 +15,8 @@ router.use(requireAuth)
 
 router.get(
   '/tool-inventory',
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Maintenance Technician',
-    'Safety Personnel'
+  requirePermission(
+    'reports.view'
   ),
   (req, res) =>
     reportsController
@@ -31,9 +28,8 @@ router.get(
 
 router.get(
   '/current-assignments',
-  requireRole(
-    'Administrator',
-    'Equipment Manager'
+  requirePermission(
+    'reports.view'
   ),
   (req, res) =>
     reportsController
@@ -45,11 +41,8 @@ router.get(
 
 router.get(
   '/maintenance-history',
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Maintenance Technician',
-    'Safety Personnel'
+  requirePermission(
+    'reports.view'
   ),
   (req, res) =>
     reportsController
@@ -61,11 +54,8 @@ router.get(
 
 router.get(
   '/inspection-status',
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Maintenance Technician',
-    'Safety Personnel'
+  requirePermission(
+    'reports.view'
   ),
   (req, res) =>
     reportsController
@@ -77,11 +67,8 @@ router.get(
 
 router.get(
   '/damage-history',
-  requireRole(
-    'Administrator',
-    'Equipment Manager',
-    'Maintenance Technician',
-    'Safety Personnel'
+  requirePermission(
+    'reports.view'
   ),
   (req, res) =>
     reportsController

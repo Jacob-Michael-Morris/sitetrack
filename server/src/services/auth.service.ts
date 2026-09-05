@@ -8,6 +8,7 @@ export interface AuthenticatedUser {
   name: string
   email: string
   role: string
+  permissions: string[]
 }
 
 interface AuthUserRecord {
@@ -18,6 +19,7 @@ interface AuthUserRecord {
   is_active: boolean
   role_id: number
   role_name: string
+  permissions: string[]
 }
 
 export class AuthDomainError extends Error {
@@ -135,7 +137,19 @@ export class AuthService {
          u.password_hash,
          u.is_active,
          r.role_id,
-         r.name AS role_name
+         r.name AS role_name,
+         ARRAY(
+           SELECT p.permission_key
+           FROM role_permissions rp
+           JOIN permissions p
+             ON p.permission_id =
+               rp.permission_id
+           WHERE rp.role_id =
+             r.role_id
+           ORDER BY
+             p.sort_order,
+             p.permission_id
+         ) AS permissions
        FROM users u
        JOIN roles r
          ON u.role_id = r.role_id
@@ -158,7 +172,19 @@ export class AuthService {
          u.email,
          u.is_active,
          r.role_id,
-         r.name AS role_name
+         r.name AS role_name,
+         ARRAY(
+           SELECT p.permission_key
+           FROM role_permissions rp
+           JOIN permissions p
+             ON p.permission_id =
+               rp.permission_id
+           WHERE rp.role_id =
+             r.role_id
+           ORDER BY
+             p.sort_order,
+             p.permission_id
+         ) AS permissions
        FROM users u
        JOIN roles r
          ON u.role_id = r.role_id
@@ -204,7 +230,8 @@ export class AuthService {
       user_id: user.user_id,
       name: user.name,
       email: user.email,
-      role: user.role_name
+      role: user.role_name,
+      permissions: user.permissions
     }
   }
 }

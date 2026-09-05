@@ -2,24 +2,43 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 
 import StatusBadge from '../components/StatusBadge.js'
+import { useAuth } from '../context/useAuth.js'
 import { getJobsites } from '../services/jobsites.service.js'
 
 import type { Jobsite } from '../types/Jobsite.js'
 
 function Jobsites() {
-  const [jobsites, setJobsites] = useState<Jobsite[]>([])
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('All')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { hasPermission } = useAuth()
+
+  const [jobsites, setJobsites] =
+    useState<Jobsite[]>([])
+
+  const [search, setSearch] =
+    useState('')
+
+  const [statusFilter, setStatusFilter] =
+    useState('All')
+
+  const [loading, setLoading] =
+    useState(true)
+
+  const [error, setError] =
+    useState('')
+
+  const canCreateJobsite =
+    hasPermission('jobsites.create')
 
   useEffect(() => {
     async function loadJobsites() {
       try {
-        const data = await getJobsites()
+        const data =
+          await getJobsites()
+
         setJobsites(data)
       } catch {
-        setError('Unable to load jobsites.')
+        setError(
+          'Unable to load jobsites.'
+        )
       } finally {
         setLoading(false)
       }
@@ -28,28 +47,44 @@ function Jobsites() {
     loadJobsites()
   }, [])
 
-  const filteredJobsites = jobsites.filter((jobsite) => {
-    const searchValue = search.toLowerCase()
+  const filteredJobsites =
+    jobsites.filter((jobsite) => {
+      const searchValue =
+        search.toLowerCase()
 
-    const matchesSearch =
-      jobsite.name.toLowerCase().includes(searchValue) ||
-      (jobsite.location || '')
-        .toLowerCase()
-        .includes(searchValue)
+      const matchesSearch =
+        jobsite.name
+          .toLowerCase()
+          .includes(searchValue) ||
+        (jobsite.location || '')
+          .toLowerCase()
+          .includes(searchValue)
 
-    const matchesStatus =
-      statusFilter === 'All' ||
-      jobsite.status === statusFilter
+      const matchesStatus =
+        statusFilter === 'All' ||
+        jobsite.status ===
+          statusFilter
 
-    return matchesSearch && matchesStatus
-  })
+      return (
+        matchesSearch &&
+        matchesStatus
+      )
+    })
 
   if (loading) {
-    return <p>Loading jobsites...</p>
+    return (
+      <p>
+        Loading jobsites...
+      </p>
+    )
   }
 
   if (error) {
-    return <p role="alert">{error}</p>
+    return (
+      <p role="alert">
+        {error}
+      </p>
+    )
   }
 
   return (
@@ -57,12 +92,21 @@ function Jobsites() {
       <div className="page-header">
         <div>
           <h1>Jobsites</h1>
-          <p>Manage SiteTrack construction jobsites.</p>
+
+          <p>
+            Manage SiteTrack
+            construction jobsites.
+          </p>
         </div>
 
-        <Link className="button" to="/jobsites/new">
-          Add Jobsite
-        </Link>
+        {canCreateJobsite && (
+          <Link
+            className="button"
+            to="/jobsites/new"
+          >
+            Add Jobsite
+          </Link>
+        )}
       </div>
 
       <div className="toolbar">
@@ -71,20 +115,35 @@ function Jobsites() {
           placeholder="Search jobsites..."
           value={search}
           onChange={(event) =>
-            setSearch(event.target.value)
+            setSearch(
+              event.target.value
+            )
           }
         />
 
         <select
           value={statusFilter}
           onChange={(event) =>
-            setStatusFilter(event.target.value)
+            setStatusFilter(
+              event.target.value
+            )
           }
         >
-          <option value="All">All Statuses</option>
-          <option value="Active">Active</option>
-          <option value="Completed">Completed</option>
-          <option value="Inactive">Inactive</option>
+          <option value="All">
+            All Statuses
+          </option>
+
+          <option value="Active">
+            Active
+          </option>
+
+          <option value="Completed">
+            Completed
+          </option>
+
+          <option value="Inactive">
+            Inactive
+          </option>
         </select>
       </div>
 
@@ -101,102 +160,125 @@ function Jobsites() {
           </thead>
 
           <tbody>
-            {filteredJobsites.map((jobsite) => (
-              <tr key={jobsite.jobsite_id}>
-                <td>{jobsite.name}</td>
+            {filteredJobsites.map(
+              (jobsite) => (
+                <tr
+                  key={
+                    jobsite.jobsite_id
+                  }
+                >
+                  <td>
+                    {jobsite.name}
+                  </td>
 
-                <td>
-                  {jobsite.location || 'N/A'}
-                </td>
+                  <td>
+                    {jobsite.location ||
+                      'N/A'}
+                  </td>
 
-                <td>
-                  <StatusBadge
-                    value={jobsite.status}
-                  />
-                </td>
+                  <td>
+                    <StatusBadge
+                      value={
+                        jobsite.status
+                      }
+                    />
+                  </td>
 
-                <td>
-                  {jobsite.start_date
-                    ? new Date(
-                        jobsite.start_date
-                      ).toLocaleDateString()
-                    : 'N/A'}
-                </td>
+                  <td>
+                    {jobsite.start_date
+                      ? new Date(
+                          jobsite.start_date
+                        ).toLocaleDateString()
+                      : 'N/A'}
+                  </td>
 
-                <td>
-                  <Link
-                    to={`/jobsites/${jobsite.jobsite_id}`}
-                  >
-                    View
-                  </Link>
-                </td>
-              </tr>
-            ))}
+                  <td>
+                    <Link
+                      to={`/jobsites/${jobsite.jobsite_id}`}
+                    >
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              )
+            )}
           </tbody>
         </table>
       </div>
 
       <div className="mobile-card-list">
-        {filteredJobsites.map((jobsite) => (
-          <article
-            className="mobile-data-card"
-            key={jobsite.jobsite_id}
-          >
-            <div className="mobile-data-card-header">
-              <h2>{jobsite.name}</h2>
-
-              <StatusBadge
-                value={jobsite.status}
-              />
-            </div>
-
-            <div className="mobile-data-card-body">
-              <div className="mobile-data-row">
-                <span className="mobile-data-label">
-                  Location
-                </span>
-
-                <span>
-                  {jobsite.location || 'N/A'}
-                </span>
-              </div>
-
-              <div className="mobile-data-row">
-                <span className="mobile-data-label">
-                  Status
-                </span>
+        {filteredJobsites.map(
+          (jobsite) => (
+            <article
+              className="mobile-data-card"
+              key={
+                jobsite.jobsite_id
+              }
+            >
+              <div className="mobile-data-card-header">
+                <h2>
+                  {jobsite.name}
+                </h2>
 
                 <StatusBadge
-                  value={jobsite.status}
+                  value={
+                    jobsite.status
+                  }
                 />
               </div>
 
-              <div className="mobile-data-row">
-                <span className="mobile-data-label">
-                  Start Date
-                </span>
+              <div className="mobile-data-card-body">
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Location
+                  </span>
 
-                <span>
-                  {jobsite.start_date
-                    ? new Date(
-                        jobsite.start_date
-                      ).toLocaleDateString()
-                    : 'N/A'}
-                </span>
+                  <span>
+                    {jobsite.location ||
+                      'N/A'}
+                  </span>
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Status
+                  </span>
+
+                  <StatusBadge
+                    value={
+                      jobsite.status
+                    }
+                  />
+                </div>
+
+                <div className="mobile-data-row">
+                  <span className="mobile-data-label">
+                    Start Date
+                  </span>
+
+                  <span>
+                    {jobsite.start_date
+                      ? new Date(
+                          jobsite.start_date
+                        ).toLocaleDateString()
+                      : 'N/A'}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <Link
-              className="mobile-card-action"
-              to={`/jobsites/${jobsite.jobsite_id}`}
-            >
-              View Jobsite
-            </Link>
-          </article>
-        ))}
+              <Link
+                className="mobile-card-action"
+                to={`/jobsites/${jobsite.jobsite_id}`}
+              >
+                View Jobsite
+              </Link>
+            </article>
+          )
+        )}
       </div>
 
-      {filteredJobsites.length === 0 && (
+      {filteredJobsites.length ===
+        0 && (
         <p>
           {jobsites.length === 0
             ? 'No jobsites have been added yet. Add a jobsite before checking out or transferring tools.'

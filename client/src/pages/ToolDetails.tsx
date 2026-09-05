@@ -1,52 +1,77 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+
+import {
+  Link,
+  useParams
+} from 'react-router'
 
 import StatusBadge from '../components/StatusBadge.js'
+import { useAuth } from '../context/useAuth.js'
 import { getTool } from '../services/tools.service.js'
 
 import type { Tool } from '../types/Tool.js'
 
 function ToolDetails() {
   const { id } = useParams()
+  const { hasPermission } = useAuth()
+
+  const canEditTool =
+    hasPermission(
+      'tools.edit'
+    )
 
   const [tool, setTool] =
     useState<Tool | null>(null)
-
-  const [loading, setLoading] =
-    useState(true)
 
   const [error, setError] =
     useState('')
 
   useEffect(() => {
-    async function loadTool() {
-      if (!id) {
-        setLoading(false)
-        setError('Invalid tool ID.')
-        return
-      }
-
-      try {
-        const data = await getTool(id)
-        setTool(data)
-      } catch {
-        setError('Unable to load tool.')
-      } finally {
-        setLoading(false)
-      }
+    if (!id) {
+      return
     }
 
-    loadTool()
+    let cancelled = false
+
+    getTool(id)
+      .then((data) => {
+        if (!cancelled) {
+          setTool(data)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError(
+            'Unable to load tool.'
+          )
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [id])
 
-  if (loading) {
-    return <p>Loading tool...</p>
-  }
-
-  if (error || !tool) {
+  if (!id) {
     return (
       <p role="alert">
-        {error || 'Tool not found.'}
+        Invalid tool ID.
+      </p>
+    )
+  }
+
+  if (error) {
+    return (
+      <p role="alert">
+        {error}
+      </p>
+    )
+  }
+
+  if (!tool) {
+    return (
+      <p>
+        Loading tool...
       </p>
     )
   }
@@ -55,19 +80,23 @@ function ToolDetails() {
     <div className="detail-page">
       <div className="page-header">
         <div>
-          <h1>{tool.name}</h1>
+          <h1>
+            {tool.name}
+          </h1>
 
           <p>
             Tool #{tool.tool_id}
           </p>
         </div>
 
-        <Link
-          className="button"
-          to={`/tools/${tool.tool_id}/edit`}
-        >
-          Edit Tool
-        </Link>
+        {canEditTool && (
+          <Link
+            className="button"
+            to={`/tools/${tool.tool_id}/edit`}
+          >
+            Edit Tool
+          </Link>
+        )}
       </div>
 
       <div className="details-card">
@@ -88,7 +117,7 @@ function ToolDetails() {
             </span>
 
             <span className="details-value">
-              {tool.category || 'N/A'}
+              {tool.category}
             </span>
           </div>
 
@@ -136,7 +165,7 @@ function ToolDetails() {
         className="back-link"
         to="/tools"
       >
-        ← Back to Tools
+        &larr; Back to Tools
       </Link>
     </div>
   )

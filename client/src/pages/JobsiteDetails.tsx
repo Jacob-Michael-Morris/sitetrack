@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import {
+  Link,
+  useParams
+} from 'react-router'
 
 import StatusBadge from '../components/StatusBadge.js'
+import { useAuth } from '../context/useAuth.js'
 import { getJobsite } from '../services/jobsites.service.js'
 
 import type { Jobsite } from '../types/Jobsite.js'
 
 function JobsiteDetails() {
   const { id } = useParams()
+  const { hasPermission } = useAuth()
 
   const [jobsite, setJobsite] =
     useState<Jobsite | null>(null)
@@ -18,11 +23,16 @@ function JobsiteDetails() {
   const [error, setError] =
     useState('')
 
+  const canEditJobsite =
+    hasPermission('jobsites.edit')
+
   useEffect(() => {
     async function loadJobsite() {
       if (!id) {
         setLoading(false)
-        setError('Invalid jobsite ID.')
+        setError(
+          'Invalid jobsite ID.'
+        )
         return
       }
 
@@ -44,13 +54,18 @@ function JobsiteDetails() {
   }, [id])
 
   if (loading) {
-    return <p>Loading jobsite...</p>
+    return (
+      <p>
+        Loading jobsite...
+      </p>
+    )
   }
 
   if (error || !jobsite) {
     return (
       <p role="alert">
-        {error || 'Jobsite not found.'}
+        {error ||
+          'Jobsite not found.'}
       </p>
     )
   }
@@ -59,19 +74,24 @@ function JobsiteDetails() {
     <div className="detail-page">
       <div className="page-header">
         <div>
-          <h1>{jobsite.name}</h1>
+          <h1>
+            {jobsite.name}
+          </h1>
 
           <p>
-            Jobsite #{jobsite.jobsite_id}
+            Jobsite #
+            {jobsite.jobsite_id}
           </p>
         </div>
 
-        <Link
-          className="button"
-          to={`/jobsites/${jobsite.jobsite_id}/edit`}
-        >
-          Edit Jobsite
-        </Link>
+        {canEditJobsite && (
+          <Link
+            className="button"
+            to={`/jobsites/${jobsite.jobsite_id}/edit`}
+          >
+            Edit Jobsite
+          </Link>
+        )}
       </div>
 
       <div className="details-card">
@@ -82,7 +102,8 @@ function JobsiteDetails() {
             </span>
 
             <span className="details-value">
-              {jobsite.location || 'N/A'}
+              {jobsite.location ||
+                'N/A'}
             </span>
           </div>
 
@@ -93,7 +114,9 @@ function JobsiteDetails() {
 
             <span className="details-value">
               <StatusBadge
-                value={jobsite.status}
+                value={
+                  jobsite.status
+                }
               />
             </span>
           </div>
@@ -143,7 +166,7 @@ function JobsiteDetails() {
         className="back-link"
         to="/jobsites"
       >
-        ← Back to Jobsites
+        &larr; Back to Jobsites
       </Link>
     </div>
   )

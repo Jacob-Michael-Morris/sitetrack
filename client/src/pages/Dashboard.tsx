@@ -10,12 +10,95 @@ import type { DashboardData } from '../types/Dashboard.js'
 import './CSS/Dashboard.css'
 
 function Dashboard() {
-  const { user } = useAuth()
+  const {
+    user,
+    hasPermission
+  } = useAuth()
 
   const [dashboard, setDashboard] =
     useState<DashboardData | null>(null)
 
-  const [error, setError] = useState('')
+  const [error, setError] =
+    useState('')
+
+  const canViewTools =
+    hasPermission(
+      'tools.view'
+    )
+
+  const canViewJobsites =
+    hasPermission(
+      'jobsites.view'
+    )
+
+  const canViewAssignments =
+    hasPermission(
+      'assignments.view'
+    )
+
+  const canViewInspections =
+    hasPermission(
+      'inspections.view'
+    )
+
+  const canCreateInspection =
+    hasPermission(
+      'inspections.create'
+    )
+
+  const canViewDamageReports =
+    hasPermission(
+      'damage_reports.view'
+    )
+
+  const canCreateDamageReport =
+    hasPermission(
+      'damage_reports.create'
+    )
+
+  const canViewMaintenance =
+    hasPermission(
+      'maintenance.view'
+    )
+
+  const canViewAlerts =
+    hasPermission(
+      'alerts.view'
+    )
+
+  const canViewUsers =
+    hasPermission(
+      'users.view'
+    )
+
+  const showToolStatus =
+    canViewTools ||
+    canViewAssignments ||
+    canViewMaintenance ||
+    canViewDamageReports
+
+  const showOperations =
+    canViewJobsites ||
+    canViewDamageReports ||
+    canViewMaintenance ||
+    canViewInspections ||
+    canViewAlerts
+
+  const showQuickActions =
+    canViewTools ||
+    canViewJobsites ||
+    canViewAssignments ||
+    (
+      canViewInspections &&
+      canCreateInspection
+    ) ||
+    (
+      canViewDamageReports &&
+      canCreateDamageReport
+    ) ||
+    canViewMaintenance ||
+    canViewAlerts ||
+    canViewUsers
 
   useEffect(() => {
     let cancelled = false
@@ -48,36 +131,17 @@ function Dashboard() {
   }
 
   if (!dashboard) {
-    return <p>Loading dashboard...</p>
+    return (
+      <p>
+        Loading dashboard...
+      </p>
+    )
   }
 
   const {
     summary,
     recent_alerts
   } = dashboard
-
-  const role = user?.role
-
-  const isAdministrator =
-    role === 'Administrator'
-
-  const isEquipmentManager =
-    role === 'Equipment Manager'
-
-  const isMaintenanceTechnician =
-    role === 'Maintenance Technician'
-
-  const isWorker =
-    role === 'Worker'
-
-  const isSafetyPersonnel =
-    role === 'Safety Personnel'
-
-  const canViewAlerts =
-    isAdministrator ||
-    isEquipmentManager ||
-    isMaintenanceTechnician ||
-    isSafetyPersonnel
 
   return (
     <div className="dashboard-page">
@@ -91,241 +155,247 @@ function Dashboard() {
         </div>
 
         <div className="dashboard-role">
-          {role}
+          {user?.role}
         </div>
       </div>
 
-      <section>
-        <h2>Tool Status</h2>
+      {showToolStatus && (
+        <section>
+          <h2>Tool Status</h2>
 
-        <div className="dashboard-grid">
-          <div className="dashboard-card">
-            <span>Total Tools</span>
+          <div className="dashboard-grid">
+            {canViewTools && (
+              <>
+                <div className="dashboard-card">
+                  <span>
+                    Total Tools
+                  </span>
 
-            <strong>
-              {summary.total_tools}
-            </strong>
+                  <strong>
+                    {
+                      summary.total_tools
+                    }
+                  </strong>
+                </div>
+
+                <div className="dashboard-card">
+                  <span>
+                    Available
+                  </span>
+
+                  <strong>
+                    {
+                      summary.available_tools
+                    }
+                  </strong>
+                </div>
+              </>
+            )}
+
+            {canViewAssignments && (
+              <div className="dashboard-card">
+                <span>
+                  Checked Out
+                </span>
+
+                <strong>
+                  {
+                    summary.checked_out_tools
+                  }
+                </strong>
+              </div>
+            )}
+
+            {canViewMaintenance && (
+              <div className="dashboard-card">
+                <span>
+                  Maintenance
+                </span>
+
+                <strong>
+                  {
+                    summary.maintenance_tools
+                  }
+                </strong>
+              </div>
+            )}
+
+            {canViewDamageReports && (
+              <div className="dashboard-card">
+                <span>
+                  Out of Service
+                </span>
+
+                <strong>
+                  {
+                    summary.out_of_service_tools
+                  }
+                </strong>
+              </div>
+            )}
           </div>
+        </section>
+      )}
 
-          <div className="dashboard-card">
-            <span>Available</span>
+      {showOperations && (
+        <section>
+          <h2>Operations</h2>
 
-            <strong>
-              {summary.available_tools}
-            </strong>
+          <div className="dashboard-grid">
+            {canViewJobsites && (
+              <div className="dashboard-card">
+                <span>
+                  Active Jobsites
+                </span>
+
+                <strong>
+                  {
+                    summary.active_jobsites
+                  }
+                </strong>
+              </div>
+            )}
+
+            {canViewDamageReports && (
+              <div className="dashboard-card">
+                <span>
+                  Open Damage Reports
+                </span>
+
+                <strong>
+                  {
+                    summary.open_damage_reports
+                  }
+                </strong>
+              </div>
+            )}
+
+            {canViewMaintenance && (
+              <div className="dashboard-card">
+                <span>
+                  Open Work Orders
+                </span>
+
+                <strong>
+                  {
+                    summary.open_work_orders
+                  }
+                </strong>
+              </div>
+            )}
+
+            {canViewInspections && (
+              <div className="dashboard-card">
+                <span>
+                  Overdue Inspections
+                </span>
+
+                <strong>
+                  {
+                    summary.overdue_inspections
+                  }
+                </strong>
+              </div>
+            )}
+
+            {canViewAlerts && (
+              <div className="dashboard-card">
+                <span>
+                  Unread Alerts
+                </span>
+
+                <strong>
+                  {
+                    summary.unread_alerts
+                  }
+                </strong>
+              </div>
+            )}
           </div>
+        </section>
+      )}
 
-          {(isAdministrator ||
-            isEquipmentManager ||
-            isWorker) && (
-            <div className="dashboard-card">
-              <span>Checked Out</span>
+      {showQuickActions && (
+        <section>
+          <h2>Quick Actions</h2>
 
-              <strong>
-                {
-                  summary.checked_out_tools
-                }
-              </strong>
-            </div>
-          )}
+          <div className="dashboard-actions">
+            {canViewTools && (
+              <Link
+                className="dashboard-action"
+                to="/tools"
+              >
+                View Tools
+              </Link>
+            )}
 
-          {(isAdministrator ||
-            isMaintenanceTechnician) && (
-            <div className="dashboard-card">
-              <span>Maintenance</span>
+            {canViewJobsites && (
+              <Link
+                className="dashboard-action"
+                to="/jobsites"
+              >
+                Jobsites
+              </Link>
+            )}
 
-              <strong>
-                {
-                  summary.maintenance_tools
-                }
-              </strong>
-            </div>
-          )}
+            {canViewAssignments && (
+              <Link
+                className="dashboard-action"
+                to="/assignments"
+              >
+                Tool Assignments
+              </Link>
+            )}
 
-          {(isAdministrator ||
-            isMaintenanceTechnician ||
-            isWorker ||
-            isSafetyPersonnel) && (
-            <div className="dashboard-card">
-              <span>
-                Out of Service
-              </span>
+            {canViewInspections &&
+              canCreateInspection && (
+                <Link
+                  className="dashboard-action"
+                  to="/inspections"
+                >
+                  Perform Inspection
+                </Link>
+              )}
 
-              <strong>
-                {
-                  summary.out_of_service_tools
-                }
-              </strong>
-            </div>
-          )}
-        </div>
-      </section>
+            {canViewDamageReports &&
+              canCreateDamageReport && (
+                <Link
+                  className="dashboard-action"
+                  to="/damage-reports"
+                >
+                  Report Damage
+                </Link>
+              )}
 
-      <section>
-        <h2>Operations</h2>
+            {canViewMaintenance && (
+              <Link
+                className="dashboard-action"
+                to="/maintenance"
+              >
+                Maintenance
+              </Link>
+            )}
 
-        <div className="dashboard-grid">
-          {(isAdministrator ||
-            isEquipmentManager) && (
-            <div className="dashboard-card">
-              <span>
-                Active Jobsites
-              </span>
+            {canViewAlerts && (
+              <Link
+                className="dashboard-action"
+                to="/alerts"
+              >
+                View Alerts
+              </Link>
+            )}
 
-              <strong>
-                {
-                  summary.active_jobsites
-                }
-              </strong>
-            </div>
-          )}
-
-          {(isAdministrator ||
-            isMaintenanceTechnician ||
-            isWorker ||
-            isSafetyPersonnel) && (
-            <div className="dashboard-card">
-              <span>
-                Open Damage Reports
-              </span>
-
-              <strong>
-                {
-                  summary.open_damage_reports
-                }
-              </strong>
-            </div>
-          )}
-
-          {(isAdministrator ||
-            isMaintenanceTechnician) && (
-            <div className="dashboard-card">
-              <span>
-                Open Work Orders
-              </span>
-
-              <strong>
-                {
-                  summary.open_work_orders
-                }
-              </strong>
-            </div>
-          )}
-
-          {(isAdministrator ||
-            isMaintenanceTechnician ||
-            isSafetyPersonnel) && (
-            <div className="dashboard-card">
-              <span>
-                Overdue Inspections
-              </span>
-
-              <strong>
-                {
-                  summary.overdue_inspections
-                }
-              </strong>
-            </div>
-          )}
-
-          {canViewAlerts && (
-            <div className="dashboard-card">
-              <span>Unread Alerts</span>
-
-              <strong>
-                {
-                  summary.unread_alerts
-                }
-              </strong>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section>
-        <h2>Quick Actions</h2>
-
-        <div className="dashboard-actions">
-          <Link
-            className="dashboard-action"
-            to="/tools"
-          >
-            View Tools
-          </Link>
-
-          {(isAdministrator ||
-            isEquipmentManager) && (
-            <Link
-              className="dashboard-action"
-              to="/jobsites"
-            >
-              Manage Jobsites
-            </Link>
-          )}
-
-          {(isAdministrator ||
-            isEquipmentManager ||
-            isWorker) && (
-            <Link
-              className="dashboard-action"
-              to="/assignments"
-            >
-              Tool Assignments
-            </Link>
-          )}
-
-          {(isAdministrator ||
-            isMaintenanceTechnician ||
-            isSafetyPersonnel) && (
-            <Link
-              className="dashboard-action"
-              to="/inspections"
-            >
-              Perform Inspection
-            </Link>
-          )}
-
-          {(isAdministrator ||
-            isMaintenanceTechnician ||
-            isWorker ||
-            isSafetyPersonnel) && (
-            <Link
-              className="dashboard-action"
-              to="/damage-reports"
-            >
-              Report Damage
-            </Link>
-          )}
-
-          {(isAdministrator ||
-            isMaintenanceTechnician) && (
-            <Link
-              className="dashboard-action"
-              to="/maintenance"
-            >
-              Maintenance
-            </Link>
-          )}
-
-          {canViewAlerts && (
-            <Link
-              className="dashboard-action"
-              to="/alerts"
-            >
-              View Alerts
-            </Link>
-          )}
-
-          {isAdministrator && (
-            <Link
-              className="dashboard-action"
-              to="/users"
-            >
-              Manage Users
-            </Link>
-          )}
-        </div>
-      </section>
+            {canViewUsers && (
+              <Link
+                className="dashboard-action"
+                to="/users"
+              >
+                Manage Users
+              </Link>
+            )}
+          </div>
+        </section>
+      )}
 
       {canViewAlerts && (
         <section>
@@ -338,7 +408,9 @@ function Dashboard() {
           </div>
 
           {recent_alerts.length === 0 ? (
-            <p>No recent alerts.</p>
+            <p>
+              No recent alerts.
+            </p>
           ) : (
             <>
               <div className="dashboard-table-container">
@@ -416,8 +488,10 @@ function Dashboard() {
                           </h3>
 
                           <span>
-                            {alert.tool_name ??
-                              'No Tool'}
+                            {
+                              alert.tool_name ??
+                              'No Tool'
+                            }
                           </span>
                         </div>
 

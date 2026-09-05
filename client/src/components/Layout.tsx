@@ -5,34 +5,30 @@ import {
   Outlet
 } from 'react-router'
 
-import Sidebar from './Sidebar'
+import Sidebar from './Sidebar.js'
 
 import { useAuth } from '../context/useAuth.js'
-
-import {
-  ASSIGNMENT_ROLES,
-  JOBSITE_ROLES,
-  hasAllowedRole
-} from '../constants/roles.js'
 
 function Layout() {
   const [menuOpen, setMenuOpen] =
     useState(false)
 
-  const { user } = useAuth()
+  const { hasPermission } =
+    useAuth()
 
-  const role = user?.role
+  const canViewTools =
+    hasPermission(
+      'tools.view'
+    )
 
   const canViewJobsites =
-    hasAllowedRole(
-      role,
-      JOBSITE_ROLES
+    hasPermission(
+      'jobsites.view'
     )
 
   const canViewAssignments =
-    hasAllowedRole(
-      role,
-      ASSIGNMENT_ROLES
+    hasPermission(
+      'assignments.view'
     )
 
   function closeMenu() {
@@ -89,19 +85,21 @@ function Layout() {
           className="mobile-bottom-nav"
           aria-label="Quick navigation"
         >
-          <NavLink
-            to="/tools"
-            onClick={closeMenu}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
+          {canViewTools && (
+            <NavLink
+              to="/tools"
+              onClick={closeMenu}
             >
-              <path d="M14.5 6.5a4 4 0 0 0-5-5l2.2 2.2-2.8 2.8-2.2-2.2a4 4 0 0 0 5 5L19 16.6a2 2 0 1 1-2.8 2.8l-7.3-7.3" />
-            </svg>
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M14.5 6.5a4 4 0 0 0-5-5l2.2 2.2-2.8 2.8-2.2-2.2a4 4 0 0 0 5 5L19 16.6a2 2 0 1 1-2.8 2.8l-7.3-7.3" />
+              </svg>
 
-            <span>Tools</span>
-          </NavLink>
+              <span>Tools</span>
+            </NavLink>
+          )}
 
           {canViewJobsites && (
             <NavLink

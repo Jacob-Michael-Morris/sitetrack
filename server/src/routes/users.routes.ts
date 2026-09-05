@@ -6,39 +6,59 @@ import {
 
 import {
   requireAuth,
-  requireRole
+  requirePermission
 } from '../middleware/auth.middleware.js'
 
 const router = Router()
 
 router.use(requireAuth)
 
-router.use(
-  requireRole('Administrator')
-)
-
 router.get(
   '/',
+  requirePermission(
+    'users.view'
+  ),
   (req, res) =>
-    usersController.getAll(req, res)
+    usersController.getAll(
+      req,
+      res
+    )
 )
 
 router.get(
   '/:id',
+  requirePermission(
+    'users.view'
+  ),
   (req, res) =>
-    usersController.getById(req, res)
+    usersController.getById(
+      req,
+      res
+    )
 )
 
 router.post(
   '/',
+  requirePermission(
+    'users.create'
+  ),
   (req, res) =>
-    usersController.create(req, res)
+    usersController.create(
+      req,
+      res
+    )
 )
 
 router.put(
   '/:id',
+  requirePermission(
+    'users.edit'
+  ),
   (req, res) =>
-    usersController.update(req, res)
+    usersController.update(
+      req,
+      res
+    )
 )
 
 export default router

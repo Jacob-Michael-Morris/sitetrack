@@ -14,10 +14,12 @@ import type { DamageReport } from '../types/DamageReport.js'
 import type { Tool } from '../types/Tool.js'
 
 function DamageReports() {
-  const { user } = useAuth()
+  const { hasPermission } = useAuth()
 
   const canReportDamage =
-    user?.role !== 'Safety Personnel'
+    hasPermission(
+      'damage_reports.create'
+    )
 
   const [reports, setReports] =
     useState<DamageReport[]>([])
@@ -77,7 +79,10 @@ function DamageReports() {
             return
           }
 
-          setReports(reportData)
+          setReports(
+            reportData
+          )
+
           setTools(toolData)
         }
       )
@@ -100,7 +105,10 @@ function DamageReports() {
   ) {
     event.preventDefault()
 
-    if (submitting) {
+    if (
+      !canReportDamage ||
+      submitting
+    ) {
       return
     }
 
@@ -143,7 +151,9 @@ function DamageReports() {
     <div>
       <div className="page-header">
         <div>
-          <h1>Damage Reports</h1>
+          <h1>
+            Damage Reports
+          </h1>
 
           <p>
             Report damaged tools and
@@ -159,115 +169,132 @@ function DamageReports() {
       )}
 
       {message && (
-        <p>{message}</p>
+        <p>
+          {message}
+        </p>
       )}
 
-      <h2>Report Damaged Tool</h2>
+      {canReportDamage ? (
+        <>
+          <h2>
+            Report Damaged Tool
+          </h2>
 
-      <form
-        className="tool-form"
-        onSubmit={handleSubmit}
-      >
-        <label>
-          Tool
-
-          <select
-            value={toolId}
-            onChange={(event) =>
-              setToolId(
-                event.target.value
-              )
-            }
-            required
-            disabled={!canReportDamage}
+          <form
+            className="tool-form"
+            onSubmit={handleSubmit}
           >
-            <option value="">
-              Select Tool
-            </option>
+            <label>
+              Tool
 
-            {tools.map((tool) => (
-              <option
-                key={tool.tool_id}
-                value={tool.tool_id}
+              <select
+                value={toolId}
+                onChange={(event) =>
+                  setToolId(
+                    event.target.value
+                  )
+                }
+                required
               >
-                {tool.name} -{' '}
-                {tool.serial_number}
-              </option>
-            ))}
-          </select>
-        </label>
+                <option value="">
+                  Select Tool
+                </option>
 
-        <label>
-          Severity
+                {tools.map((tool) => (
+                  <option
+                    key={tool.tool_id}
+                    value={tool.tool_id}
+                  >
+                    {tool.name} -{' '}
+                    {tool.serial_number}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <select
-            value={severity}
-            onChange={(event) =>
-              setSeverity(
-                event.target.value
-              )
-            }
-            disabled={!canReportDamage}
-          >
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-            <option>Critical</option>
-          </select>
-        </label>
+            <label>
+              Severity
 
-        <label>
-          Description
+              <select
+                value={severity}
+                onChange={(event) =>
+                  setSeverity(
+                    event.target.value
+                  )
+                }
+              >
+                <option>
+                  Low
+                </option>
 
-          <textarea
-            value={description}
-            onChange={(event) =>
-              setDescription(
-                event.target.value
-              )
-            }
-            required
-            disabled={!canReportDamage}
-          />
-        </label>
+                <option>
+                  Medium
+                </option>
 
-        <label>
-          Notes
+                <option>
+                  High
+                </option>
 
-          <textarea
-            value={notes}
-            onChange={(event) =>
-              setNotes(
-                event.target.value
-              )
-            }
-            disabled={!canReportDamage}
-          />
-        </label>
+                <option>
+                  Critical
+                </option>
+              </select>
+            </label>
 
-        <button
-          type="submit"
-          disabled={
-            toolId === '' ||
-            description.trim() === '' ||
-            submitting ||
-            !canReportDamage
-          }
-        >
-          {submitting
-            ? 'Submitting...'
-            : 'Submit Damage Report'}
-        </button>
+            <label>
+              Description
 
-        {!canReportDamage && (
-          <p className="form-help">
-            Safety Personnel have review-only
-            access to damage reports.
-          </p>
-        )}
-      </form>
+              <textarea
+                value={description}
+                onChange={(event) =>
+                  setDescription(
+                    event.target.value
+                  )
+                }
+                required
+              />
+            </label>
 
-      <h2>Damage Report History</h2>
+            <label>
+              Notes
+
+              <textarea
+                value={notes}
+                onChange={(event) =>
+                  setNotes(
+                    event.target.value
+                  )
+                }
+              />
+            </label>
+
+            <button
+              type="submit"
+              disabled={
+                toolId === '' ||
+                description.trim() ===
+                  '' ||
+                submitting
+              }
+            >
+              {submitting
+                ? 'Submitting...'
+                : 'Submit Damage Report'}
+            </button>
+          </form>
+        </>
+      ) : (
+        <p className="form-help">
+          You can review damage
+          reports, but you do not have
+          permission to create a
+          damage report.
+        </p>
+      )}
+
+      <h2>
+        Damage Report History
+      </h2>
 
       <div className="responsive-table-view">
         <table>
@@ -287,7 +314,8 @@ function DamageReports() {
               (report) => (
                 <tr
                   key={
-                    report.damage_report_id
+                    report
+                      .damage_report_id
                   }
                 >
                   <td>
@@ -296,7 +324,8 @@ function DamageReports() {
 
                   <td>
                     {
-                      report.serial_number
+                      report
+                        .serial_number
                     }
                   </td>
 
@@ -323,7 +352,9 @@ function DamageReports() {
                   </td>
 
                   <td>
-                    {report.description}
+                    {
+                      report.description
+                    }
                   </td>
                 </tr>
               )
@@ -338,7 +369,8 @@ function DamageReports() {
             <article
               className="mobile-data-card"
               key={
-                report.damage_report_id
+                report
+                  .damage_report_id
               }
             >
               <div className="mobile-data-card-header">
@@ -361,7 +393,8 @@ function DamageReports() {
 
                   <span>
                     {
-                      report.serial_number
+                      report
+                        .serial_number
                     }
                   </span>
                 </div>
@@ -408,7 +441,9 @@ function DamageReports() {
                   </span>
 
                   <span>
-                    {report.description}
+                    {
+                      report.description
+                    }
                   </span>
                 </div>
               </div>
