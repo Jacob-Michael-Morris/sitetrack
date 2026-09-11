@@ -4,93 +4,124 @@ import {
   Routes
 } from 'react-router'
 
-import Layout from './components/Layout.js'
-import RequireAuth from './components/RequireAuth.js'
-import RequirePermission from './components/RequirePermission.js'
+import Layout from './session-navigation/components/Layout.js'
+import RequireAuth from './session-navigation/components/RequireAuth.js'
+import RequirePermission from './session-navigation/components/RequirePermission.js'
 
-import { useAuth } from './context/useAuth.js'
+import { useAuth } from './session-navigation/context/useAuth.js'
 
-import Login from './pages/Login.js'
-import Dashboard from './pages/Dashboard.js'
+import Login from './session-navigation/auth/Login.js'
+import Dashboard from './administration/dashboard/DashboardPage.js'
 
-import Tools from './pages/Tools.js'
-import ToolDetails from './pages/ToolDetails.js'
-import RegisterTool from './pages/RegisterTool.js'
-import EditTool from './pages/EditTool.js'
+import Tools from './jobsite-tool-operations/tools/Tools.js'
+import ToolDetails from './jobsite-tool-operations/tools/ToolDetails.js'
+import RegisterTool from './jobsite-tool-operations/tools/RegisterTool.js'
+import EditTool from './jobsite-tool-operations/tools/EditTool.js'
 
-import Jobsites from './pages/Jobsites.js'
-import JobsiteDetails from './pages/JobsiteDetails.js'
-import RegisterJobsite from './pages/RegisterJobsite.js'
-import EditJobsite from './pages/EditJobsite.js'
+import Jobsites from './jobsite-tool-operations/jobsites/Jobsites.js'
+import JobsiteDetails from './jobsite-tool-operations/jobsites/JobsiteDetails.js'
+import RegisterJobsite from './jobsite-tool-operations/jobsites/RegisterJobsite.js'
+import EditJobsite from './jobsite-tool-operations/jobsites/EditJobsite.js'
 
-import Assignments from './pages/Assignments.js'
-import Inspections from './pages/Inspections.js'
-import DamageReports from './pages/DamageReports.js'
-import Maintenance from './pages/Maintenance.js'
-import Alerts from './pages/Alerts.js'
-import Reports from './pages/Reports.js'
-import AuditLog from './pages/AuditLog.js'
+import Assignments from './jobsite-tool-operations/assignments/Assignments.js'
 
-import Users from './pages/Users.js'
-import RegisterUser from './pages/RegisterUser.js'
-import UserDetails from './pages/UserDetails.js'
-import EditUser from './pages/EditUser.js'
-import ManageRoles from './pages/ManageRoles.js'
+import Inspections from './inspection-maintenance/inspections/Inspections.js'
+import DamageReports from './inspection-maintenance/damage-reports/DamageReports.js'
+import Maintenance from './inspection-maintenance/maintenance/Maintenance.js'
 
-import Forbidden from './pages/Forbidden.js'
-import NotFound from './pages/NotFound.js'
+import Alerts from './alerts/Alerts.js'
+
+import Reports from './administration/reports/Reports.js'
+
+import AuditLog from './audit/AuditLogPage.js'
+
+import Users from './administration/users/Users.js'
+import RegisterUser from './administration/users/RegisterUser.js'
+import UserDetails from './administration/users/UserDetails.js'
+import EditUser from './administration/users/EditUser.js'
+
+import ManageRoles from './administration/roles/ManageRoles.js'
+
+import Forbidden from './session-navigation/pages/Forbidden.js'
+import NotFound from './session-navigation/pages/NotFound.js'
 
 function DefaultRoute() {
-  const { hasPermission } = useAuth()
+  const {
+    hasPermission
+  } = useAuth()
 
   const destinations = [
     {
-      permission: 'dashboard.view',
-      path: '/dashboard'
+      permission:
+        'dashboard.view',
+      path:
+        '/dashboard'
     },
     {
-      permission: 'tools.view',
-      path: '/tools'
+      permission:
+        'tools.view',
+      path:
+        '/tools'
     },
     {
-      permission: 'jobsites.view',
-      path: '/jobsites'
+      permission:
+        'jobsites.view',
+      path:
+        '/jobsites'
     },
     {
-      permission: 'assignments.view',
-      path: '/assignments'
+      permission:
+        'assignments.view',
+      path:
+        '/assignments'
     },
     {
-      permission: 'inspections.view',
-      path: '/inspections'
+      permission:
+        'inspections.view',
+      path:
+        '/inspections'
     },
     {
-      permission: 'damage_reports.view',
-      path: '/damage-reports'
+      permission:
+        'damage_reports.view',
+      path:
+        '/damage-reports'
     },
     {
-      permission: 'maintenance.view',
-      path: '/maintenance'
+      permission:
+        'maintenance.view',
+      path:
+        '/maintenance'
     },
     {
-      permission: 'alerts.view',
-      path: '/alerts'
+      permission:
+        'alerts.view',
+      path:
+        '/alerts'
     },
     {
-      permission: 'reports.view',
-      path: '/reports'
+      permission:
+        'reports.view',
+      path:
+        '/reports'
     },
     {
-      permission: 'users.view',
-      path: '/users'
+      permission:
+        'users.view',
+      path:
+        '/users'
     },
     {
-      permission: 'roles.manage',
-      path: '/roles/manage'
+      permission:
+        'roles.manage',
+      path:
+        '/roles/manage'
     },
     {
-      permission: 'audit.view',
-      path: '/audit-log'
+      permission:
+        'audit.view',
+      path:
+        '/audit-log'
     }
   ]
 
@@ -121,8 +152,12 @@ function App() {
         element={<Login />}
       />
 
-      <Route element={<RequireAuth />}>
-        <Route element={<Layout />}>
+      <Route
+        element={<RequireAuth />}
+      >
+        <Route
+          element={<Layout />}
+        >
           <Route
             path="/"
             element={<DefaultRoute />}
