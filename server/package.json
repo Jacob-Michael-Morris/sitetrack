@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/models/workflow-rules.test.ts",
+    "test": "tsx --test src/inspection-maintenance/maintenance/workflow-rules.test.ts",
     "migrate:return-service": "tsx src/scripts/migrate-return-service.ts",
     "migrate:role-permissions": "tsx src/scripts/migrate-role-permissions.ts"
   },
