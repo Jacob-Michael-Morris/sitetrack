@@ -1,22 +1,63 @@
 # SiteTrack
 
-**SiteTrack** is a web-based tool and maintenance management system designed for construction companies operating across multiple jobsites.
+**SiteTrack** is a responsive web-based jobsite tool and maintenance management system designed for construction companies operating across multiple jobsites.
 
-The system provides a centralized way to manage tools, equipment assignments, inspections, damage reports, maintenance work orders, alerts, service history, and equipment status.
+The system provides a centralized way to manage tools, jobsites, equipment assignments, inspections, damage reports, maintenance work orders, return-to-service decisions, alerts, reports, users, role permissions, service history, and audit records.
 
-SiteTrack uses a responsive React frontend, a Node.js/Express REST API, and a PostgreSQL database. The application is deployed using Render for the frontend and backend and Neon for PostgreSQL.
+SiteTrack uses a React/TypeScript frontend, a Node.js/Express REST API, and PostgreSQL. The deployed application uses Render for the frontend and backend and Neon for PostgreSQL.
 
 ---
 
 ## Table of Contents
 
-1. [Technologies](#technologies)
-2. [Repository Structure](#repository-structure)
-3. [System Architecture](#system-architecture)
-4. [Development Workflow](#development-workflow)
-5. [Deployment](#deployment)
-6. [Security](#security)
-7. [Repository](#repository)
+1. [Implemented Features](#implemented-features)
+2. [Technologies](#technologies)
+3. [Repository Structure](#repository-structure)
+4. [System Architecture](#system-architecture)
+5. [Development Workflow](#development-workflow)
+6. [Testing](#testing)
+7. [Deployment](#deployment)
+8. [Security](#security)
+9. [Planned Enhancements](#planned-enhancements)
+10. [Documentation](#documentation)
+11. [Repository](#repository)
+
+---
+
+# Implemented Features
+
+Current SiteTrack functionality includes:
+
+- User authentication and logout
+- Role-Based Access Control (RBAC)
+- Database-backed configurable role permissions
+- User account creation, editing, activation, and deactivation
+- Tool registration and editing
+- Unique tool serial-number enforcement
+- Jobsite management
+- Tool checkout
+- Tool return
+- Tool transfer
+- Tool assignment and movement history
+- Prevention of multiple active assignments for one tool
+- Prevention of checkout for blocked or unavailable tools
+- Inspection recording
+- Next-inspection date validation
+- Failed-inspection tool blocking
+- Damage reporting
+- Damage-related tool blocking
+- Maintenance work-order creation
+- Maintenance Technician assignment
+- Repair completion
+- Return-to-service review requests
+- Return-to-service approval and denial
+- Separation of duties for return-to-service approval
+- Alerts
+- Audit logging
+- Operational reports
+- Responsive desktop and mobile layouts
+- Basic accessibility support
+- Server-side validation and authorization
 
 ---
 
@@ -26,18 +67,20 @@ SiteTrack uses a responsive React frontend, a Node.js/Express REST API, and a Po
 
 - **Framework:** React 19.2
 - **Language:** TypeScript
-- **Build Tool:** Vite
+- **Build Tool:** Vite 8
+- **Routing:** React Router
 - **Styling:** CSS
 - **Hosting:** Render Static Site
 
 ## Backend
 
-- **Runtime:** Node.js 24 LTS
-- **Framework:** Express
+- **Runtime:** Node.js
+- **Framework:** Express 5
 - **Language:** TypeScript
 - **API Style:** JSON / REST
 - **Authentication:** JWT with HTTP-only cookies
-- **Authorization:** Role-Based Access Control (RBAC)
+- **Authorization:** RBAC with database-backed permissions
+- **Database Driver:** `pg`
 - **Hosting:** Render Web Service
 
 ## Database
@@ -59,101 +102,181 @@ SiteTrack uses a responsive React frontend, a Node.js/Express REST API, and a Po
 sitetrack/
 |-- client/                         # React / TypeScript frontend
 |   |-- src/
-|   |   |-- components/             # Reusable interface components
-|   |   |-- constants/              # Shared frontend constants
-|   |   |-- context/                # Authentication context
-|   |   |-- pages/                  # Application pages
-|   |   |-- services/               # REST API communication
-|   |   |-- types/                  # TypeScript interfaces and types
-|   |   `-- utils/                  # Frontend utility functions
+|   |   |-- administration/         # Dashboard, reports, users, and roles
+|   |   |-- alerts/                 # Alerts interface
+|   |   |-- audit/                  # Audit-log interface
+|   |   |-- inspection-maintenance/ # Inspections, damage, and maintenance
+|   |   |-- jobsite-tool-operations/# Tools, jobsites, and assignments
+|   |   |-- session-navigation/     # Authentication and navigation
+|   |   `-- shared/                 # Shared frontend components and utilities
 |   |
-|   `-- package.json                # Frontend dependencies and scripts
+|   `-- package.json
 |
 |-- server/                         # Node.js / Express backend
 |   |-- src/
-|   |   |-- controllers/            # HTTP request and response handling
-|   |   |-- database/               # Database connection, schema, migrations
-|   |   |-- errors/                 # Application error classes
-|   |   |-- middleware/             # Authentication and RBAC middleware
-|   |   |-- models/                 # Domain models and business rules
-|   |   |-- routes/                 # REST API routes
-|   |   |-- scripts/                # Database and maintenance scripts
-|   |   `-- services/               # Business logic and database operations
+|   |   |-- alerts/                 # Alert routes and logic
+|   |   |-- audit/                  # Audit logging
+|   |   |-- authentication-rbac/    # Authentication, users, roles, permissions
+|   |   |-- dashboard/              # Dashboard API
+|   |   |-- database/               # PostgreSQL schema and database support
+|   |   |-- errors/                 # Application errors
+|   |   |-- inspection-maintenance/ # Inspection, damage, and maintenance logic
+|   |   |-- jobsite-tool-operations/# Tool, jobsite, and assignment logic
+|   |   |-- reports/                # Reporting endpoints
+|   |   |-- scripts/                # Migration and administration scripts
+|   |   `-- server.ts               # Express application entry point
 |   |
-|   `-- package.json                # Backend dependencies and scripts
+|   `-- package.json
 |
-|-- docs/                           # Project documentation
-|   |-- api/                        # API documentation
-|   |-- architecture/               # Architecture documentation
-|   |-- database/                   # Database documentation
-|   `-- testing/                    # Testing documentation
+|-- docs/
+|   |-- api/
+|   |   `-- api-design.md
+|   |-- architecture/
+|   |   `-- architecture-overview.md
+|   |-- database/
+|   |   `-- database-overview.md
+|   |-- deployment/
+|   |   `-- deployment-overview.md
+|   `-- testing/
+|       `-- punchlist-status.md
 |
-|-- .gitignore                      # Files excluded from Git
-`-- README.md                       # Main project documentation
+|-- .gitignore
+|-- LICENSE
+`-- README.md
 ```
 
 ---
 
 # System Architecture
 
-SiteTrack uses a three-tier client-server architecture and follows Model-View-Controller (MVC) principles to separate the user interface, request handling, application logic, and persistent data.
+SiteTrack uses a client-server architecture and applies Model-View-Controller (MVC) principles.
 
 ```text
 User
  |
 HTTPS
  |
-React Web Interface
+React Web Client
 (View)
  |
 JSON / REST
  |
-Express Routes and Controllers
+Express API / Controllers
 (Controller)
  |
-Application Services and Domain Models
+Services / Domain Logic
 (Model)
  |
-SQL
+Parameterized SQL
  |
 PostgreSQL
 ```
 
-## View
+The application is organized around two primary business areas.
 
-The React frontend serves as the View layer. It provides the responsive user interface, displays application data, accepts user input, and presents functions based on the user's assigned role.
+## Jobsite and Tool Operations
 
-## Controller
-
-Express routes and controllers serve as the Controller layer. They receive REST API requests, enforce authentication and authorization requirements, validate requests, and direct processing to the appropriate application functions.
-
-## Model
-
-Services and domain models make up the Model layer. They contain SiteTrack's application logic, workflow rules, validation behavior, and database operations.
-
-Major SiteTrack functional areas include:
+This area manages:
 
 - Tools
 - Jobsites
-- Tool Assignments
+- Checkout
+- Return
+- Transfer
+- Assignments
+- Tool availability
+- Movement history
+
+## Inspection and Maintenance Management
+
+This area manages:
+
 - Inspections
-- Damage Reports
-- Maintenance Work Orders
-- Return-to-Service Approval
-- Users and Roles
+- Failed-inspection blocking
+- Damage reports
+- Maintenance work orders
+- Repair completion
+- Return-to-service requests
+- Return-to-service approval and denial
+
+Shared capabilities include:
+
+- Authentication
+- Role-Based Access Control
+- Configurable permissions
 - Alerts
-- Audit Logs
+- Audit logging
+- Dashboard functions
 - Reports
+- PostgreSQL persistence
 
-PostgreSQL acts as the centralized persistent data store shared by these functions.
+---
 
-SiteTrack also uses authentication middleware and Role-Based Access Control to restrict application functions according to each user's assigned role.
+# Role-Based Access Control
+
+SiteTrack uses database-backed Role-Based Access Control.
+
+The authorization model is:
+
+```text
+User
+ |
+ v
+Role
+ |
+ v
+Role Permissions
+ |
+ v
+Permissions
+```
+
+SiteTrack currently supports:
+
+- Administrator
+- Equipment Manager
+- Maintenance Technician
+- Worker
+- Safety Personnel
+
+Examples of permissions include:
+
+```text
+dashboard.view
+tools.view
+tools.create
+tools.edit
+jobsites.create
+jobsites.edit
+assignments.view
+assignments.checkout
+assignments.return
+assignments.transfer
+inspections.view
+inspections.create
+damage_reports.view
+damage_reports.create
+maintenance.view
+maintenance.create
+maintenance.complete
+maintenance.return_request
+maintenance.return_approve
+alerts.view
+reports.view
+audit.view
+users.view
+users.create
+users.edit
+roles.manage
+```
+
+Frontend controls can change based on the current user's permissions, but authorization is also enforced independently by the backend.
 
 ---
 
 # Development Workflow
 
-SiteTrack uses separate Git branches to keep development work separated from the stable production version.
+SiteTrack uses separate Git branches to keep development work separated from production.
 
 ```text
 feature branch
@@ -165,21 +288,21 @@ feature branch
      main
 ```
 
-## `main`
-
-`main` contains the stable production version of SiteTrack.
-
-Normal development changes should not be made directly on `main`.
-
 ## `develop`
 
 `develop` is the shared development and integration branch.
 
-Completed feature branches are merged into `develop` before being merged into `main`.
+New functionality and fixes are integrated and verified here before production release.
+
+## `main`
+
+`main` contains the production release.
+
+Production deployment originates from this branch.
 
 ## Feature Branches
 
-New development work should normally be completed on a feature branch.
+Feature branches can be created from `develop` for isolated development.
 
 Example:
 
@@ -187,7 +310,7 @@ Example:
 feature/testing-fixes
 ```
 
-A typical workflow is:
+Typical workflow:
 
 ```bash
 git checkout develop
@@ -203,15 +326,153 @@ git commit -m "Describe what was changed"
 git push -u origin feature/name-of-work
 ```
 
-The feature branch can then be reviewed and merged into `develop`.
+After review and verification, changes can be merged into `develop` and later promoted to `main`.
 
-Once the integrated changes are verified, `develop` can be merged into `main` for production deployment.
+---
+
+# Testing
+
+The final SiteTrack qualification cycle included:
+
+- Client production build
+- Client lint
+- Server build
+- Server TypeScript type-check
+- Automated workflow-rule tests
+- Authentication testing
+- Authorization testing
+- User and role administration testing
+- Tool-management testing
+- Checkout and return testing
+- Inspection testing
+- Damage-report testing
+- Maintenance testing
+- Return-to-service testing
+- Alert and audit verification
+- Responsive layout testing
+- Basic accessibility testing
+- API performance testing
+- Connectivity and data-integrity testing
+
+The automated workflow-rule suite completed:
+
+```text
+3 tests
+3 passed
+0 failed
+```
+
+A controlled local performance check executed 20 authenticated requests to:
+
+```text
+GET /api/tools
+```
+
+Results:
+
+```text
+Requests:                  20
+Requests under 3 seconds:  20
+Percentage under target:   100%
+Average response time:     approximately 200.8 ms
+Slowest response:          approximately 582.7 ms
+```
+
+The project performance target was at least 95 percent of ordinary requests completing within three seconds under the documented test profile.
+
+All formal tests executed during the final qualification cycle passed.
+
+Additional testing information is available in:
+
+```text
+docs/testing/punchlist-status.md
+```
+
+---
+
+# Development Commands
+
+## Frontend
+
+From the `client` directory:
+
+```bash
+npm install
+npm run dev
+```
+
+Production build:
+
+```bash
+npm run build
+```
+
+Lint:
+
+```bash
+npm run lint
+```
+
+---
+
+## Backend
+
+From the `server` directory:
+
+```bash
+npm install
+npm run dev
+```
+
+Production build:
+
+```bash
+npm run build
+```
+
+Type-check:
+
+```bash
+npm run typecheck
+```
+
+Automated tests:
+
+```bash
+npm test
+```
+
+Production start:
+
+```bash
+npm start
+```
+
+---
+
+# Database Migrations
+
+SiteTrack includes migration scripts for database features introduced during development.
+
+Return-to-service migration:
+
+```bash
+npm run migrate:return-service
+```
+
+Role-permissions migration:
+
+```bash
+npm run migrate:role-permissions
+```
+
+The intended database should be backed up when practical before production migrations are applied.
 
 ---
 
 # Deployment
 
-SiteTrack is deployed using separate hosted frontend, backend, and database services.
+SiteTrack is deployed using separate frontend, backend, and database services.
 
 ```text
 User
@@ -233,8 +494,6 @@ Neon PostgreSQL
 
 ## Frontend
 
-The React frontend is deployed as a **Render Static Site**.
-
 Production application:
 
 ```text
@@ -242,8 +501,6 @@ https://sitetrack-8nyy.onrender.com
 ```
 
 ## Backend
-
-The Node.js/Express REST API is deployed as a **Render Web Service**.
 
 Production API:
 
@@ -259,35 +516,106 @@ https://sitetrack-api.onrender.com/api/health
 
 ## Database
 
-SiteTrack uses a PostgreSQL database hosted through **Neon**.
+SiteTrack uses PostgreSQL hosted through Neon.
 
-The database provides centralized storage for tools, jobsites, users, assignments, inspections, damage reports, maintenance records, alerts, audit history, and other application data.
+The browser never connects directly to PostgreSQL. All application data access occurs through the backend API.
 
 ---
 
 # Security
 
-SiteTrack includes several security controls:
+Implemented SiteTrack security controls include:
 
-- HTTPS for production communication
+- HTTPS for production browser communication
 - JWT authentication
 - HTTP-only authentication cookies
-- Role-Based Access Control
-- Protected REST API routes
+- Server-side authentication
+- Database-backed RBAC permissions
+- Server-side permission checks
 - Password hashing
-- Server-side authorization
-- User activity auditing
-- Environment variables for private configuration
+- Protected REST API routes
+- Parameterized SQL
+- CORS origin restrictions
+- Environment variables for sensitive configuration
+- Audit logging for important operations
+- Separation of duties for return-to-service approval
 
-Role-Based Access Control limits system functions according to each user's assigned responsibilities.
+A user who completes a repair cannot approve the same repair for return to service.
 
-SiteTrack currently supports the following user roles:
+Sensitive server and database configuration is not stored in frontend code.
 
-- Administrator
-- Equipment Manager
-- Maintenance Technician
-- Worker
-- Safety Personnel
+---
+
+# Planned Enhancements
+
+The current MVP does not claim completion of every capability described in the broader SiteTrack design.
+
+Planned future work includes:
+
+- End-to-end evidence and attachment upload
+- Attachment file-type validation
+- Attachment file-size enforcement
+- Malware or file scanning
+- Protected attachment storage and retrieval
+- Production rate limiting
+- Expanded authentication and security-event logging
+- Query monitoring
+- Additional denial-of-service protections
+- Larger hosted load and stress tests
+- Broader browser and device compatibility testing
+- Formal WCAG 2.2 Level AA evaluation
+- Documented nonproduction backup-restoration testing
+- Expanded draft preservation during extended connectivity interruptions
+
+---
+
+# Documentation
+
+Additional technical documentation is available under:
+
+```text
+docs/
+```
+
+## API
+
+```text
+docs/api/api-design.md
+```
+
+Describes the implemented REST API, endpoints, authentication, permissions, and response behavior.
+
+## Architecture
+
+```text
+docs/architecture/architecture-overview.md
+```
+
+Describes SiteTrack's architecture, MVC structure, functional domains, shared services, security model, and repository organization.
+
+## Database
+
+```text
+docs/database/database-overview.md
+```
+
+Describes PostgreSQL tables, relationships, constraints, RBAC data, and database responsibilities.
+
+## Deployment
+
+```text
+docs/deployment/deployment-overview.md
+```
+
+Describes the Render and Neon production deployment environment.
+
+## Testing
+
+```text
+docs/testing/punchlist-status.md
+```
+
+Describes final qualification results and future testing work.
 
 ---
 

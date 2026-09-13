@@ -6,6 +6,8 @@ This document describes the REST API currently implemented by SiteTrack.
 
 The API provides communication between the React frontend and the Node.js/Express backend. Requests and responses use JSON where application data is exchanged.
 
+Authentication and authorization are enforced by the backend. Most protected operations require both an authenticated user and the permission associated with the requested function.
+
 ---
 
 # 1. Base URLs
@@ -28,25 +30,69 @@ https://sitetrack-api.onrender.com/api
 GET /api/health
 ```
 
-The health endpoint can be used to verify that the SiteTrack backend is running.
+The health endpoint verifies that the SiteTrack backend is running.
+
+Example response:
+
+```json
+{
+  "status": "ok",
+  "message": "SiteTrack API is running"
+}
+```
 
 ---
 
-# 2. Authentication
+# 2. Authentication and Authorization
 
 SiteTrack uses JSON Web Tokens (JWT) stored in HTTP-only cookies.
 
 Most application endpoints require an authenticated SiteTrack user.
 
-Role-Based Access Control (RBAC) is applied to protected operations where specific user roles are required.
+Backend authorization uses Role-Based Access Control (RBAC) with database-backed permissions.
 
-Supported roles include:
+SiteTrack currently supports the following roles:
 
 - Administrator
 - Equipment Manager
 - Maintenance Technician
 - Worker
 - Safety Personnel
+
+Permissions are assigned to roles through the database and can be managed by an authorized administrator.
+
+Examples of permission keys include:
+
+```text
+dashboard.view
+tools.view
+tools.create
+tools.edit
+jobsites.create
+jobsites.edit
+assignments.view
+assignments.checkout
+assignments.return
+assignments.transfer
+inspections.view
+inspections.create
+damage_reports.view
+damage_reports.create
+maintenance.view
+maintenance.create
+maintenance.complete
+maintenance.return_request
+maintenance.return_approve
+alerts.view
+reports.view
+audit.view
+users.view
+users.create
+users.edit
+roles.manage
+```
+
+Frontend navigation may hide functions that the current user cannot access, but authorization is also enforced independently by the backend.
 
 ---
 
@@ -58,11 +104,37 @@ Base route:
 /api/auth
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/login` | Authenticate a user and establish a session |
-| POST | `/api/auth/logout` | End the current user session |
-| GET | `/api/auth/me` | Return the currently authenticated user |
+| Method | Endpoint | Description | Access |
+|---|---|---|---|
+| POST | `/api/auth/login` | Authenticate a user and establish a session | Public |
+| POST | `/api/auth/logout` | End the current session | Public |
+| GET | `/api/auth/me` | Return the currently authenticated user | Authenticated |
+
+## Login
+
+```http
+POST /api/auth/login
+```
+
+Successful authentication establishes the SiteTrack session using an HTTP-only authentication cookie.
+
+Inactive users and invalid credentials are rejected.
+
+## Logout
+
+```http
+POST /api/auth/logout
+```
+
+Logout clears the authentication session.
+
+## Current User
+
+```http
+GET /api/auth/me
+```
+
+Returns information about the currently authenticated SiteTrack user.
 
 ---
 
@@ -74,11 +146,11 @@ Base route:
 /api/dashboard
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/dashboard` | Retrieve dashboard information |
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/dashboard` | Retrieve dashboard information | `dashboard.view` |
 
-The dashboard provides summary information used by the main SiteTrack interface.
+The dashboard provides summary information used by the primary SiteTrack interface.
 
 ---
 
@@ -90,19 +162,12 @@ Base route:
 /api/tools
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/tools` | Retrieve all tools |
-| GET | `/api/tools/:id` | Retrieve a specific tool |
-| POST | `/api/tools` | Create a new tool |
-| PUT | `/api/tools/:id` | Update an existing tool |
-
-## Tool Modification Access
-
-Creating and updating tools is restricted to:
-
-- Administrator
-- Equipment Manager
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/tools` | Retrieve all tools | `tools.view` |
+| GET | `/api/tools/:id` | Retrieve a specific tool | `tools.view` |
+| POST | `/api/tools` | Create a new tool | `tools.create` |
+| PUT | `/api/tools/:id` | Update an existing tool | `tools.edit` |
 
 Tool records include information such as:
 
@@ -112,6 +177,10 @@ Tool records include information such as:
 - Status
 - Condition
 - Purchase date
+
+Tool serial numbers must be unique.
+
+Tool status and condition are also affected by SiteTrack assignment, inspection, damage, and maintenance workflows.
 
 ---
 
@@ -123,12 +192,12 @@ Base route:
 /api/jobsites
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/jobsites` | Retrieve all jobsites |
-| GET | `/api/jobsites/:id` | Retrieve a specific jobsite |
-| POST | `/api/jobsites` | Create a new jobsite |
-| PUT | `/api/jobsites/:id` | Update an existing jobsite |
+| Method | Endpoint | Description | Access |
+|---|---|---|---|
+| GET | `/api/jobsites` | Retrieve all jobsites | Authenticated |
+| GET | `/api/jobsites/:id` | Retrieve a specific jobsite | Authenticated |
+| POST | `/api/jobsites` | Create a new jobsite | `jobsites.create` |
+| PUT | `/api/jobsites/:id` | Update an existing jobsite | `jobsites.edit` |
 
 Jobsite records include information such as:
 
@@ -151,19 +220,21 @@ Base route:
 /api/assignments
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/assignments` | Retrieve assignment records |
-| POST | `/api/assignments/checkout` | Check out a tool |
-| POST | `/api/assignments/return` | Return a checked-out tool |
-| POST | `/api/assignments/transfer` | Transfer an assigned tool |
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/assignments` | Retrieve assignment records | `assignments.view` |
+| POST | `/api/assignments/checkout` | Check out a tool | `assignments.checkout` |
+| POST | `/api/assignments/return` | Return a checked-out tool | `assignments.return` |
+| POST | `/api/assignments/transfer` | Transfer an assigned tool | `assignments.transfer` |
 
-Assignment workflows enforce business rules such as:
+Assignment workflows enforce business rules including:
 
-- A tool cannot have multiple active assignments.
-- Unavailable or blocked tools cannot be checked out.
+- A tool cannot have more than one active assignment.
+- Blocked or unavailable tools cannot be checked out.
 - Tools cannot be assigned to inactive jobsites.
-- Duplicate assignment submissions are prevented.
+- Duplicate active assignment submissions are prevented.
+- Assignment history is preserved after return.
+- Transfers update the current assignment while retaining movement history.
 
 ---
 
@@ -175,36 +246,25 @@ Base route:
 /api/inspections
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/inspections` | Retrieve all inspection records |
-| GET | `/api/inspections/:id` | Retrieve a specific inspection |
-| POST | `/api/inspections` | Record a new inspection |
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/inspections` | Retrieve all inspection records | `inspections.view` |
+| GET | `/api/inspections/:id` | Retrieve a specific inspection | `inspections.view` |
+| POST | `/api/inspections` | Record a new inspection | `inspections.create` |
 
-## View Inspection Access
+Inspection processing includes validation of:
 
-Inspection records can be viewed by:
+- Tool reference
+- Inspection result
+- Tool condition
+- Inspection dates
+- Next inspection date
 
-- Administrator
-- Equipment Manager
-- Maintenance Technician
-- Worker
-- Safety Personnel
+The next inspection date cannot be in the past.
 
-## Record Inspection Access
+A failed inspection can remove the affected tool from normal operational availability.
 
-New inspections can be recorded by:
-
-- Administrator
-- Equipment Manager
-- Maintenance Technician
-- Worker
-
-Safety Personnel have review-only access.
-
-Inspection processing includes validation of inspection dates and tool condition.
-
-A failed inspection can cause the affected tool to be blocked from normal assignment activity.
+Inspection results are retained in the tool's history.
 
 ---
 
@@ -216,20 +276,24 @@ Base route:
 /api/damage-reports
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/damage-reports` | Retrieve all damage reports |
-| GET | `/api/damage-reports/:id` | Retrieve a specific damage report |
-| POST | `/api/damage-reports` | Create a new damage report |
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/damage-reports` | Retrieve all damage reports | `damage_reports.view` |
+| GET | `/api/damage-reports/:id` | Retrieve a specific damage report | `damage_reports.view` |
+| POST | `/api/damage-reports` | Create a new damage report | `damage_reports.create` |
 
 Damage-report processing can:
 
-- Record damage severity and description
-- Block the affected tool
+- Record damage severity
+- Record damage description
+- Associate damage with a tool
 - Associate damage with an inspection
-- Generate maintenance activity
-- Create a repair work order when an active one does not already exist
-- Generate alerts and audit records
+- Remove the affected tool from service
+- Create a maintenance work order when an active one does not already exist
+- Generate alerts
+- Generate audit records
+
+Damage reports remain part of the permanent equipment history.
 
 ---
 
@@ -241,28 +305,15 @@ Base route:
 /api/work-orders
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/work-orders` | Retrieve all work orders |
-| GET | `/api/work-orders/technicians` | Retrieve available Maintenance Technicians |
-| GET | `/api/work-orders/:id` | Retrieve a specific work order |
-| POST | `/api/work-orders` | Create a maintenance work order |
-| PUT | `/api/work-orders/:id/complete` | Mark repair work as completed |
-| PUT | `/api/work-orders/:id/return-request` | Request return-to-service review |
-| PUT | `/api/work-orders/:id/return-decision` | Approve or deny return to service |
-
----
-
-## View Maintenance Access
-
-Work orders and Maintenance Technician information can be viewed by:
-
-- Administrator
-- Equipment Manager
-- Maintenance Technician
-- Safety Personnel
-
----
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/work-orders` | Retrieve all work orders | `maintenance.view` |
+| GET | `/api/work-orders/technicians` | Retrieve available Maintenance Technicians | `maintenance.view` |
+| GET | `/api/work-orders/:id` | Retrieve a specific work order | `maintenance.view` |
+| POST | `/api/work-orders` | Create a maintenance work order | `maintenance.create` |
+| PUT | `/api/work-orders/:id/complete` | Mark repair work as completed | `maintenance.complete` |
+| PUT | `/api/work-orders/:id/return-request` | Request return-to-service review | `maintenance.return_request` |
+| PUT | `/api/work-orders/:id/return-decision` | Approve or deny return to service | `maintenance.return_approve` |
 
 ## Create Work Order
 
@@ -270,14 +321,11 @@ Work orders and Maintenance Technician information can be viewed by:
 POST /api/work-orders
 ```
 
-Allowed roles:
-
-- Administrator
-- Equipment Manager
-
 Creates a maintenance work order for a tool.
 
 The system prevents duplicate active work orders where appropriate.
+
+Work orders may originate from damage reports or other maintenance needs.
 
 ---
 
@@ -287,16 +335,13 @@ The system prevents duplicate active work orders where appropriate.
 PUT /api/work-orders/:id/complete
 ```
 
-Allowed roles:
-
-- Administrator
-- Maintenance Technician
-
-Marks repair work as completed.
+Records completion of repair work.
 
 The system records the user who completed the repair.
 
-Completing the repair does not automatically return the tool to service.
+Completing a repair does not automatically return the tool to operational service.
+
+The tool remains blocked until the required return-to-service process is completed.
 
 ---
 
@@ -306,14 +351,11 @@ Completing the repair does not automatically return the tool to service.
 PUT /api/work-orders/:id/return-request
 ```
 
-Allowed roles:
+Requests review of completed repair work before the tool can return to operational service.
 
-- Administrator
-- Maintenance Technician
+A return-to-service request is only valid after repair completion.
 
-Requests review of a completed repair before the tool can be returned to operational service.
-
-A return-to-service request is only valid after repair work has been completed.
+The tool remains blocked while the approval request is pending.
 
 ---
 
@@ -323,14 +365,9 @@ A return-to-service request is only valid after repair work has been completed.
 PUT /api/work-orders/:id/return-decision
 ```
 
-Allowed roles:
-
-- Administrator
-- Equipment Manager
-
 Records an approval or denial decision.
 
-The request body includes information such as:
+Example request:
 
 ```json
 {
@@ -346,13 +383,13 @@ Approved
 Denied
 ```
 
-The system prevents the user who completed the repair from approving their own return-to-service request.
+The user who completed the repair cannot approve the same repair for return to service.
 
-Approval allows the tool to be returned to operational service when applicable.
+An approved decision allows the maintenance block to clear when no other blocking condition remains.
 
-Denial keeps the tool blocked until the required maintenance and review conditions are satisfied.
+A denied decision keeps the tool blocked until the required maintenance and approval conditions are satisfied.
 
-Return-to-service decisions are recorded in the database and generate appropriate audit and alert information.
+Return-to-service decisions are retained in the database and can generate related alerts and audit records.
 
 ---
 
@@ -364,21 +401,21 @@ Base route:
 /api/alerts
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/alerts` | Retrieve alerts |
-| GET | `/api/alerts/:id` | Retrieve a specific alert |
-| PUT | `/api/alerts/read-all` | Mark all alerts as read |
-| PUT | `/api/alerts/:id/read` | Mark a specific alert as read |
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/alerts` | Retrieve alerts | `alerts.view` |
+| GET | `/api/alerts/:id` | Retrieve a specific alert | `alerts.view` |
+| PUT | `/api/alerts/read-all` | Mark all alerts as read | `alerts.view` |
+| PUT | `/api/alerts/:id/read` | Mark a specific alert as read | `alerts.view` |
 
 Alerts provide notifications related to operational and maintenance events.
 
 Examples include:
 
 - Damage reports
-- Inspections
+- Inspection events
 - Maintenance actions
-- Return-to-service decisions
+- Return-to-service actions
 - Tool status changes
 
 ---
@@ -391,26 +428,32 @@ Base route:
 /api/audit-logs
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/audit-logs` | Retrieve SiteTrack audit history |
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/audit-logs` | Retrieve SiteTrack audit history | `audit.view` |
 
-Audit-log access is restricted to:
+Audit records provide traceability for important SiteTrack activity.
 
-- Administrator
-- Safety Personnel
+Records can include information such as:
 
-Audit records provide traceability for important system activity.
+- Acting user
+- Action performed
+- Entity type
+- Entity identifier
+- Description
+- Timestamp
 
-Records may include:
+Audit activity can include:
 
-- User actions
 - Tool changes
-- Jobsite changes
+- Jobsite activity
 - Assignment activity
+- Inspection activity
+- Damage reports
 - Maintenance activity
-- Administrative actions
+- Administrative changes
 - Return-to-service decisions
+- Role-permission changes
 
 ---
 
@@ -422,25 +465,29 @@ Base route:
 /api/users
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/users` | Retrieve users |
-| GET | `/api/users/:id` | Retrieve a specific user |
-| POST | `/api/users` | Create a user |
-| PUT | `/api/users/:id` | Update a user |
+| Method | Endpoint | Description | Required Permission |
+|---|---|---|---|
+| GET | `/api/users` | Retrieve users | `users.view` |
+| GET | `/api/users/:id` | Retrieve a specific user | `users.view` |
+| POST | `/api/users` | Create a user | `users.create` |
+| PUT | `/api/users/:id` | Update a user | `users.edit` |
 
-User records contain information such as:
+User records include information such as:
 
 - Name
 - Email
 - Assigned role
 - Account status
 
-Passwords are not stored as plain text.
+User email addresses must be unique.
+
+User accounts can be activated or deactivated.
+
+Passwords are stored as password hashes and are not returned through normal user API responses.
 
 ---
 
-# 14. Roles
+# 14. Roles and Permissions
 
 Base route:
 
@@ -448,17 +495,43 @@ Base route:
 /api/roles
 ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/roles` | Retrieve available SiteTrack roles |
+| Method | Endpoint | Description | Access |
+|---|---|---|---|
+| GET | `/api/roles` | Retrieve SiteTrack roles | Authenticated |
+| GET | `/api/roles/permissions` | Retrieve all defined permissions | `roles.manage` |
+| GET | `/api/roles/:id/permissions` | Retrieve permissions assigned to a role | `roles.manage` |
+| PUT | `/api/roles/:id/permissions` | Update permissions assigned to a role | `roles.manage` |
 
-SiteTrack currently supports:
+SiteTrack currently defines the following roles:
 
 - Administrator
 - Equipment Manager
 - Maintenance Technician
 - Worker
 - Safety Personnel
+
+Role permissions are stored in PostgreSQL using the `permissions` and `role_permissions` tables.
+
+The Administrator role initially receives all defined permissions.
+
+Authorized administrators can view and modify permissions for SiteTrack roles.
+
+Examples of configurable permission categories include:
+
+- Dashboard
+- Tools
+- Jobsites
+- Assignments
+- Inspections
+- Damage Reports
+- Maintenance
+- Alerts
+- Reports
+- Audit Log
+- Users
+- Roles
+
+Changing a role's permission assignments changes the operations available to users assigned that role.
 
 ---
 
@@ -470,22 +543,17 @@ Base route:
 /api/reports
 ```
 
-SiteTrack provides five report endpoints.
+All report endpoints require:
 
----
+```text
+reports.view
+```
 
 ## Tool Inventory
 
 ```http
 GET /api/reports/tool-inventory
 ```
-
-Allowed roles:
-
-- Administrator
-- Equipment Manager
-- Maintenance Technician
-- Safety Personnel
 
 Provides tool inventory and current status information.
 
@@ -497,11 +565,6 @@ Provides tool inventory and current status information.
 GET /api/reports/current-assignments
 ```
 
-Allowed roles:
-
-- Administrator
-- Equipment Manager
-
 Provides information about active tool assignments.
 
 ---
@@ -511,13 +574,6 @@ Provides information about active tool assignments.
 ```http
 GET /api/reports/maintenance-history
 ```
-
-Allowed roles:
-
-- Administrator
-- Equipment Manager
-- Maintenance Technician
-- Safety Personnel
 
 Provides historical maintenance and work-order information.
 
@@ -529,13 +585,6 @@ Provides historical maintenance and work-order information.
 GET /api/reports/inspection-status
 ```
 
-Allowed roles:
-
-- Administrator
-- Equipment Manager
-- Maintenance Technician
-- Safety Personnel
-
 Provides tool inspection status and inspection information.
 
 ---
@@ -546,20 +595,54 @@ Provides tool inspection status and inspection information.
 GET /api/reports/damage-history
 ```
 
-Allowed roles:
-
-- Administrator
-- Equipment Manager
-- Maintenance Technician
-- Safety Personnel
-
 Provides historical damage-report information.
 
 ---
 
-# 16. HTTP Request Format
+# 16. Permission Enforcement
 
-SiteTrack uses JSON for API request bodies.
+Protected SiteTrack endpoints use backend authentication and authorization middleware.
+
+The general request flow is:
+
+```text
+Request
+   |
+   v
+Authentication Check
+   |
+   v
+Permission Check
+   |
+   v
+Controller
+   |
+   v
+Application Service
+   |
+   v
+PostgreSQL
+```
+
+A request without a valid authenticated session can return:
+
+```text
+401 Unauthorized
+```
+
+An authenticated user who does not have the required permission can receive:
+
+```text
+403 Forbidden
+```
+
+This prevents access control from depending only on frontend navigation or hidden buttons.
+
+---
+
+# 17. HTTP Request Format
+
+SiteTrack uses JSON for API request bodies where application data is submitted.
 
 Example:
 
@@ -568,7 +651,7 @@ POST /api/damage-reports
 Content-Type: application/json
 ```
 
-Example JSON:
+Example request body:
 
 ```json
 {
@@ -578,11 +661,13 @@ Example JSON:
 }
 ```
 
-Authentication cookies are included with requests made by the SiteTrack frontend.
+Authenticated browser requests include the SiteTrack authentication cookie.
+
+The React frontend sends requests with browser credentials when authentication is required.
 
 ---
 
-# 17. HTTP Response Format
+# 18. HTTP Response Format
 
 Successful API responses generally return JSON.
 
@@ -594,9 +679,12 @@ Example:
 }
 ```
 
-Responses that retrieve records may return either a single JSON object or an array of objects.
+Responses retrieving records may return either:
 
-Application errors may return a JSON message such as:
+- A JSON object
+- An array of JSON objects
+
+Application errors may return a response such as:
 
 ```json
 {
@@ -604,13 +692,13 @@ Application errors may return a JSON message such as:
 }
 ```
 
-The frontend displays useful API error messages while avoiding unnecessary exposure of internal server details.
+The frontend displays useful API error messages while avoiding unnecessary exposure of internal server information.
 
 ---
 
-# 18. Common HTTP Status Codes
+# 19. Common HTTP Status Codes
 
-SiteTrack may use standard HTTP status codes including:
+SiteTrack uses standard HTTP status codes including:
 
 | Status | Meaning |
 |---|---|
@@ -619,14 +707,39 @@ SiteTrack may use standard HTTP status codes including:
 | `204 No Content` | Request succeeded without a response body |
 | `400 Bad Request` | Invalid request or business-rule violation |
 | `401 Unauthorized` | Authentication is required |
-| `403 Forbidden` | User does not have permission |
+| `403 Forbidden` | User does not have the required permission |
 | `404 Not Found` | Requested resource was not found |
-| `409 Conflict` | Request conflicts with current system state |
+| `409 Conflict` | Request conflicts with the current system state |
 | `500 Internal Server Error` | Unexpected server error |
+
+Business-rule failures use safe API responses rather than exposing internal server or database details.
 
 ---
 
-# 19. API Architecture
+# 20. API Security
+
+SiteTrack includes several controls around API access.
+
+These include:
+
+- HTTPS in the production environment
+- JWT authentication
+- HTTP-only authentication cookies
+- Backend authentication middleware
+- Database-backed role permissions
+- Backend permission checks
+- Password hashing
+- Parameterized SQL
+- Environment variables for private configuration
+- CORS restrictions
+- Audit logging for important operations
+- Separation of duties for return-to-service approval
+
+Production CORS behavior limits authenticated browser requests to the configured SiteTrack frontend origin.
+
+---
+
+# 21. API Architecture
 
 The SiteTrack API follows this general request flow:
 
@@ -637,52 +750,88 @@ React Frontend
 REST API Route
       |
       v
-Authentication / RBAC Middleware
+Authentication / Permission Middleware
       |
       v
 Controller
       |
       v
-Service
+Service / Domain Logic
       |
       v
-Domain Model
+Parameterized SQL
       |
       v
 PostgreSQL
 ```
 
-Routes define the HTTP interface.
+Routes define the HTTP interface and required authorization.
 
 Controllers manage request and response handling.
 
-Services implement application workflows and database operations.
-
-Domain models provide validation and business behavior.
+Application services and domain logic implement SiteTrack workflows and validation.
 
 PostgreSQL provides persistent application storage.
 
 ---
 
-# 20. API Summary
+# 22. Backend Organization
 
-The implemented SiteTrack API supports:
+The implemented backend is organized primarily by functional domain.
+
+```text
+server/src/
+|-- alerts/
+|-- audit/
+|-- authentication-rbac/
+|   |-- authentication/
+|   |-- roles/
+|   `-- users/
+|-- dashboard/
+|-- database/
+|-- errors/
+|-- inspection-maintenance/
+|   |-- damage-reports/
+|   |-- inspections/
+|   `-- maintenance/
+|-- jobsite-tool-operations/
+|   |-- assignments/
+|   |-- jobsites/
+|   `-- tools/
+|-- reports/
+|-- scripts/
+`-- server.ts
+```
+
+This organization keeps routes, controllers, services, domain models, and supporting logic grouped with the functional area they support.
+
+---
+
+# 23. API Summary
+
+The implemented SiteTrack REST API supports:
 
 - User authentication
+- Session management
 - Dashboard information
 - Tool management
 - Jobsite management
-- Tool checkout, return, and transfer
+- Tool checkout
+- Tool return
+- Tool transfer
+- Assignment history
 - Inspections
 - Damage reporting
 - Maintenance work orders
 - Maintenance Technician selection
 - Repair completion
-- Return-to-service review and approval
+- Return-to-service requests
+- Return-to-service approval and denial
 - Alerts
 - Audit history
 - User management
-- Roles
+- Role management
+- Configurable role permissions
 - Operational reports
 
-The API is designed to keep business rules and authorization checks on the server rather than relying solely on frontend restrictions.
+The API is designed so that business rules and authorization are enforced by the backend rather than relying solely on frontend restrictions.

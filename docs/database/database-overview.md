@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This document describes the PostgreSQL database used by SiteTrack, including the major tables, relationships, constraints, and data responsibilities.
+This document describes the PostgreSQL database used by SiteTrack, including its major tables, relationships, constraints, role-permission structure, and data responsibilities.
 
-SiteTrack uses a centralized PostgreSQL database hosted through Neon. The database stores information related to users, roles, jobsites, tools, assignments, inspections, damage reports, maintenance work orders, return-to-service decisions, alerts, and audit history.
+SiteTrack uses a centralized PostgreSQL database hosted through Neon. The database stores information related to users, roles, permissions, jobsites, tools, assignments, inspections, damage reports, maintenance work orders, return-to-service decisions, alerts, and audit history.
 
 ---
 
@@ -24,11 +24,13 @@ Neon
 
 The Node.js/Express backend communicates with PostgreSQL using SQL through the PostgreSQL Node.js driver.
 
-The database schema is maintained in:
+The primary database schema is maintained in:
 
 ```text
 server/src/database/schema.sql
 ```
+
+The React frontend does not connect directly to PostgreSQL. Application data is accessed through the SiteTrack REST API.
 
 ---
 
@@ -37,16 +39,20 @@ server/src/database/schema.sql
 The SiteTrack database contains the following major tables:
 
 1. `roles`
-2. `users`
-3. `jobsites`
-4. `tools`
-5. `tool_assignments`
-6. `inspections`
-7. `damage_reports`
-8. `work_orders`
-9. `return_service_decisions`
-10. `alerts`
-11. `audit_logs`
+2. `permissions`
+3. `role_permissions`
+4. `users`
+5. `jobsites`
+6. `tools`
+7. `tool_assignments`
+8. `inspections`
+9. `damage_reports`
+10. `work_orders`
+11. `return_service_decisions`
+12. `alerts`
+13. `audit_logs`
+
+These tables support SiteTrack's Jobsite and Tool Operations, Inspection and Maintenance Management, authentication/RBAC, alerting, auditing, and reporting capabilities.
 
 ---
 
@@ -62,7 +68,7 @@ The `roles` table defines the user roles supported by SiteTrack.
 | `name` | VARCHAR(100) | Unique role name |
 | `description` | TEXT | Description of the role |
 
-SiteTrack currently defines the following roles:
+SiteTrack defines the following roles:
 
 - Administrator
 - Equipment Manager
@@ -71,27 +77,6 @@ SiteTrack currently defines the following roles:
 - Safety Personnel
 
 Each user is assigned one role through the `users.role_id` foreign key.
-
----
-
-# 4. Users
-
-The `users` table stores SiteTrack user accounts.
-
-## Table: `users`
-
-| Column | Type | Description |
-|---|---|---|
-| `user_id` | INTEGER | Primary key |
-| `role_id` | INTEGER | Foreign key to `roles` |
-| `name` | VARCHAR(150) | User's name |
-| `email` | VARCHAR(255) | Unique user email |
-| `password_hash` | VARCHAR(255) | Hashed password |
-| `is_active` | BOOLEAN | Indicates whether the account is active |
-| `created_at` | TIMESTAMP | Account creation timestamp |
-| `updated_at` | TIMESTAMP | Last update timestamp |
-
-## Relationship
 
 ```text
 roles
@@ -103,11 +88,138 @@ roles
 users
 ```
 
-A role can be assigned to multiple users, while each user has one assigned role.
+---
+
+# 4. Permissions
+
+The `permissions` table defines individual application permissions that can be assigned to roles.
+
+## Table: `permissions`
+
+| Column | Type | Description |
+|---|---|---|
+| `permission_id` | INTEGER | Primary key |
+| `permission_key` | VARCHAR(100) | Unique programmatic permission identifier |
+| `category` | VARCHAR(50) | Functional permission category |
+| `display_name` | VARCHAR(100) | Human-readable permission name |
+| `description` | TEXT | Description of the permission |
+| `sort_order` | INTEGER | Display ordering value |
+| `created_at` | TIMESTAMP | Permission creation timestamp |
+
+Current permission keys include:
+
+```text
+dashboard.view
+tools.view
+tools.create
+tools.edit
+jobsites.view
+jobsites.create
+jobsites.edit
+assignments.view
+assignments.checkout
+assignments.return
+assignments.transfer
+inspections.view
+inspections.create
+damage_reports.view
+damage_reports.create
+maintenance.view
+maintenance.create
+maintenance.complete
+maintenance.return_request
+maintenance.return_approve
+alerts.view
+reports.view
+audit.view
+users.view
+users.create
+users.edit
+roles.manage
+```
+
+Permissions allow SiteTrack access rules to be configured by capability rather than relying only on hard-coded role names.
 
 ---
 
-# 5. Jobsites
+# 5. Role Permissions
+
+The `role_permissions` table creates the many-to-many relationship between SiteTrack roles and permissions.
+
+## Table: `role_permissions`
+
+| Column | Type | Description |
+|---|---|---|
+| `role_id` | INTEGER | Foreign key to `roles` |
+| `permission_id` | INTEGER | Foreign key to `permissions` |
+| `created_at` | TIMESTAMP | Permission-assignment timestamp |
+
+The combination of `role_id` and `permission_id` forms the primary key.
+
+```text
+roles
+  |
+  | many
+  v
+role_permissions
+  ^
+  | many
+  |
+permissions
+```
+
+A role can contain many permissions, and a permission can be assigned to multiple roles.
+
+If a role or permission is deleted, related role-permission records are removed through cascading foreign-key behavior.
+
+The Administrator role is initially assigned all defined permissions.
+
+Other roles receive permission sets appropriate to their normal SiteTrack responsibilities.
+
+Authorized administrators can modify role permissions through the SiteTrack role-management interface.
+
+---
+
+# 6. Users
+
+The `users` table stores SiteTrack user accounts.
+
+## Table: `users`
+
+| Column | Type | Description |
+|---|---|---|
+| `user_id` | INTEGER | Primary key |
+| `role_id` | INTEGER | Foreign key to `roles` |
+| `name` | VARCHAR(150) | User name |
+| `email` | VARCHAR(255) | Unique user email |
+| `password_hash` | VARCHAR(255) | Hashed password |
+| `is_active` | BOOLEAN | Indicates whether the account is active |
+| `created_at` | TIMESTAMP | Account creation timestamp |
+| `updated_at` | TIMESTAMP | Last update timestamp |
+
+User email addresses must be unique.
+
+Passwords are stored as hashes rather than plain text.
+
+Inactive users remain stored in the database but cannot authenticate normally.
+
+Each user has one assigned role, while a role can be assigned to many users.
+
+```text
+roles
+  |
+  | 1
+  |
+  | many
+  v
+users
+```
+
+The user's effective application access is determined by the permissions assigned to the user's role.
+
+---
+
+# 7. Jobsites
 
 The `jobsites` table stores information about construction jobsites.
 
@@ -133,9 +245,11 @@ Active
 
 Jobsites are referenced by tool assignments and alerts.
 
+Application logic prevents inactive jobsites from being used for new tool assignments.
+
 ---
 
-# 6. Tools
+# 8. Tools
 
 The `tools` table stores SiteTrack equipment and tool records.
 
@@ -153,14 +267,16 @@ The `tools` table stores SiteTrack equipment and tool records.
 | `created_at` | TIMESTAMP | Record creation timestamp |
 | `updated_at` | TIMESTAMP | Record update timestamp |
 
-The default tool values are:
+Default tool values are:
 
 ```text
 status: Available
 condition: Good
 ```
 
-Tools are central to most SiteTrack workflows and are referenced by:
+Tool serial numbers must be unique.
+
+Tools are referenced by:
 
 - Tool assignments
 - Inspections
@@ -170,9 +286,9 @@ Tools are central to most SiteTrack workflows and are referenced by:
 
 ---
 
-# 7. Tool Assignments
+# 9. Tool Assignments
 
-The `tool_assignments` table records tool checkout, assignment, return, and transfer activity.
+The `tool_assignments` table records tool checkout, transfer, and return activity.
 
 ## Table: `tool_assignments`
 
@@ -192,7 +308,7 @@ The default assignment status is:
 Checked Out
 ```
 
-An assignment is considered active while:
+An assignment remains active while:
 
 ```text
 released_at IS NULL
@@ -200,27 +316,25 @@ released_at IS NULL
 
 ## Active Assignment Constraint
 
-SiteTrack includes the following unique partial index:
+SiteTrack uses the following unique partial index:
 
 ```text
 one_active_assignment_per_tool
 ```
 
-This prevents a tool from having more than one active assignment at the same time.
-
-Conceptually:
+This prevents one tool from having multiple active assignments at the same time.
 
 ```text
 Tool
  |
- +---- Active Assignment ---- Jobsite
+ +---- one active assignment ---- Jobsite
 ```
 
-A tool cannot be checked out to multiple active jobsites simultaneously.
+Previous assignment records remain stored after return so movement history is preserved.
 
 ---
 
-# 8. Inspections
+# 10. Inspections
 
 The `inspections` table records tool inspection results.
 
@@ -248,11 +362,15 @@ tools
 inspections
 ```
 
-Inspection records can also be associated with damage reports.
+Inspection records may also be referenced by damage reports.
+
+Application validation prevents the next inspection date from being set to a date in the past.
+
+Failed inspections can trigger tool-blocking behavior.
 
 ---
 
-# 9. Damage Reports
+# 11. Damage Reports
 
 The `damage_reports` table records damage identified for SiteTrack tools.
 
@@ -270,7 +388,7 @@ The `damage_reports` table records damage identified for SiteTrack tools.
 | `resolved_at` | TIMESTAMP | Time damage was resolved |
 | `notes` | TEXT | Optional notes |
 
-The default damage report status is:
+The default damage-report status is:
 
 ```text
 Open
@@ -278,11 +396,11 @@ Open
 
 A damage report always references a tool and may optionally reference the inspection during which the damage was identified.
 
-Damage reports may also be connected to maintenance work orders.
+Damage-report processing can also place the affected tool into a blocked state and create or associate a maintenance work order.
 
 ---
 
-# 10. Work Orders
+# 12. Work Orders
 
 The `work_orders` table stores maintenance and repair activities.
 
@@ -296,7 +414,7 @@ The `work_orders` table stores maintenance and repair activities.
 | `description` | TEXT | Description of required work |
 | `priority` | VARCHAR(50) | Work-order priority |
 | `status` | VARCHAR(50) | Current work-order status |
-| `assigned_to` | VARCHAR(150) | Assigned maintenance technician |
+| `assigned_to` | VARCHAR(150) | Assigned Maintenance Technician |
 | `completed_by` | INTEGER | Foreign key to the user completing the repair |
 | `return_requested_by` | INTEGER | Foreign key to the user requesting return-to-service review |
 | `return_requested_at` | TIMESTAMP | Time return-to-service review was requested |
@@ -315,13 +433,15 @@ Each work order belongs to one tool.
 
 A work order may optionally originate from a damage report.
 
-The `completed_by` and `return_requested_by` fields provide traceability to SiteTrack users involved in the maintenance workflow.
+The `completed_by` and `return_requested_by` fields provide user-level traceability for the maintenance workflow.
+
+Completing a repair does not automatically return a tool to operational service.
 
 ---
 
-# 11. Return-to-Service Decisions
+# 13. Return-to-Service Decisions
 
-The `return_service_decisions` table records approval and denial decisions made after maintenance has been completed.
+The `return_service_decisions` table records approval and denial decisions made after maintenance is completed and return-to-service review is requested.
 
 ## Table: `return_service_decisions`
 
@@ -354,11 +474,13 @@ work_orders
 return_service_decisions
 ```
 
-The decision table provides a persistent history of approval activity rather than storing only the most recent decision.
+Separate decision records preserve approval history instead of storing only the most recent decision.
+
+The application also enforces separation of duties so the user who completed a repair cannot approve the same repair for return to service.
 
 ---
 
-# 12. Alerts
+# 14. Alerts
 
 The `alerts` table stores operational notifications generated by SiteTrack.
 
@@ -386,7 +508,7 @@ An alert may reference a tool, a jobsite, or both depending on the event that ge
 
 ---
 
-# 13. Audit Logs
+# 15. Audit Logs
 
 The `audit_logs` table records important user and system activity.
 
@@ -402,26 +524,42 @@ The `audit_logs` table records important user and system activity.
 | `description` | TEXT | Description of the action |
 | `created_at` | TIMESTAMP | Audit timestamp |
 
-Audit logs provide traceability for important system activities.
+Audit records provide traceability for important SiteTrack activities.
 
-The optional `user_id` identifies the user responsible for an action when applicable.
+Audit data can include activity related to:
+
+- Tool changes
+- Jobsite activity
+- Assignments
+- Inspections
+- Damage reports
+- Maintenance
+- Return-to-service decisions
+- User administration
+- Role-permission administration
 
 ---
 
-# 14. Major Database Relationships
+# 16. Major Database Relationships
 
-The major relationships in SiteTrack can be summarized as:
+The major database relationships can be summarized as:
 
 ```text
-Roles
-  |
-  v
-Users
-  |
-  +--------------------+
-  |                    |
-  v                    v
-Work Orders      Return-Service Decisions
+Permissions
+     |
+     v
+Role Permissions
+     ^
+     |
+   Roles
+     |
+     v
+   Users
+     |
+     +------------------------------+
+     |                              |
+     v                              v
+Work Orders              Return-Service Decisions
 
 
 Jobsites
@@ -436,9 +574,9 @@ Tool Assignments
    |          |             |             |
    v          v             v             v
 Assignments Inspections Damage Reports Work Orders
-                         |       |
-                         |       v
-                         +--> Work Orders
+                         |          ^
+                         |          |
+                         +----------+
 
 
 Tools --------> Alerts
@@ -449,7 +587,40 @@ Users --------> Audit Logs
 
 ---
 
-# 15. Tool Lifecycle Data
+# 17. Role and Permission Model
+
+SiteTrack uses database-backed permissions to support RBAC.
+
+```text
+User
+ |
+ v
+Role
+ |
+ v
+Role Permissions
+ |
+ v
+Permissions
+```
+
+Authentication identifies the current user.
+
+The user's assigned role determines which permissions apply.
+
+Backend authorization middleware checks required permissions before protected operations are executed.
+
+This allows access control to be enforced on the server rather than relying only on frontend navigation or hidden controls.
+
+The Administrator role receives all available permissions by default.
+
+Other roles receive initial permission sets appropriate to their responsibilities.
+
+Authorized administrators can modify role permissions through the SiteTrack administration interface.
+
+---
+
+# 18. Tool Lifecycle Data
 
 The database supports the major SiteTrack tool lifecycle:
 
@@ -484,45 +655,106 @@ Inspection
                     +-----+-----+
                     |           |
                  Approved     Denied
+                    |
+                    v
+          Operational Service
 ```
 
-Different database tables preserve the history of each stage rather than storing the entire lifecycle in a single record.
+Different tables preserve the history of each stage rather than storing the entire lifecycle in a single record.
 
 ---
 
-# 16. Data Integrity
+# 19. Data Integrity
 
-The SiteTrack schema uses several database-level controls to protect data integrity.
+The SiteTrack database uses database-level controls to protect data integrity.
 
 These include:
 
 - Primary keys on all major tables
-- Foreign-key relationships between related entities
+- Foreign-key relationships
 - Unique user email addresses
 - Unique tool serial numbers
 - Unique role names
+- Unique permission keys
+- Composite primary key for role-permission assignments
+- Cascading removal of role-permission links
 - Default values for operational statuses
-- A unique partial index preventing multiple active assignments for one tool
-- A check constraint limiting return-to-service decisions to Approved or Denied
+- Unique partial index preventing multiple active assignments for one tool
+- Check constraint limiting return-to-service decisions to `Approved` or `Denied`
 - Required fields through `NOT NULL` constraints
 
-Additional business rules are enforced by the backend application layer.
+Additional business rules are enforced by the Node.js/Express application layer.
+
+Examples include:
+
+- Authentication and permission enforcement
+- Blocked-tool checkout prevention
+- Inactive-jobsite assignment prevention
+- Duplicate active work-order prevention
+- Inspection-date validation
+- Return-to-service workflow validation
+- Separation of duties for approval
 
 ---
 
-# 17. Database Responsibility
+# 20. Database Security
+
+The frontend does not directly access PostgreSQL.
+
+The general data path is:
+
+```text
+React Frontend
+      |
+      v
+HTTPS / REST API
+      |
+      v
+Authentication and Permission Checks
+      |
+      v
+Controller / Service Logic
+      |
+      v
+Parameterized SQL
+      |
+      v
+PostgreSQL
+```
+
+Database credentials and connection information are maintained in backend environment configuration and are not exposed to browser clients.
+
+User passwords are stored as password hashes.
+
+Authorization checks are performed on the server before protected database operations are allowed.
+
+---
+
+# 21. Database Responsibility
 
 PostgreSQL acts as the centralized persistent data store for SiteTrack.
 
-The database itself is responsible for:
+The database is responsible for:
 
 - Persistent application data
 - Entity relationships
 - Referential integrity
 - Unique identifiers
 - Database constraints
-- Historical records
+- Role-permission relationships
+- Historical operational records
+- Return-to-service decision history
+- Alert records
+- Audit records
 
-The Node.js/Express application layer remains responsible for higher-level workflow rules, validation, authentication, authorization, and business operations.
+The Node.js/Express application layer remains responsible for:
 
-This separation keeps persistent storage centralized while allowing application behavior to remain within the SiteTrack Model layer.
+- Authentication
+- Authorization
+- Workflow rules
+- Application validation
+- Transaction coordination
+- Business operations
+- API behavior
+
+This separation keeps persistent data centralized while allowing application behavior to remain within the SiteTrack Model and service layers.
